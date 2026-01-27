@@ -62,11 +62,16 @@
 
 ## 次回やること
 
-1. **NV_ACE と MetaHuman 連携** ← 今ここ
-   - A2FLocal設定（ローカルGPU処理）
-   - BP_KeijiにACEコンポーネント追加
+1. **Face_AnimBP 設定** ← 今ここ（エディタで手動）
+   - `/Game/MetaHumans/Common/Face/Face_AnimBP` を開く
+   - `Apply ACE Face Animations` ノードを `mh_arkit_mapping_pose` の前に追加
+   - `mh_arkit_mapping_pose` → `mh_arkit_mapping_pose_A2F` に変更
+   - `Modify Curve (MouthClose)` を無効化
 2. **リアルタイムリップシンクテスト**
 3. **VOICEVOX → ACE パイプライン構築**
+
+### 完了済み
+- [x] ACEAudioCurveSource コンポーネント追加済み（Patient_Keiji）
 
 ---
 
