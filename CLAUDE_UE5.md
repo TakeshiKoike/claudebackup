@@ -17,7 +17,7 @@
 | パス | `C:\UE_Projects\PatientSim56` |
 | エンジン | UE 5.6.1 |
 | MCP | runreal/unreal-mcp |
-| 有効プラグイン | PythonScriptPlugin, LiveLink, LiveLinkControlRig |
+| 有効プラグイン | PythonScriptPlugin, LiveLink, LiveLinkControlRig, **NV_ACE_Reference v2.5.0** |
 | 現在のマップ | Lvl_ThirdPerson |
 | MetaHuman | Keiji（Patient_Keiji として配置済み） |
 
@@ -36,13 +36,37 @@
 
 ---
 
+## NVIDIA ACE プラグイン詳細
+
+| 項目 | 値 |
+|------|-----|
+| プラグイン名 | NV_ACE_Reference |
+| バージョン | 2.5.0-20250614-2282 |
+| 場所 | `C:\UE_Projects\PatientSim56\Plugins\NV_ACE_Reference` |
+| ドキュメント | https://docs.nvidia.com/ace/ace-unreal-plugin/latest/ |
+
+### 含まれるモジュール
+| モジュール | 説明 |
+|-----------|------|
+| **A2FLocal** | ローカルAudio2Face (RTX 4090で実行) |
+| **A2FRemote** | リモートAudio2Face (クラウド) |
+| **GPTLocal** | ローカルLLM (Minitron SLM) |
+| **AnimStream** | アニメーションストリーミング |
+| **OmniverseLiveLink** | Omniverse連携 |
+
+### 含まれるアセット
+- `mh_arkit_mapping_pose_A2F` - MetaHuman用ポーズアセット
+- `mh_arkit_mapping_anim_A2F` - MetaHuman用アニメーション
+
+---
+
 ## 次回やること
 
-1. **Audio2Face と MetaHuman 連携** ← 今ここ
-   - LiveLinkウィンドウでA2Fソース追加
-   - BP_KeijiのFace AnimBPにLiveLink接続
+1. **NV_ACE と MetaHuman 連携** ← 今ここ
+   - A2FLocal設定（ローカルGPU処理）
+   - BP_KeijiにACEコンポーネント追加
 2. **リアルタイムリップシンクテスト**
-3. **VOICEVOX → Audio2Face パイプライン構築**
+3. **VOICEVOX → ACE パイプライン構築**
 
 ---
 
@@ -76,6 +100,9 @@
 ---
 
 ## 断念したアプローチ
+
+### Audio2Face スタンドアロン
+- **理由**: NV_ACE_Referenceプラグインで直接UE5内処理が可能。外部アプリ不要。
 
 ### MuseTalk（Tencent）
 - **理由**: 「リアルタイム」が実際にはバッチ処理、リップシンク品質も不十分
