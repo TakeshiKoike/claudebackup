@@ -31,8 +31,9 @@
 - [x] MetaHuman Keiji インポート済み
 - [x] レベルに Patient_Keiji 配置
 - [x] **NVIDIA Audio2Face/ACE プラグイン導入** ✓
-- [ ] **Audio2Face と MetaHuman 連携** ← 今ここ
-- [ ] リアルタイムリップシンク設定
+- [x] **Audio2Face と MetaHuman 連携（Face_AnimBP設定）** ✓
+- [ ] **リアルタイムリップシンクテスト** ← 今ここ
+- [ ] VOICEVOX → ACE パイプライン構築
 
 ---
 
@@ -62,16 +63,27 @@
 
 ## 次回やること
 
-1. **Face_AnimBP 設定** ← 今ここ（エディタで手動）
-   - `/Game/MetaHumans/Common/Face/Face_AnimBP` を開く
-   - `Apply ACE Face Animations` ノードを `mh_arkit_mapping_pose` の前に追加
-   - `mh_arkit_mapping_pose` → `mh_arkit_mapping_pose_A2F` に変更
-   - `Modify Curve (MouthClose)` を無効化
+1. **Audio2Face-3D モデルをダウンロード＆インストール** ← 今ここ
+   - https://developer.nvidia.com/ace-for-games にアクセス
+   - 「Download Audio2Face 3.0 Unreal Engine Models」をダウンロード
+   - 解凍して `C:\UE_Projects\PatientSim56\Plugins\` に配置
+   - UEエディタ再起動
 2. **リアルタイムリップシンクテスト**
+   - VOICEVOX（玄野武宏 ID:11）で音声生成
+   - `AnimateCharacterFromWavFileAsync` でリップシンク実行
 3. **VOICEVOX → ACE パイプライン構築**
+   - リアルタイム連携テスト
 
 ### 完了済み
 - [x] ACEAudioCurveSource コンポーネント追加済み（Patient_Keiji）
+- [x] Face_AnimBP 設定完了
+  - Apply ACE Face Animations ノード追加
+  - Pose Asset → mh_arkit_mapping_pose_A2F に変更
+  - Modify Curve (MouthClose) 無効化（Alpha=0）
+- [x] VOICEVOX テスト音声生成済み（`C:\UE_Projects\PatientSim56\Saved\test_voice.wav`）
+
+### ブロッカー
+- **A2FLocal モデル未インストール**: NV_ACE_Reference プラグインはあるが、リップシンク用AIモデルが別途必要
 
 ---
 
