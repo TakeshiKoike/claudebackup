@@ -23,7 +23,7 @@
 
 ---
 
-## 進捗状況（2026-01-27）
+## 進捗状況（2026-01-28）
 
 - [x] UE5.6 プロジェクト作成
 - [x] MCP 接続確認（runreal/unreal-mcp）
@@ -32,8 +32,11 @@
 - [x] レベルに Patient_Keiji 配置
 - [x] **NVIDIA Audio2Face/ACE プラグイン導入** ✓
 - [x] **Audio2Face と MetaHuman 連携（Face_AnimBP設定）** ✓
-- [ ] **リアルタイムリップシンクテスト** ← 今ここ
-- [ ] VOICEVOX → ACE パイプライン構築
+- [x] **Audio2Face-3D モデル（LocalA2F-Mark）インストール** ✓
+- [x] **バッチ処理リップシンク動作確認** ✓
+- [x] **カメラ設定（顔アップ）** ✓
+- [ ] **リアルタイムストリーミングパイプライン構築** ← 今ここ
+- [ ] VOICEVOX → ACE リアルタイム連携
 
 ---
 
@@ -63,27 +66,28 @@
 
 ## 次回やること
 
-1. **Audio2Face-3D モデルをダウンロード＆インストール** ← 今ここ
-   - https://developer.nvidia.com/ace-for-games にアクセス
-   - 「Download Audio2Face 3.0 Unreal Engine Models」をダウンロード
-   - 解凍して `C:\UE_Projects\PatientSim56\Plugins\` に配置
-   - UEエディタ再起動
-2. **リアルタイムリップシンクテスト**
-   - VOICEVOX（玄野武宏 ID:11）で音声生成
-   - `AnimateCharacterFromWavFileAsync` でリップシンク実行
-3. **VOICEVOX → ACE パイプライン構築**
-   - リアルタイム連携テスト
+1. **リアルタイムストリーミングパイプライン構築** ← 今ここ
+   - `AnimateFromAudioSamples()` API調査（C++ API、生オーディオサンプル送信可能）
+   - VOICEVOXストリーミング出力 → ACE リアルタイム入力
+   - LLM → VOICEVOX → ACE → MetaHuman の完全リアルタイム連携
 
 ### 完了済み
-- [x] ACEAudioCurveSource コンポーネント追加済み（Patient_Keiji）
+- [x] ACEAudioCurveSource コンポーネント追加済み（BP_Keiji）
 - [x] Face_AnimBP 設定完了
-  - Apply ACE Face Animations ノード追加
-  - Pose Asset → mh_arkit_mapping_pose_A2F に変更
-  - Modify Curve (MouthClose) 無効化（Alpha=0）
 - [x] VOICEVOX テスト音声生成済み（`C:\UE_Projects\PatientSim56\Saved\test_voice.wav`）
+- [x] **Audio2Face-3D モデル インストール**
+  - NvAudio2FaceMark-UE5.6-v2.4.0（LocalA2F-Mark）
+  - `C:\UE_Projects\PatientSim56\Plugins\` に配置済み
+- [x] **バッチ処理リップシンク動作確認**
+  - `ACEBlueprintLibrary.animate_character_from_wav_file()` で動作OK
+  - `a2f_provider_name="LocalA2F-Mark"` 指定
+- [x] **カメラ・PlayerStart設定**
+  - Keijiの顔正面にカメラ配置
+  - PlayerStartも同位置に配置
 
-### ブロッカー
-- **A2FLocal モデル未インストール**: NV_ACE_Reference プラグインはあるが、リップシンク用AIモデルが別途必要
+### 課題
+- **バッチ処理の遅延**: WAVファイル全体を処理してから再生開始
+- **リアルタイム化が必要**: 完全なリアルタイムLLM会話システムには音声ストリーミングが必須
 
 ---
 
