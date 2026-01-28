@@ -116,6 +116,11 @@
 - **真のオーディオストリーミング**: UE5プラグインでは未対応、SDK直接利用が必要
 - **pip版TensorRT**: DLLのみでヘッダなし、SDKビルドには不十分
 
+#### 要確認（ユーザー視覚確認）
+`python C:/Users/kokek/ue_observe_test.py` を実行して、処理中に唇が動くか確認してください。
+- **Yes**: リアルタイムモード機能中 → 会話システム構築可能
+- **No**: TensorRT SDK + Audio2Face-3D SDK ビルドが必要
+
 ---
 
 ## MCP 設定
@@ -180,6 +185,7 @@
 | `C:\Users\kokek\generate_voice.py` | VOICEVOX音声生成 |
 | `C:\Users\kokek\ue_check_ace_api.py` | ACE API 一覧表示 |
 | `C:\Users\kokek\ue_check_realtime_api.py` | リアルタイムAPI詳細 |
+| `C:\Users\kokek\ue_observe_test.py` | リップシンク観察テスト（要確認）|
 
 ---
 
