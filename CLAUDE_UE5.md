@@ -118,14 +118,15 @@
 - **pip版TensorRT**: DLLのみでヘッダなし、SDKビルドには不十分
 
 #### パイプライン性能テスト結果（2026-01-28）
-| ステップ | 時間 | 備考 |
-|---------|------|------|
-| LLM応答 (ELYZA-8B) | 2.3秒 | モデルロード後 |
-| 音声生成 (VOICEVOX) | 6秒 | 約2.7秒の音声 |
-| リップシンク (LocalA2F-Mark) | 2.5秒 | リアルタイムより速い |
-| **合計** | **約11秒** | |
+| ステップ | CPU版 | GPU版 |
+|---------|-------|-------|
+| LLM応答 (ELYZA-8B) | 2.3秒 | 2.3秒 |
+| 音声生成 (VOICEVOX) | 6秒 | **0.14秒** |
+| リップシンク (LocalA2F-Mark) | - | 音声長と同等 |
 
-**結論**: 会話システムは実用レベル。音声生成が最大のボトルネック。
+**VOICEVOX GPU モード**: `--use_gpu` オプションで約50倍高速化
+
+**結論**: 会話システム実用レベル達成。
 
 ---
 
@@ -176,9 +177,21 @@
 | 項目 | 値 |
 |------|-----|
 | LLM | Ollama + ELYZA-JP-8B |
-| TTS | VOICEVOX（localhost:50021） |
+| TTS | VOICEVOX（localhost:50021、GPU モード） |
 | GPU | NVIDIA RTX 4090 |
 | 患者画像 | `C:\Users\kokek\Downloads\ComfyUI_00238_.png` |
+
+---
+
+## VOICEVOX GPU モード起動
+
+```powershell
+# エンジン停止
+Stop-Process -Name 'run' -Force -ErrorAction SilentlyContinue
+
+# GPU モードで起動
+Start-Process -FilePath 'C:\Users\kokek\AppData\Local\Programs\VOICEVOX\vv-engine\run.exe' -ArgumentList '--use_gpu','--port','50021'
+```
 
 ---
 
