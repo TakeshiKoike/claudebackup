@@ -33,12 +33,15 @@
 - [x] **NVIDIA Audio2Face/ACE プラグイン導入** ✓
 - [x] **Audio2Face と MetaHuman 連携（Face_AnimBP設定）** ✓
 - [x] **Audio2Face-3D モデル（LocalA2F-Mark）インストール** ✓
-- [x] **バッチ処理リップシンク動作確認** ✓
 - [x] **カメラ設定（顔アップ）** ✓
 - [x] **ACE API 調査完了** ✓
-- [x] **リアルタイムストリーミングパイプライン構築** ✓
-- [x] **VOICEVOX → ACE リアルタイム連携** ✓
+- [ ] **リップシンク動作** ← 現在問題あり
 - [ ] 会話システム最適化（応答時間短縮）
+
+### 現在の問題（2026-01-28 深夜）
+- ACEプラグインがPython Remote Executionから認識されない
+- `unreal.ACEBlueprintLibrary` が利用不可
+- プラグインは `.uproject` に追加済み、UE5上では読み込まれているが Python バインディングが公開されていない可能性
 
 ---
 
