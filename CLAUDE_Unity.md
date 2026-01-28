@@ -27,7 +27,7 @@ LLM リアルタイムリップシンク AI 患者会話システム
 
 ---
 
-## 進捗状況（2026-01-28 23:50 更新）
+## 進捗状況（2026-01-29 00:10 更新）
 
 ### 完了
 - [x] Unity 6 プロジェクト作成
@@ -36,9 +36,11 @@ LLM リアルタイムリップシンク AI 患者会話システム
 - [x] uLipSync 設定完了
 - [x] VOICEVOX 連携完了
 - [x] LLM (ELYZA) 連携完了
+- [x] WebGL ビルド（Web プロファイル）
 
 ### 次にやること
-- [ ] **音声認識連携** ← 今ここ
+- [ ] **WebGL 圧縮設定を Disabled に変更してリビルド** ← 今ここ
+- [ ] 音声認識連携
 - [ ] 全体統合テスト
 
 ---
@@ -140,6 +142,34 @@ CC からエクスポートする際、以下の設定が必要：
 |----------|------|
 | `Assets/Scripts/VoicevoxSpeaker.cs` | VOICEVOX API 連携 |
 | `Assets/Scripts/PatientAI.cs` | LLM (Ollama/ELYZA) 連携 |
+
+---
+
+## WebGL ビルド
+
+### ビルド場所
+```
+C:\zzz\
+├── index.html
+├── Build/
+└── TemplateData/
+```
+
+### ローカル実行方法
+```bash
+cd C:\zzz
+python -m http.server 8080
+# ブラウザで http://localhost:8080 を開く
+```
+
+### 注意：Brotli 圧縮問題
+デフォルトの Brotli 圧縮は Python の http.server で動作しない。
+
+**解決策**: Edit → Project Settings → Player → Web → Publishing Settings → **Compression Format を Disabled** に変更してリビルド
+
+### Web 版の制限事項
+- VOICEVOX/Ollama への localhost 接続はブラウザから直接不可
+- 本番運用には中継サーバーが必要
 
 ---
 
