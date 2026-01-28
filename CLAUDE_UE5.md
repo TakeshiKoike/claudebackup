@@ -36,8 +36,9 @@
 - [x] **バッチ処理リップシンク動作確認** ✓
 - [x] **カメラ設定（顔アップ）** ✓
 - [x] **ACE API 調査完了** ✓
-- [ ] **リアルタイムストリーミングパイプライン構築** ← 今ここ
-- [ ] VOICEVOX → ACE リアルタイム連携
+- [x] **リアルタイムストリーミングパイプライン構築** ✓
+- [x] **VOICEVOX → ACE リアルタイム連携** ✓
+- [ ] 会話システム最適化（応答時間短縮）
 
 ---
 
@@ -116,10 +117,15 @@
 - **真のオーディオストリーミング**: UE5プラグインでは未対応、SDK直接利用が必要
 - **pip版TensorRT**: DLLのみでヘッダなし、SDKビルドには不十分
 
-#### 要確認（ユーザー視覚確認）
-`python C:/Users/kokek/ue_observe_test.py` を実行して、処理中に唇が動くか確認してください。
-- **Yes**: リアルタイムモード機能中 → 会話システム構築可能
-- **No**: TensorRT SDK + Audio2Face-3D SDK ビルドが必要
+#### パイプライン性能テスト結果（2026-01-28）
+| ステップ | 時間 | 備考 |
+|---------|------|------|
+| LLM応答 (ELYZA-8B) | 11.42秒 | ボトルネック |
+| 音声生成 (VOICEVOX) | 6.23秒 | 2.76秒の音声 |
+| リップシンク (LocalA2F-Mark) | 2.58秒 | リアルタイムより速い！ |
+| **合計** | **20.58秒** | |
+
+**結論**: リップシンクは音声より速く処理される。会話システムは実用可能。
 
 ---
 
@@ -185,7 +191,9 @@
 | `C:\Users\kokek\generate_voice.py` | VOICEVOX音声生成 |
 | `C:\Users\kokek\ue_check_ace_api.py` | ACE API 一覧表示 |
 | `C:\Users\kokek\ue_check_realtime_api.py` | リアルタイムAPI詳細 |
-| `C:\Users\kokek\ue_observe_test.py` | リップシンク観察テスト（要確認）|
+| `C:\Users\kokek\ue_observe_test.py` | リップシンク観察テスト |
+| `C:\Users\kokek\patient_test.py` | パイプライン自動テスト |
+| `C:\Users\kokek\patient_conversation.py` | 対話式会話システム |
 
 ---
 
