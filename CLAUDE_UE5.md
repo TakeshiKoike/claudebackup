@@ -66,10 +66,13 @@
 
 ## 次回やること
 
-1. **リアルタイムストリーミングパイプライン構築** ← 今ここ
-   - `AnimateFromAudioSamples()` API調査（C++ API、生オーディオサンプル送信可能）
-   - VOICEVOXストリーミング出力 → ACE リアルタイム入力
-   - LLM → VOICEVOX → ACE → MetaHuman の完全リアルタイム連携
+1. **Audio2Face-3D SDK ダウンロード＆導入** ← 今ここ
+   - https://developer.nvidia.com/ace-for-games からダウンロード
+   - C++/Python対応、MITライセンス
+   - ストリーミングオーディオ入力でリアルタイムリップシンク可能
+2. **リアルタイムパイプライン構築**
+   - LLM(ELYZA) → VOICEVOX → Audio2Face-3D SDK → MetaHuman
+   - VOICEVOXは日本語TTS用に継続使用（Riva TTSは日本語非対応）
 
 ### 完了済み
 - [x] ACEAudioCurveSource コンポーネント追加済み（BP_Keiji）
