@@ -21,68 +21,70 @@ LLM リアルタイムリップシンク AI 患者会話システム
 | プロジェクト名 | My project |
 | パス | `C:\zzz\My project` |
 | エンジン | Unity 6 (6000.0.23f1) |
-| キャラクター | koike1（Character Creator） |
+| キャラクター | **koike2**（Character Creator） |
 | リップシンク | uLipSync |
-| MCP | MCP For Unity（UE5 が使用中のため手動操作） |
+| MCP | MCP For Unity |
 
 ---
 
-## 進捗状況（2026-01-27 22:50 更新）
-
-### セッション終了時点
+## 進捗状況（2026-01-28 23:50 更新）
 
 ### 完了
 - [x] Unity 6 プロジェクト作成
-- [x] CC キャラクター (koike1) インポート
+- [x] CC キャラクター (koike2) インポート
 - [x] uLipSync パッケージインポート
-- [x] uLipSync コンポーネント追加
-- [x] uLipSyncBlendShape コンポーネント追加
-- [x] Skinned Mesh Renderer: CC_Base_Body 設定
-- [x] Phoneme - BlendShape マッピング設定
-- [x] uLipSync Profile 設定（uLipSync-Profile-Sample 使用）
-- [x] イベント接続（uLipSync → uLipSyncBlendShape）
+- [x] uLipSync 設定完了
+- [x] VOICEVOX 連携完了
+- [x] LLM (ELYZA) 連携完了
 
 ### 次にやること
-- [ ] **Audio Source を koike1 に追加** ← 今ここ
-- [ ] Audio Source Proxy に Audio Source を設定
-- [ ] VOICEVOX 連携テスト
-- [ ] LLM (ELYZA) 連携
-- [ ] 音声認識連携
+- [ ] **音声認識連携** ← 今ここ
 - [ ] 全体統合テスト
 
 ---
 
-## koike1 コンポーネント設定（現在）
+## koike2 コンポーネント設定（現在）
 
 ### U Lip Sync Blend Shape (Script)
 | 項目 | 値 |
 |------|-----|
 | Skinned Mesh Renderer | CC_Base_Body |
-| Phoneme A | Open |
-| Phoneme I | Wide |
-| Phoneme U | Tight-O |
-| Phoneme E | Wide |
-| Phoneme O | Tight-O |
+| Phoneme A | Mouth_Open |
+| Phoneme I | Mouth_Widen |
+| Phoneme U | Mouth_Pucker |
+| Phoneme E | Mouth_Widen |
+| Phoneme O | Mouth_Open |
 
 ### U Lip Sync (Script)
 | 項目 | 値 |
 |------|-----|
-| Profile | uLipSync-Profile-Sample |
-| On Lip Sync Update | → uLipSyncBlendShape.OnLipSyncUpdate (koike1) |
-| Audio Source Proxy | 未設定（次のステップ） |
+| Profile | JapaneseProfile または uLipSync-Profile-UnityChan |
+| On Lip Sync Update | → uLipSyncBlendShape.OnLipSyncUpdate (koike2) |
+| Audio Source Proxy | uLipSyncAudioSource (koike2) |
+
+### VoicevoxSpeaker (Script)
+| 項目 | 値 |
+|------|-----|
+| Voicevox Url | http://localhost:50021 |
+| Speaker Id | 11（玄野武宏・男性） |
+| Audio Source | koike2 の Audio Source |
+
+### PatientAI (Script)
+| 項目 | 値 |
+|------|-----|
+| Ollama Url | http://localhost:11434/api/generate |
+| Model Name | hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest |
+| Voicevox Speaker | koike2 の VoicevoxSpeaker |
 
 ---
 
-## 次のステップ詳細
+## 重要：Character Creator エクスポート設定
 
-### Audio Source 設定
-1. koike1 に **Add Component** → **Audio Source**
-2. U Lip Sync (Script) の **Audio Source Proxy** に Audio Source を設定
+CC からエクスポートする際、以下の設定が必要：
 
-### VOICEVOX 連携
-1. VOICEVOX API (localhost:50021) から音声取得
-2. AudioClip に変換
-3. Audio Source で再生 → uLipSync がリップシンク
+1. Target Tool Preset: **Unity 3D**
+2. 歯車アイコンをクリック → Export FBX Advanced Setting
+3. **「Mouth Open as Morph」にチェック** ← これがないと口が開かない！
 
 ---
 
@@ -114,6 +116,7 @@ LLM リアルタイムリップシンク AI 患者会話システム
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │ 音声認識    │ →  │ LLM         │ →  │ VOICEVOX    │
 │ (未実装)    │    │ ELYZA-JP-8B │    │ TTS         │
+│             │    │ PatientAI   │    │ Speaker:11  │
 └─────────────┘    └─────────────┘    └──────┬──────┘
                                              │
                                              ▼
@@ -121,14 +124,22 @@ LLM リアルタイムリップシンク AI 患者会話システム
 │ Unity                                               │
 │  ┌──────────────┐    ┌──────────────────────────┐  │
 │  │ Audio Source │ →  │ uLipSync → BlendShape    │  │
+│  │ VoicevoxSpkr │    │ (Mouth_Open etc.)        │  │
 │  └──────────────┘    └──────────────────────────┘  │
 │                              ↓                      │
 │                      ┌──────────────┐              │
-│                      │ koike1 (CC)  │              │
+│                      │ koike2 (CC)  │              │
 │                      │ リップシンク  │              │
 │                      └──────────────┘              │
 └─────────────────────────────────────────────────────┘
 ```
+
+## スクリプトファイル
+
+| ファイル | 説明 |
+|----------|------|
+| `Assets/Scripts/VoicevoxSpeaker.cs` | VOICEVOX API 連携 |
+| `Assets/Scripts/PatientAI.cs` | LLM (Ollama/ELYZA) 連携 |
 
 ---
 
