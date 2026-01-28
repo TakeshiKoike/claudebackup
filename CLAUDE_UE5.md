@@ -35,6 +35,7 @@
 - [x] **Audio2Face-3D モデル（LocalA2F-Mark）インストール** ✓
 - [x] **バッチ処理リップシンク動作確認** ✓
 - [x] **カメラ設定（顔アップ）** ✓
+- [x] **ACE API 調査完了** ✓
 - [ ] **リアルタイムストリーミングパイプライン構築** ← 今ここ
 - [ ] VOICEVOX → ACE リアルタイム連携
 
@@ -66,14 +67,24 @@
 
 ## 次回やること
 
-1. **TensorRT インストール** ← 今ここ
-   - https://developer.nvidia.com/tensorrt からダウンロード
+### 選択肢A: UE5 ACE プラグインで実用的な会話システム（推奨）
+1. **Blueprint で非同期 API を使用**
+   - `AnimateCharacterFromWavFileAsync` は Blueprint 専用
+   - Python からは同期版のみ利用可能（25秒の遅延あり）
+2. **短い音声クリップで運用**
+   - 長い文章を分割して順次再生
+   - 各クリップの処理遅延を許容
+
+### 選択肢B: Audio2Face-3D SDK で真のリアルタイム
+1. **TensorRT スタンドアロン SDK インストール**
+   - https://developer.nvidia.com/tensorrt からZIPダウンロード
+   - pip版はDLLのみでヘッダファイルなし（ビルド不可）
    - バージョン 10.13+ が必要
 2. **Audio2Face-3D SDK ビルド**
    - `C:\UE_Projects\Audio2Face-3D-SDK` にクローン済み
-   - CUDA 12.8 ✅、TensorRT ❌
-3. **リアルタイムパイプライン構築**
-   - LLM(ELYZA) → VOICEVOX → Audio2Face-3D SDK → MetaHuman
+   - CUDA 12.8 ✅、TensorRT ❌（スタンドアロン版が必要）
+3. **カスタム統合**
+   - SDK から生成したブレンドシェイプを UE5 へ送信
 
 ### 完了済み
 - [x] ACEAudioCurveSource コンポーネント追加済み（BP_Keiji）
@@ -89,9 +100,21 @@
   - Keijiの顔正面にカメラ配置
   - PlayerStartも同位置に配置
 
-### 課題
-- **バッチ処理の遅延**: WAVファイル全体を処理してから再生開始
-- **リアルタイム化が必要**: 完全なリアルタイムLLM会話システムには音声ストリーミングが必須
+### 課題と調査結果
+
+#### ACE プラグイン API 調査（2026-01-28）
+| API | 説明 | Python公開 |
+|-----|------|-----------|
+| `animate_character_from_wav_file` | 同期版、約25秒遅延 | ✓ |
+| `AnimateCharacterFromWavFileAsync` | 非同期版 | ✗（Blueprint専用）|
+| `override_a2f3d_inference_mode` | バースト/リアルタイムモード切替 | ✓ |
+| `override_a2f3d_realtime_initial_chunk_size` | チャンクサイズ設定 | ✓ |
+| `allocate_a2f3d_resources` | リソース事前確保 | ✓ |
+
+#### 発見事項
+- **リアルタイムモード**: `force_burst_mode=False` で有効だが、入力は完全なWAVファイル必須
+- **真のオーディオストリーミング**: UE5プラグインでは未対応、SDK直接利用が必要
+- **pip版TensorRT**: DLLのみでヘッダなし、SDKビルドには不十分
 
 ---
 
@@ -148,6 +171,19 @@
 
 ---
 
+## 作成済みスクリプト
+
+| スクリプト | 説明 |
+|-----------|------|
+| `C:\Users\kokek\ue_lipsync_test.py` | 基本リップシンクテスト |
+| `C:\Users\kokek\ue_realtime_lipsync2.py` | リアルタイムモード設定+テスト |
+| `C:\Users\kokek\generate_voice.py` | VOICEVOX音声生成 |
+| `C:\Users\kokek\ue_check_ace_api.py` | ACE API 一覧表示 |
+| `C:\Users\kokek\ue_check_realtime_api.py` | リアルタイムAPI詳細 |
+
+---
+
 ## 参考リンク
 - [runreal/unreal-mcp](https://github.com/runreal/unreal-mcp)
 - [NVIDIA ACE](https://developer.nvidia.com/ace)
+- [Audio2Face-3D SDK](https://github.com/NVIDIA/Audio2Face-3D-SDK)
