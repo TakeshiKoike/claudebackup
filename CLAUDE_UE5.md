@@ -66,13 +66,14 @@
 
 ## 次回やること
 
-1. **Audio2Face-3D SDK ダウンロード＆導入** ← 今ここ
-   - https://developer.nvidia.com/ace-for-games からダウンロード
-   - C++/Python対応、MITライセンス
-   - ストリーミングオーディオ入力でリアルタイムリップシンク可能
-2. **リアルタイムパイプライン構築**
+1. **TensorRT インストール** ← 今ここ
+   - https://developer.nvidia.com/tensorrt からダウンロード
+   - バージョン 10.13+ が必要
+2. **Audio2Face-3D SDK ビルド**
+   - `C:\UE_Projects\Audio2Face-3D-SDK` にクローン済み
+   - CUDA 12.8 ✅、TensorRT ❌
+3. **リアルタイムパイプライン構築**
    - LLM(ELYZA) → VOICEVOX → Audio2Face-3D SDK → MetaHuman
-   - VOICEVOXは日本語TTS用に継続使用（Riva TTSは日本語非対応）
 
 ### 完了済み
 - [x] ACEAudioCurveSource コンポーネント追加済み（BP_Keiji）
