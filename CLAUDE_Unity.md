@@ -27,7 +27,7 @@ LLM リアルタイムリップシンク AI 患者会話システム
 
 ---
 
-## 進捗状況（2026-01-29 00:10 更新）
+## 進捗状況（2026-01-29 15:50 更新）
 
 ### 完了
 - [x] Unity 6 プロジェクト作成
@@ -37,9 +37,13 @@ LLM リアルタイムリップシンク AI 患者会話システム
 - [x] VOICEVOX 連携完了
 - [x] LLM (ELYZA) 連携完了
 - [x] WebGL ビルド（Web プロファイル）
+- [x] WebGL 圧縮設定を Disabled に変更
+- [x] 正しいシーン（koike2）をビルドに含める
+- [x] WebGL ブラウザ表示確認
+- [x] ChatUI.cs スクリプト作成
 
 ### 次にやること
-- [ ] **WebGL 圧縮設定を Disabled に変更してリビルド** ← 今ここ
+- [ ] **UI作成（Canvas, InputField, Button）+ ChatUIアタッチ** ← 今ここ
 - [ ] 音声認識連携
 - [ ] 全体統合テスト
 
@@ -142,6 +146,7 @@ CC からエクスポートする際、以下の設定が必要：
 |----------|------|
 | `Assets/Scripts/VoicevoxSpeaker.cs` | VOICEVOX API 連携 |
 | `Assets/Scripts/PatientAI.cs` | LLM (Ollama/ELYZA) 連携 |
+| `Assets/Scripts/ChatUI.cs` | ブラウザ用テキスト入力UI |
 
 ---
 
@@ -168,8 +173,22 @@ python -m http.server 8080
 **解決策**: Edit → Project Settings → Player → Web → Publishing Settings → **Compression Format を Disabled** に変更してリビルド
 
 ### Web 版の制限事項
-- VOICEVOX/Ollama への localhost 接続はブラウザから直接不可
+- VOICEVOX/Ollama への localhost 接続はブラウザから直接不可（CORS）
 - 本番運用には中継サーバーが必要
+
+### CORS 対応起動方法（ローカルテスト用）
+
+**VOICEVOX（CORS有効）:**
+```
+"C:\Users\kokek\AppData\Local\Programs\VOICEVOX\VOICEVOX.exe" --cors_policy_mode all
+```
+
+**Ollama（CORS有効）:**
+```powershell
+$env:OLLAMA_ORIGINS="*"
+ollama serve
+```
+または Windows スタートメニューから Ollama を起動
 
 ---
 
