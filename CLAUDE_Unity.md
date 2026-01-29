@@ -27,7 +27,7 @@ LLM リアルタイムリップシンク AI 患者会話システム
 
 ---
 
-## 進捗状況（2026-01-29 15:50 更新）
+## 進捗状況（2026-01-29 21:00 更新）
 
 ### 完了
 - [x] Unity 6 プロジェクト作成
@@ -41,10 +41,23 @@ LLM リアルタイムリップシンク AI 患者会話システム
 - [x] 正しいシーン（koike2）をビルドに含める
 - [x] WebGL ブラウザ表示確認
 - [x] ChatUI.cs スクリプト作成
+- [x] Unity UI作成（Canvas, InputField, Button）+ ChatUIアタッチ
+- [x] 日本語フォント設定（Noto Sans JP）
+- [x] HTML側の入力欄追加（WebGL用）
+- [x] JavaScript → Unity連携（SendChatFromWeb）
+- [x] WebGL版テキスト入力動作確認
+
+### 既知の問題・制限
+- **WebGLでのリップシンク制限**: 長文（複数の「。」を含む）では途中でリップシンクが止まる
+  - Unity Editorでは正常動作
+  - 対策: LLMの応答を1文に制限するプロンプト設定
+- **ビルド時のindex.html上書き**: Unity再ビルドのたびにカスタムindex.htmlが上書きされる
+  - 対策: ビルド後に手動でindex.htmlを修正、またはカスタムテンプレート作成
 
 ### 次にやること
-- [ ] **UI作成（Canvas, InputField, Button）+ ChatUIアタッチ** ← 今ここ
-- [ ] 音声認識連携
+- [ ] カスタムWebGLテンプレート作成（index.html上書き問題解決）
+- [ ] カメラ位置・背景の調整
+- [ ] 音声認識連携（オプション）
 - [ ] 全体統合テスト
 
 ---
@@ -146,7 +159,15 @@ CC からエクスポートする際、以下の設定が必要：
 |----------|------|
 | `Assets/Scripts/VoicevoxSpeaker.cs` | VOICEVOX API 連携 |
 | `Assets/Scripts/PatientAI.cs` | LLM (Ollama/ELYZA) 連携 |
-| `Assets/Scripts/ChatUI.cs` | ブラウザ用テキスト入力UI |
+| `Assets/Scripts/ChatUI.cs` | ブラウザ用テキスト入力UI + SendChatFromWeb() |
+
+### ChatUI.cs の重要メソッド
+- `SendChatFromWeb(string message)`: JavaScriptから呼び出されるpublicメソッド
+
+### index.html カスタマイズ内容
+- HTMLの入力欄（`#chat-input`）を追加
+- JavaScript で `gameInstance.SendMessage('chatmanager', 'SendChatFromWeb', message)` を呼び出し
+- Unity内のInputFieldは WebGL で動作しないため、HTML側で入力を受け付ける
 
 ---
 
@@ -163,9 +184,16 @@ C:\zzz\
 ### ローカル実行方法
 ```bash
 cd C:\zzz
-python -m http.server 8080
-# ブラウザで http://localhost:8080 を開く
+python -m http.server 8000
+# ブラウザで http://localhost:8000 を開く
 ```
+
+### 一括起動バッチファイル
+`C:\zzz\start.bat` をダブルクリックで以下が起動：
+- VOICEVOX（CORS有効）
+- Ollama（CORS有効）
+- Python HTTPサーバー
+- ブラウザ自動オープン
 
 ### 注意：Brotli 圧縮問題
 デフォルトの Brotli 圧縮は Python の http.server で動作しない。
