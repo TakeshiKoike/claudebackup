@@ -576,7 +576,57 @@ Start-Process -FilePath 'C:\Users\kokek\AppData\Local\Programs\VOICEVOX\vv-engin
 
 ---
 
+## 公式パイプライン構築（2026-01-30）
+
+### 目標
+NVIDIA 公式の完全統合パイプラインを構築する（オリジナル手法は使用しない）
+
+### 公式パイプライン構成
+```
+[マイク] → Riva ASR → ACE Agent LLM → Riva TTS → Audio2Face → [MetaHuman/UE5]
+```
+
+### インストール済みコンポーネント
+
+| コンポーネント | バージョン | 状態 |
+|---------------|-----------|------|
+| Docker Desktop | 29.1.5 | ✅ 完了 |
+| NGC レジストリログイン | - | ✅ 完了 |
+| ACE リポジトリ | GitHub clone | ✅ 完了 |
+
+### 環境設定
+
+**NGC API Key 設定済み**
+```bash
+docker login nvcr.io -u '$oauthtoken' -p <NGC_API_KEY>
+```
+
+**ACE Agent リポジトリ**
+```
+C:/ACE/microservices/ace_agent/4.1/
+├── deploy/docker/docker-compose.yml
+├── samples/chitchat_bot/
+└── samples/llm_bot/
+```
+
+### 必要なコンテナ（ダウンロード中）
+| コンテナ | サイズ | 用途 |
+|---------|--------|------|
+| nvcr.io/nvidia/riva/riva-speech:2.18.0 | ~10GB | ASR/TTS |
+| nvcr.io/nvidia/ace/chat-engine:4.1.0 | ~5GB | 会話エンジン |
+| nvcr.io/nvidia/ace/chat-controller:4.1.0 | - | パイプライン制御 |
+
+### 次のステップ
+1. [ ] コンテナダウンロード完了を待つ
+2. [ ] chitchat_bot サンプルを起動
+3. [ ] UE5 との連携設定
+4. [ ] 動作確認
+
+---
+
 ## 参考リンク
 - [runreal/unreal-mcp](https://github.com/runreal/unreal-mcp)
 - [NVIDIA ACE](https://developer.nvidia.com/ace)
 - [Audio2Face-3D SDK](https://github.com/NVIDIA/Audio2Face-3D-SDK)
+- [ACE Agent Docs](https://docs.nvidia.com/ace/ace-agent/latest/)
+- [NVIDIA ACE GitHub](https://github.com/NVIDIA/ACE)
