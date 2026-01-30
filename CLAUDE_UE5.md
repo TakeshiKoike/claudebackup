@@ -144,6 +144,81 @@ C++ `AnimateFromAudioSamples()` API を使用すれば、音声生成中にリ�
 
 ---
 
+## ダウンロード元・インストール手順（再現用）
+
+### 必須ダウンロード元
+**https://developer.nvidia.com/ace-for-games**
+
+※NVIDIA Developer アカウント（無料）が必要
+
+### ダウンロードするファイル
+
+#### 1. ACE Unreal Plugin（必須）
+| UEバージョン | ファイル名 |
+|-------------|-----------|
+| UE 5.6 | `nv_ace_reference-ue5.6-v2.5.0rc3.zip` |
+| UE 5.5 | `nv_ace_reference-ue5.5-v2.5.0rc3.zip` |
+| UE 5.4 | `nv_ace_reference-ue5.4-v2.4.0.zip` |
+
+配置先: `プロジェクト/Plugins/NV_ACE_Reference/`
+
+#### 2. Audio2Face-3D Plugins（ローカル推論用、必須）
+| ファイル名 | 含まれるモデル | バージョン |
+|-----------|---------------|-----------|
+| `ace_3.0_a2f_models.zip` | Mark, Claire, James（diffusion） | v3.0 |
+| `ace_2.5_v2.3_a2f_models.zip` | Mark, Claire, James（regressive） | v2.3 |
+
+配置先: `プロジェクト/Plugins/` に展開
+
+**展開後のフォルダ構造例:**
+```
+プロジェクト/Plugins/
+├── NV_ACE_Reference/           ← ACE Plugin本体
+├── NvAudio2FaceMark-UE5.6-.../  ← Markモデル（v3.0 diffusion）
+├── NvAudio2FaceClaire-UE5.6-.../
+└── NvAudio2FaceJames-UE5.6-.../
+```
+
+#### 利用可能なAudio2Face-3Dプラグイン一覧
+
+| プラグイン名 | モデル | バージョン | VRAM | FPS |
+|-------------|--------|-----------|------|-----|
+| NvAudio2FaceMark | Mark | v3.0 diffusion | 4.4+ GiB | 60 |
+| NvAudio2FaceClaire | Claire | v3.0 diffusion | 4.4+ GiB | 60 |
+| NvAudio2FaceJames | James | v3.0 diffusion | 4.4+ GiB | 60 |
+| NvAudio2FaceMarkRegressive | Mark | v2.3 regressive | 3.0+ GiB | 30 |
+| NvAudio2FaceClaireRegressive | Claire | v2.3 regressive | 2.9+ GiB | 30 |
+| NvAudio2FaceJamesRegressive | James | v2.3 regressive | 2.9+ GiB | 30 |
+
+### インストール手順
+
+1. **NVIDIA Developer にログイン**
+   - https://developer.nvidia.com/ace-for-games にアクセス
+   - アカウント作成またはログイン
+
+2. **ACE Unreal Plugin をダウンロード**
+   - UE5.6 用: `nv_ace_reference-ue5.6-v2.5.0rc3.zip`
+   - 解凍して `プロジェクト/Plugins/NV_ACE_Reference/` に配置
+
+3. **Audio2Face モデルをダウンロード**
+   - `ace_3.0_a2f_models.zip` をダウンロード
+   - 解凍すると `NvAudio2FaceMark-UE5.6-v2.4.0` 等のフォルダが出てくる
+   - `プロジェクト/Plugins/` に配置
+
+4. **UE5 プロジェクトを開く**
+   - プラグインが自動認識される
+   - Edit → Plugins で有効化を確認
+
+### オプション：Audio2Face-3D SDK
+
+| 項目 | 値 |
+|------|-----|
+| GitHub | https://github.com/NVIDIA/Audio2Face-3D-SDK |
+| 用途 | 音声→ブレンドシェイプJSON変換（UE5外での前処理用） |
+| 依存 | TensorRT 10.x（https://developer.nvidia.com/tensorrt から取得） |
+
+---
+
 ## NVIDIA ACE プラグイン詳細
 
 | 項目 | 値 |
