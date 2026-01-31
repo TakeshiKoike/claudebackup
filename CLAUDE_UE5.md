@@ -42,6 +42,8 @@
 - [x] **MetaHuman Face 構造調査** ✓
 - [x] **JSON→モーフターゲット直接適用実験** ❌ 失敗（詳細は下記「実験記録」参照）
 - [x] **Sound Wave リップシンク動作** ✅ 成功（BP_takeshi77）
+- [x] **WAV File リップシンク動作** ✅ 成功（2026-01-31）
+- [x] **会話パイプライン統合** ✅ 成功（2026-01-31）
 - [ ] **リアルタイムリップシンク** ← 次の目標（下記「リアルタイム方式」参照）
 - [ ] 会話システム最適化
 
@@ -609,18 +611,55 @@ C:/ACE/microservices/ace_agent/4.1/
 └── samples/llm_bot/
 ```
 
-### 必要なコンテナ（ダウンロード中）
-| コンテナ | サイズ | 用途 |
+### 必要なコンテナ
+| コンテナ | サイズ | 状態 |
 |---------|--------|------|
-| nvcr.io/nvidia/riva/riva-speech:2.18.0 | ~10GB | ASR/TTS |
-| nvcr.io/nvidia/ace/chat-engine:4.1.0 | ~5GB | 会話エンジン |
-| nvcr.io/nvidia/ace/chat-controller:4.1.0 | - | パイプライン制御 |
+| nvcr.io/nvidia/ace/chat-engine:4.1.0 | 10.1GB | ✅ 完了 |
+| nvcr.io/nvidia/ace/chat-controller:4.1.0 | 20.9GB | ✅ 完了 |
+| nvcr.io/nim/meta/llama3-8b-instruct:1.0.3 | 19.2GB | ✅ 完了 |
+| nvcr.io/nvidia/riva/riva-speech:2.18.0 | 54.8GB | ✅ 完了 |
 
 ### 次のステップ
-1. [ ] コンテナダウンロード完了を待つ
-2. [ ] chitchat_bot サンプルを起動
-3. [ ] UE5 との連携設定
-4. [ ] 動作確認
+1. [x] chat-engine ダウンロード完了
+2. [x] chat-controller ダウンロード完了
+3. [x] NIM (llama3-8b) ダウンロード完了
+4. [x] Riva ダウンロード完了
+5. [ ] ACE Agent サンプル起動
+6. [ ] UE5 との連携設定
+7. [ ] 動作確認
+
+---
+
+## 会話パイプライン動作確認（2026-01-31）
+
+### テスト結果
+
+**パイプライン構成:**
+```
+[テキスト入力] → [Ollama/ELYZA-8B] → [VOICEVOX GPU] → [WAV] → [ACE animate_character_from_wav_file] → [BP_takeshi77]
+```
+
+**性能測定:**
+| ステップ | 処理時間 |
+|---------|---------|
+| LLM応答 (ELYZA-8B) | 8.05秒 |
+| 音声生成 (VOICEVOX GPU) | 0.15秒 |
+| リップシンク (LocalA2F-Mark) | 5.64秒 |
+| **合計** | **約14秒** |
+
+**動作確認済みコンポーネント:**
+- ✅ Ollama + ELYZA-JP-8B
+- ✅ VOICEVOX v0.25.1 (GPU モード)
+- ✅ UE5 Remote Execution 接続
+- ✅ ACE `animate_character_from_wav_file` API
+- ✅ BP_takeshi77 リップシンク
+
+**スクリプト:**
+- `C:\Users\kokek\patient_conversation.py` - 対話式会話システム
+
+**注意事項:**
+- `animate_character_from_wav_file` は非推奨（Async版推奨だがBlueprintのみ）
+- 応答時間の大部分はLLM推論時間
 
 ---
 
