@@ -41,8 +41,9 @@ webgl-patient/
 - [x] Flask バックエンド実装 (port 8888)
 - [x] LLM + TTS 統合テスト成功
 - [x] Blender MCP設定追加
-- [ ] Blender MCPでリアルな顔モデル作成
+- [x] シンプル顔モデル作成済み (patient.glb, mouth_openシェイプキー付き)
 - [ ] リップシンク動作確認
+- [ ] より リアルな顔モデル作成（オプション）
 
 ## 作業ログ
 ### 2026-01-31
@@ -50,7 +51,8 @@ webgl-patient/
 - Three.js + Flask 基本実装完了
 - Chat API動作確認: LLM応答 + VOICEVOX音声生成 OK
 - Blender MCP設定を settings.local.json に追加
-- 次: Claude Code再起動後、Blender MCPでモデル作成
+- **patient.glb 作成完了** (mouth_open シェイプキー付き)
+- 次: ブラウザでリップシンク動作確認
 
 ## リップシンク仕組み
 1. ユーザー入力 → Flask → Ollama (LLM応答)
@@ -59,7 +61,7 @@ webgl-patient/
 4. 音量 → Three.js morph target → 口の開閉アニメーション
 
 ## 次のステップ
-1. Claude Code再起動 (`/exit` → `claude`)
-2. Blender MCPでリアルな顔モデル作成
-3. mouth_open シェイプキー追加
-4. GLBエクスポート → ブラウザでテスト
+1. サーバー起動: `python server.py` (webgl-patient フォルダ)
+2. ブラウザで http://localhost:8888 にアクセス
+3. チャットでリップシンク動作確認
+4. (オプション) よりリアルなモデルに改善
