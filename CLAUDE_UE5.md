@@ -46,7 +46,7 @@
 - [x] **会話パイプライン統合** ✅ 成功（2026-01-31）
 - [x] **リアルタイムリップシンク最適化** ✅ 成功（2026-02-01、約14秒→約3.8秒、73%短縮）
 - [x] **Blueprint Async API 移行** ✅ 成功（2026-02-02、連続リップシンク実現）
-- [ ] 会話システム最適化
+- [x] **会話システム更新** ✅ 成功（2026-02-02、PendingWavPath方式対応）
 
 ---
 
@@ -753,6 +753,11 @@ for a in unreal.GameplayStatics.get_all_actors_of_class(game_world, unreal.Actor
 - 連続5セリフ: ✅ 全て成功
 - 長文セリフ: ✅ 全て成功
 - 様々なパターン: ✅ 全て成功
+
+### patient_conversation.py 更新済み（2026-02-02）
+会話システムを新しいPendingWavPath方式に対応させた。
+- 旧方式: `animate_character_from_sound_wave` (同期API、連続リップシンク不可)
+- 新方式: PendingWavPath変数を設定 (Blueprint Async API、連続リップシンク対応)
 
 ---
 
