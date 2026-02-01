@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MB-Lab リップシンク模擬患者</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            height: 100vh;
+            display: flex;
+        }
+        #canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        #canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        #chat-panel {
+            width: 350px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            border-left: 2px solid #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.4em; margin-bottom: 5px; }
+        .header p { opacity: 0.9; font-size: 0.85em; }
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f5f5f5;
+        }
+        .msg {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .msg.user { align-items: flex-end; }
+        .msg.bot { align-items: flex-start; }
+        .msg .bubble {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        .msg.user .bubble {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+        .msg.bot .bubble {
+            background: #fff;
+            border: 1px solid #ddd;
+        }
+        .msg .label {
+            font-size: 0.7em;
+            color: #888;
+            margin-bottom: 3px;
+        }
+        #input-area {
+            padding: 15px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+        #input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            font-size: 1em;
+            outline: none;
+        }
+        #input:focus { border-color: #667eea; }
+        #send {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        #send:hover { opacity: 0.9; }
+        #send:disabled { opacity: 0.5; cursor: not-allowed; }
+        #status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #0f0;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+        .speaking { color: #ff0 !important; }
+        #debug {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.75em;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+        <div id="status">モデル読込中...</div>
+        <div id="debug">Mouth: 0%</div>
+    </div>
+    <div id="chat-panel">
+        <div class="header">
+            <h1>山田 一子</h1>
+            <p>72歳女性・COPD患者</p>
+        </div>
+        <div id="messages"></div>
+        <div id="input-area">
+            <input type="text" id="input" placeholder="話しかけてください..." autofocus>
+            <button id="send">送信</button>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Three.js setup
+        const canvas = document.getElementById('canvas');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x2a2a4a);
+
+        const camera = new THREE.PerspectiveCamera(30, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+        camera.position.set(0, 1.5, 2);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(2, 3, 2);
+        scene.add(dirLight);
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        backLight.position.set(-1, 2, -2);
+        scene.add(backLight);
+
+        // Controls
+        const controls = new OrbitControls(camera, canvas);
+        controls.target.set(0, 1.3, 0);
+        controls.enableDamping = true;
+        controls.update();
+
+        // Model and morph targets
+        let model = null;
+        let morphMeshes = [];
+        let morphTargetDict = {};
+        const clock = new THREE.Clock();
+
+        // MB-Lab shape key mapping for AIUEO
+        const lipSyncMap = {
+            'A': 'Expressions_mouthOpenLarge_max',  // あ
+            'I': 'Expressions_mouthSmile_max',       // い
+            'U': 'Expressions_mouthOpenO_max',       // う
+            'E': 'Expressions_mouthOpenHalf_max',    // え
+            'O': 'Expressions_mouthOpenO_max',       // お
+            'closed': 'Expressions_mouthClosed_max'  // 閉口
+        };
+
+        // Materials for different body parts
+        const materials = {
+            skin: new THREE.MeshStandardMaterial({
+                color: 0xE8C4B8,
+                roughness: 0.7,
+                metalness: 0.0
+            }),
+            eyes: new THREE.MeshStandardMaterial({
+                color: 0xFFFAF0,
+                roughness: 0.2,
+                metalness: 0.0
+            }),
+            iris: new THREE.MeshStandardMaterial({
+                color: 0x4A3728,
+                roughness: 0.3,
+                metalness: 0.1
+            }),
+            pupil: new THREE.MeshStandardMaterial({
+                color: 0x1a1a1a,
+                roughness: 0.1,
+                metalness: 0.0
+            }),
+            cornea: new THREE.MeshStandardMaterial({
+                color: 0xFFFFFF,
+                roughness: 0.0,
+                metalness: 0.1,
+                transparent: true,
+                opacity: 0.3
+            }),
+            teeth: new THREE.MeshStandardMaterial({
+                color: 0xFFFAF0,
+                roughness: 0.4,
+                metalness: 0.0
+            }),
+            tongue: new THREE.MeshStandardMaterial({
+                color: 0xCC6666,
+                roughness: 0.8,
+                metalness: 0.0
+            }),
+            eyelash: new THREE.MeshStandardMaterial({
+                color: 0x2a2a2a,
+                roughness: 0.9,
+                metalness: 0.0
+            }),
+            nails: new THREE.MeshStandardMaterial({
+                color: 0xE8D0C8,
+                roughness: 0.3,
+                metalness: 0.1
+            })
+        };
+
+        // Load MB-Lab GLB model
+        const loader = new GLTFLoader();
+        loader.load('mblab_patient.glb', (gltf) => {
+            model = gltf.scene;
+            scene.add(model);
+
+            // Apply materials based on material/mesh name
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    const matName = child.material?.name?.toLowerCase() || '';
+                    const meshName = child.name?.toLowerCase() || '';
+                    console.log('Mesh:', meshName, 'Material:', matName);
+
+                    // Hair - gray
+                    if (meshName.includes('hair') || meshName.includes('sphere') || matName.includes('hair') || matName.includes('gray')) {
+                        child.material = new THREE.MeshStandardMaterial({
+                            color: 0x555555,
+                            roughness: 0.8
+                        });
+                    }
+                    // Gown - light blue
+                    else if (meshName.includes('gown') || matName.includes('gown')) {
+                        child.material = new THREE.MeshStandardMaterial({
+                            color: 0x6699CC,
+                            roughness: 0.7
+                        });
+                    }
+                    // Eyes, teeth, etc
+                    else if (matName.includes('pupil')) {
+                        child.material = materials.pupil;
+                    } else if (matName.includes('iris')) {
+                        child.material = materials.iris;
+                    } else if (matName.includes('cornea')) {
+                        child.material = materials.cornea;
+                    } else if (matName.includes('eye')) {
+                        child.material = materials.eyes;
+                    } else if (matName.includes('teeth')) {
+                        child.material = materials.teeth;
+                    } else if (matName.includes('tongue')) {
+                        child.material = materials.tongue;
+                    } else if (matName.includes('eyelash')) {
+                        child.material = materials.eyelash;
+                    } else if (matName.includes('nail')) {
+                        child.material = materials.nails;
+                    } else {
+                        child.material = materials.skin;
+                    }
+
+                    if (child.morphTargetInfluences) {
+                        morphMeshes.push(child);
+                        morphTargetDict = child.morphTargetDictionary || {};
+                        console.log('Morph targets found:', Object.keys(morphTargetDict).length);
+                    }
+                }
+            });
+
+            // Adjust model position
+            model.position.y = 0;
+            model.rotation.y = 0; // Face camera
+
+            updateStatus('モデル読込完了 - 話しかけてください');
+            console.log('Model loaded with', morphMeshes.length, 'morph meshes');
+        },
+        (progress) => {
+            const pct = Math.round((progress.loaded / progress.total) * 100);
+            updateStatus(`読込中... ${pct}%`);
+        },
+        (error) => {
+            console.error('Load error:', error);
+            updateStatus('モデル読込エラー');
+        });
+
+        // Set morph target value by name
+        function setMorphTarget(name, value) {
+            morphMeshes.forEach(mesh => {
+                const index = mesh.morphTargetDictionary[name];
+                if (index !== undefined) {
+                    mesh.morphTargetInfluences[index] = value;
+                }
+            });
+        }
+
+        // Reset all mouth morphs
+        function resetMouthMorphs() {
+            Object.values(lipSyncMap).forEach(name => {
+                setMorphTarget(name, 0);
+            });
+        }
+
+        // Audio and lipsync
+        let audioContext = null;
+        let analyser = null;
+        let audioSource = null;
+        let isSpeaking = false;
+
+        function setupAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+            }
+        }
+
+        async function playAudioWithLipsync(audioUrl) {
+            setupAudio();
+
+            const response = await fetch(audioUrl);
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+            audioSource = audioContext.createBufferSource();
+            audioSource.buffer = audioBuffer;
+            audioSource.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            isSpeaking = true;
+            updateStatus('発話中...', true);
+            audioSource.start();
+
+            audioSource.onended = () => {
+                isSpeaking = false;
+                resetMouthMorphs();
+                updateStatus('待機中');
+            };
+        }
+
+        // Get volume level from audio
+        function getVolume() {
+            if (!analyser || !isSpeaking) return 0;
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+            }
+            return sum / dataArray.length / 255;
+        }
+
+        // Map volume to mouth shape
+        function updateLipSync() {
+            const volume = getVolume();
+            const debug = document.getElementById('debug');
+            debug.textContent = `Mouth: ${Math.round(volume * 100)}%`;
+
+            resetMouthMorphs();
+
+            if (volume < 0.05) {
+                // Closed
+                setMorphTarget(lipSyncMap['closed'], 0.3);
+            } else if (volume < 0.15) {
+                // U
+                setMorphTarget(lipSyncMap['U'], volume * 4);
+            } else if (volume < 0.25) {
+                // E
+                setMorphTarget(lipSyncMap['E'], volume * 3);
+            } else if (volume < 0.35) {
+                // I
+                setMorphTarget(lipSyncMap['I'], volume * 2.5);
+            } else if (volume < 0.5) {
+                // O
+                setMorphTarget(lipSyncMap['O'], volume * 2);
+            } else {
+                // A - wide open
+                setMorphTarget(lipSyncMap['A'], Math.min(volume * 1.5, 1));
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isSpeaking) {
+                updateLipSync();
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+
+        // Chat UI
+        const messages = document.getElementById('messages');
+        const input = document.getElementById('input');
+        const sendBtn = document.getElementById('send');
+        const status = document.getElementById('status');
+
+        function updateStatus(text, speaking = false) {
+            status.textContent = text;
+            status.className = speaking ? 'speaking' : '';
+        }
+
+        function addMessage(text, isUser) {
+            const div = document.createElement('div');
+            div.className = `msg ${isUser ? 'user' : 'bot'}`;
+            div.innerHTML = `
+                <span class="label">${isUser ? '看護師' : '一子'}</span>
+                <div class="bubble">${text}</div>
+            `;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+
+            if (!model) {
+                alert('モデル読込中です');
+                return;
+            }
+
+            addMessage(text, true);
+            input.value = '';
+            input.disabled = true;
+            sendBtn.disabled = true;
+            updateStatus('考え中...');
+
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await res.json();
+
+                addMessage(data.response, false);
+
+                if (data.audio_url) {
+                    await playAudioWithLipsync(data.audio_url);
+                }
+            } catch (e) {
+                console.error(e);
+                addMessage('エラーが発生しました', false);
+                updateStatus('エラー');
+            }
+
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+
+        sendBtn.onclick = sendMessage;
+        input.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+    </script>
+</body>
+</html>
