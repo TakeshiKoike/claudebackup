@@ -23,7 +23,7 @@
 
 ---
 
-## 進捗状況（2026-01-29 更新）
+## 進捗状況（2026-02-01 更新）
 
 - [x] UE5.6 プロジェクト作成
 - [x] MCP 接続確認（runreal/unreal-mcp）
@@ -44,7 +44,8 @@
 - [x] **Sound Wave リップシンク動作** ✅ 成功（BP_takeshi77）
 - [x] **WAV File リップシンク動作** ✅ 成功（2026-01-31）
 - [x] **会話パイプライン統合** ✅ 成功（2026-01-31）
-- [ ] **リアルタイムリップシンク** ← 次の目標（下記「リアルタイム方式」参照）
+- [x] **リアルタイムリップシンク最適化** ✅ 成功（2026-02-01、約14秒→約3.8秒、73%短縮）
+- [x] **Blueprint Async API 移行** ✅ 成功（2026-02-02、連続リップシンク実現）
 - [ ] 会話システム最適化
 
 ---
@@ -639,7 +640,7 @@ C:/ACE/microservices/ace_agent/4.1/
 [テキスト入力] → [Ollama/ELYZA-8B] → [VOICEVOX GPU] → [WAV] → [ACE animate_character_from_wav_file] → [BP_takeshi77]
 ```
 
-**性能測定:**
+**性能測定（初期）:**
 | ステップ | 処理時間 |
 |---------|---------|
 | LLM応答 (ELYZA-8B) | 8.05秒 |
@@ -660,6 +661,98 @@ C:/ACE/microservices/ace_agent/4.1/
 **注意事項:**
 - `animate_character_from_wav_file` は非推奨（Async版推奨だがBlueprintのみ）
 - 応答時間の大部分はLLM推論時間
+
+---
+
+## リアルタイムモード最適化（2026-02-01）
+
+### 設定変更
+```python
+import unreal
+# リアルタイムモード有効化（バーストモード無効）
+unreal.ACEBlueprintLibrary.override_a2f3d_inference_mode(False)
+# 初期チャンクサイズ 0.5秒
+unreal.ACEBlueprintLibrary.override_a2f3d_realtime_initial_chunk_size(0.5)
+# GPUリソース事前確保
+unreal.ACEBlueprintLibrary.allocate_a2f3d_resources("LocalA2F-Mark")
+```
+
+### 最適化後の性能（ウォームアップ後）
+| ステップ | 以前 | 最適化後 | 改善率 |
+|---------|------|---------|--------|
+| LLM応答 (ELYZA-8B) | 8.05秒 | **2.40秒** | 70%↓ |
+| 音声生成 (VOICEVOX) | 0.15秒 | **0.45秒** | - |
+| リップシンク (LocalA2F-Mark) | 5.64秒 | **0.97秒** | 83%↓ |
+| **合計** | **約14秒** | **約3.8秒** | **73%↓** |
+
+### 改善ポイント
+1. **リアルタイムモード**: `ForceRealTimeMode` でストリーミング処理
+2. **GPUリソース事前確保**: 初回遅延を大幅削減
+3. **LLMウォームアップ**: 初回ロード後は高速応答
+
+### 次の改善候補
+- [x] Blueprint Async API（`Animate From Wav File Async`）への移行 ✅ 完了
+- [ ] C++ `AnimateFromAudioSamples()` でのストリーミング（更なる低遅延化）
+
+---
+
+## 連続リップシンク実装（2026-02-02 成功）
+
+### 問題
+Python同期API（`animate_character_from_wav_file`）では、2回目以降のリップシンクが失敗する。
+- 1回目: OK
+- 2回目以降: 一瞬動いて停止
+
+### 原因
+- 同期APIはセッションを正しく終了しない
+- NVIDIAドキュメント: 「1つのアニメーションが完了するまで待ってから、新しいアニメーションを開始することが推奨」
+
+### 解決策
+Blueprint側でAsync APIを使い、Pythonからは変数（PendingWavPath）を設定するだけにする。
+
+### BP_takeshi77 Blueprint実装
+
+#### 追加した変数
+| 変数名 | 型 | 説明 |
+|--------|-----|------|
+| PendingWavPath | String | 再生するWAVファイルパス |
+| IsReady | Boolean | リップシンク可能状態（デフォルト: True） |
+
+#### Event Graph ロジック
+```
+Event Tick
+    → Branch (Condition: IsReady)
+        → True: Branch (Condition: PendingWavPath Is Empty)
+            → False: Set IsReady (False)
+                → AnimateCharacterFromWavFileAsync
+                    - Character: Self
+                    - Path to Wav: PendingWavPath
+                    - A2F Provider Name: LocalA2F-Mark
+                → Audio Send Completed: Set PendingWavPath ("")
+
+On Animation Ended (ACEAudioCurveSource)
+    → Print String ("Animation Ended")
+    → Set IsReady (True)
+```
+
+### Python側の使い方
+```python
+# PendingWavPath変数を設定するだけ
+remote.run_command(f'''
+import unreal
+editor_subsystem = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
+game_world = editor_subsystem.get_game_world()
+for a in unreal.GameplayStatics.get_all_actors_of_class(game_world, unreal.Actor):
+    if "BP_takeshi77" in a.get_name():
+        a.set_editor_property("PendingWavPath", "{wav_path}")
+        break
+''', unattended=True)
+```
+
+### テスト結果
+- 連続5セリフ: ✅ 全て成功
+- 長文セリフ: ✅ 全て成功
+- 様々なパターン: ✅ 全て成功
 
 ---
 
