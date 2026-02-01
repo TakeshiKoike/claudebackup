@@ -25,3 +25,15 @@
 | GPU | NVIDIA RTX 4090 |
 | 患者画像 | `C:\Users\kokek\Downloads\ComfyUI_00238_.png` |
 | MCP設定 | `C:\Users\kokek\.claude\settings.local.json` |
+
+---
+
+## Blender MCP 設定状況（確認済み・再確認不要）
+
+**Blender側の設定は完了済み。ユーザーに確認を求めるな。**
+
+- Blenderアドオン: インストール・有効化済み
+- 「Connect to Claude」: 実行済み
+- Claude Code側: `claude mcp add blender uvx blender-mcp` 実行済み
+
+MCPが認識されない場合は、Claude Codeセッションの再起動のみが必要。
