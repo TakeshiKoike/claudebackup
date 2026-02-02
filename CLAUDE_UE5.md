@@ -994,6 +994,57 @@ python C:\Users\kokek\patient_ue5_monitor.py
 
 ---
 
+## 看護師音声 + 字幕機能（2026-02-02）
+
+### 概要
+- 看護師の入力テキストを音声化し、LLM処理中に再生して待ち時間をマスク
+- 映画風の字幕表示（看護師・患者両方）
+
+### 処理フロー
+```
+[メッセージ入力]
+    ├→ [VOICEVOX 看護師音声] → [再生] + [字幕表示]
+    └→ [LLM応答生成]（並行処理）
+           ↓
+    [VOICEVOX 患者音声] → [リップシンク] + [字幕表示]
+```
+
+### VOICEVOX 設定
+
+| 役割 | Speaker ID | キャラクター | 音量 |
+|------|-----------|-------------|------|
+| 看護師 | 8 | 春日部つむぎ | 1.0 |
+| 患者 | 11 | 玄野武宏 | 2.0 |
+
+### BP_takeshi77 追加変数
+
+| 変数名 | 型 | 説明 |
+|--------|-----|------|
+| CurrentSubtitle | String | 現在の字幕テキスト |
+
+### WBP_PatientChat 字幕設定
+
+**SubtitleText (Text Block):**
+- 位置: Vertical Box の下部（入力欄の上）
+- Auto Wrap Text: ✅ 有効
+- Is Variable: ✅ 有効
+
+**Event Graph（字幕更新）:**
+```
+Event Tick
+    → Get All Actors Of Class (BP_takeshi77)
+    → GET [0]
+    → Get Current Subtitle
+    → To Text (String)
+    → SetText (SubtitleText)
+```
+
+### 効果
+- 看護師音声再生中にLLM処理が進むため、体感待ち時間が大幅短縮
+- 字幕により会話内容が明確に把握可能
+
+---
+
 ## 開発ロードマップ
 
 ### Phase 1: スタンドアロン完成 ← **現在**
@@ -1001,6 +1052,8 @@ python C:\Users\kokek\patient_ue5_monitor.py
 - [x] GUIアプリ
 - [x] MetaHumanテンプレート化
 - [x] **UE5内チャットUI（UMGウィジェット）** ✅ 完了（2026-02-02）
+- [x] **看護師音声（LLM待ち時間マスク）** ✅ 完了（2026-02-02）
+- [x] **字幕表示機能** ✅ 完了（2026-02-02）
 - [ ] 患者設定カスタマイズ（GUI内）
 - [ ] 音声入力（STT）
 

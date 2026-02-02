@@ -8,3 +8,9 @@
 !simple.md
 !COPDLLM.md
 !.gitignore
+
+# AI模擬患者スクリプト
+!patient_ue5_monitor.py
+!patient_http_server.py
+!patient_gui.py
+!patient_conversation.py
