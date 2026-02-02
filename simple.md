@@ -29,10 +29,12 @@ python server.py
 ```
 webgl-patient/
 ├── index.html              # メインページ (Three.js)
-├── mblab_lipsync.html      # MB-Lab用リップシンクページ ★推奨
+├── mblab_lipsync.html      # MB-Lab女性患者リップシンクページ
+├── mblab_male_lipsync.html # MB-Lab男性患者リップシンクページ ★NEW
 ├── server.py               # Flask API サーバー (port 8888)
 ├── patient.glb             # 3Dモデル (シンプル版)
-├── mblab_patient.glb       # MB-Lab患者モデル (83シェイプキー) ★推奨
+├── mblab_patient.glb       # MB-Lab女性患者モデル (83シェイプキー)
+├── mblab_male_patient.glb  # MB-Lab男性患者モデル (83シェイプキー) ★NEW
 ├── create_patient_model.py # モデル作成スクリプト
 └── audio/                  # 生成音声ファイル
 ```
@@ -62,6 +64,12 @@ webgl-patient/
 - 髪（グレー楕円）とガウン（水色）追加
 - mblab_lipsync.html 実装 - AIUEO対応リップシンク
 - **リップシンク動作確認 OK**
+
+### 2026-02-02
+- MB-Lab男性患者モデル作成（m_as01ベース、83シェイプキー）
+- 短髪（グレー）と病院ガウン（水色）追加
+- mblab_male_lipsync.html 実装
+- 患者設定: 山田太郎 68歳男性COPD患者
 
 ## リップシンク仕組み
 1. ユーザー入力 → Flask → Ollama (LLM応答)
