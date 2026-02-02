@@ -23,7 +23,7 @@
 
 ---
 
-## 進捗状況（2026-02-01 更新）
+## 進捗状況（2026-02-02 更新）
 
 - [x] UE5.6 プロジェクト作成
 - [x] MCP 接続確認（runreal/unreal-mcp）
@@ -47,6 +47,10 @@
 - [x] **リアルタイムリップシンク最適化** ✅ 成功（2026-02-01、約14秒→約3.8秒、73%短縮）
 - [x] **Blueprint Async API 移行** ✅ 成功（2026-02-02、連続リップシンク実現）
 - [x] **会話システム更新** ✅ 成功（2026-02-02、PendingWavPath方式対応）
+- [x] **LLMリアルタイムリップシンク** ✅ 成功（2026-02-02、完全パイプライン動作）
+- [x] **GUIアプリ作成** ✅ 成功（2026-02-02、patient_gui.py）
+- [x] **MetaHumanテンプレート化** ✅ 成功（2026-02-02、PatientTemplate.json）
+- [x] **MetaHumanセットアップツール** ✅ 成功（2026-02-02、setup_metahuman_patient.py）
 
 ---
 
@@ -564,6 +568,19 @@ Start-Process -FilePath 'C:\Users\kokek\AppData\Local\Programs\VOICEVOX\vv-engin
 
 ## 作成済みスクリプト
 
+### メインツール（推奨）
+| スクリプト | 説明 |
+|-----------|------|
+| `C:\Users\kokek\patient_gui.py` | **AI模擬患者GUIアプリ（メイン）** ★ |
+| `C:\Users\kokek\patient_conversation.py` | 対話式会話システム（コマンドライン版） |
+| `C:\Users\kokek\setup_metahuman_patient.py` | **MetaHumanセットアップツール** ★ |
+
+### 設定ファイル
+| ファイル | 説明 |
+|---------|------|
+| `C:\UE_Projects\PatientSim56\Config\PatientTemplate.json` | システム設定テンプレート |
+
+### 開発・テスト用
 | スクリプト | 説明 |
 |-----------|------|
 | `C:\Users\kokek\ue_lipsync_test.py` | 基本リップシンクテスト |
@@ -573,9 +590,8 @@ Start-Process -FilePath 'C:\Users\kokek\AppData\Local\Programs\VOICEVOX\vv-engin
 | `C:\Users\kokek\ue_check_realtime_api.py` | リアルタイムAPI詳細 |
 | `C:\Users\kokek\ue_observe_test.py` | リップシンク観察テスト |
 | `C:\Users\kokek\patient_test.py` | パイプライン自動テスト |
-| `C:\Users\kokek\patient_conversation.py` | 対話式会話システム |
-| `C:\Users\kokek\lipsync_pipeline.py` | **テキスト→リップシンクJSON完全パイプライン** |
-| `C:\Users\kokek\ue_json_lipsync.py` | **UE5用JSONリップシンク適用スクリプト** |
+| `C:\Users\kokek\lipsync_pipeline.py` | テキスト→リップシンクJSON完全パイプライン |
+| `C:\Users\kokek\ue_json_lipsync.py` | UE5用JSONリップシンク適用スクリプト |
 
 ---
 
@@ -758,6 +774,245 @@ for a in unreal.GameplayStatics.get_all_actors_of_class(game_world, unreal.Actor
 会話システムを新しいPendingWavPath方式に対応させた。
 - 旧方式: `animate_character_from_sound_wave` (同期API、連続リップシンク不可)
 - 新方式: PendingWavPath変数を設定 (Blueprint Async API、連続リップシンク対応)
+
+---
+
+## LLMリアルタイムリップシンク完成（2026-02-02）
+
+### 完成したシステム
+
+```
+[テキスト入力] → [LLM (ELYZA-8B)] → [VOICEVOX] → [ACE Lipsync] → [MetaHuman発話]
+     GUI              約3秒           約0.2秒        リアルタイム
+```
+
+### 性能測定（最終）
+| ステップ | 処理時間 |
+|---------|---------|
+| LLM応答 (ELYZA-8B) | 2.6〜4.5秒 |
+| 音声生成 (VOICEVOX GPU) | 0.1〜0.2秒 |
+| リップシンク開始 | 即時 |
+| **合計** | **約3〜5秒** |
+
+### GUIアプリケーション
+
+| ファイル | 説明 |
+|---------|------|
+| `C:\Users\kokek\patient_gui.py` | AI模擬患者GUI（メイン） |
+| `C:\Users\kokek\patient_conversation.py` | コマンドライン版 |
+
+**起動方法:**
+```powershell
+python C:\Users\kokek\patient_gui.py
+```
+
+**機能:**
+- テキスト入力 → LLM応答 → 音声生成 → リップシンク
+- 会話履歴表示
+- 処理時間表示
+
+### LLMプロンプト（改善版）
+```python
+PATIENT_PROMPT = """あなたは入院中の60歳男性患者です。名前は啓二。軽い腰痛で入院しています。
+看護師の質問に、患者として自然に短く答えてください。
+名前や役割は言わず、会話の返答だけを出力してください。"""
+```
+
+**後処理（不要な文字除去）:**
+```python
+import re as regex
+text = regex.sub(r'^(患者|啓二|返答)[\(（]?[^）\)]*[\)）]?[:：]?\s*', '', text)
+text = regex.sub(r'\s*\|.*$', '', text)
+```
+
+### バックグラウンド動作の注意点
+
+**問題**: UE5をバックグラウンドにするとリップシンクが不安定になる
+
+**解決策**: Edit → Editor Preferences → General → Performance
+- 「Use Less CPU when in Background」を**OFF**
+
+**運用方針:**
+- 会話テスト時 → Playモード開始
+- 終了時 → Playモード停止（GPU解放）
+
+---
+
+## MetaHumanテンプレート化（2026-02-02）
+
+### 目的
+新しいMetaHumanでも簡単にシステムを使えるようにする
+
+### 作成ファイル
+
+| ファイル | 説明 |
+|---------|------|
+| `C:\UE_Projects\PatientSim56\Config\PatientTemplate.json` | システム設定テンプレート |
+| `C:\Users\kokek\setup_metahuman_patient.py` | MetaHumanセットアップツール |
+
+### BP_takeshi77 構成（参考）
+
+| コンポーネント | タイプ | 用途 |
+|---------------|--------|------|
+| **ACEAudioCurveSource** | ACEAudioCurveSourceComponent | リップシンク用 |
+| Face | SkeletalMeshComponent | 顔メッシュ |
+| Body/Torso/Legs/Feet | SkeletalMeshComponent | 体 |
+| Hair/Eyebrows等 | GroomComponent | 髪・毛 |
+| MetaHuman | MetaHumanComponentUE | MH制御 |
+
+**位置:** X=10, Y=0, Z=210
+**回転:** P=0, Y=0, R=0
+
+### 新しいMetaHumanのセットアップ手順
+
+```powershell
+# 1. UE5で新しいMetaHumanをレベルに配置
+# 2. セットアップツール実行
+python C:\Users\kokek\setup_metahuman_patient.py
+
+# 3. 画面の指示に従って設定:
+#    - ACEAudioCurveSourceComponent追加
+#    - Blueprint変数追加 (PendingWavPath, IsReady)
+#    - Event Graphロジック実装
+
+# 4. patient_gui.pyのMetaHuman名を更新
+```
+
+### 必須Blueprint変数
+
+| 変数名 | 型 | デフォルト | 説明 |
+|--------|-----|-----------|------|
+| PendingWavPath | String | "" | 再生するWAVファイルパス |
+| IsReady | Boolean | True | リップシンク可能状態 |
+
+---
+
+## UE5内チャットUI実装（2026-02-02）
+
+### 概要
+外部PythonGUIではなく、UE5内にUMGウィジェットでチャットUIを構築。
+MetaHumanと同じ画面内で会話可能になった。
+
+### 構成ファイル
+
+| ファイル | 場所 | 説明 |
+|---------|------|------|
+| WBP_PatientChat | /Game/UI/ | チャットウィジェットBlueprint |
+| patient_ue5_monitor.py | C:\Users\kokek\ | PendingMessage監視スクリプト |
+| patient_http_server.py | C:\Users\kokek\ | HTTPサーバー版（代替） |
+
+### WBP_PatientChat 構造
+
+```
+Canvas Panel
+└── Vertical Box (Anchors: 左下)
+    ├── Scroll Box (ChatHistoryText)
+    │   └── Text Block (チャット履歴表示)
+    └── Horizontal Box
+        ├── Border (背景色付き)
+        │   └── Editable Text Box (InputTextBox)
+        └── Button (SendButton)
+            └── Text Block ("送信")
+```
+
+### Blueprint変数（WBP_PatientChat）
+
+| 変数名 | 型 | Is Variable |
+|--------|-----|-------------|
+| SendButton | Button | ✅ |
+| InputTextBox | Editable Text Box | ✅ |
+| ChatHistoryText | Text Block | ✅ |
+
+### Event Graph ロジック
+
+```
+On Clicked (SendButton)
+    → Get All Actors Of Class (BP_takeshi77)
+    → GET (配列0番目)
+    → Set PendingMessage (InputTextBox.GetText)
+    → SetText (InputTextBox, "")  ← 入力クリア
+
+OnTextCommitted (InputTextBox)
+    → Equal (Commit Method == 1)  ← On Enterのみ
+    → Branch (True)
+        → Get All Actors Of Class (BP_takeshi77)
+        → GET (配列0番目)
+        → Set PendingMessage (InputTextBox.GetText)
+        → SetText (InputTextBox, "")
+```
+
+**重要**: OnTextCommittedは「Enter」と「フォーカス喪失」の両方で発火する。
+Commit Method == 1（On Enter）でフィルタしないと二重実行される。
+
+### BP_takeshi77 追加変数
+
+| 変数名 | 型 | デフォルト | 説明 |
+|--------|-----|-----------|------|
+| PendingMessage | String | "" | UIからのメッセージ |
+| PendingWavPath | String | "" | 再生するWAVパス |
+| IsReady | Boolean | True | リップシンク可能状態 |
+
+### Level Blueprint（Lvl_ThirdPerson）
+
+```
+Event BeginPlay
+    → Create Widget (WBP_PatientChat)
+    → Add to Viewport
+```
+
+### Python監視スクリプト（patient_ue5_monitor.py）
+
+**起動方法:**
+```powershell
+python C:\Users\kokek\patient_ue5_monitor.py
+```
+
+**処理フロー:**
+1. UE5に接続（Remote Execution）
+2. ACEリップシンク初期化
+3. 0.5秒ごとにPendingMessageを監視
+4. メッセージ検出時:
+   - LLM応答生成（ELYZA-8B）
+   - 音声生成（VOICEVOX GPU）
+   - PendingWavPath設定（リップシンクトリガー）
+
+### 使用方法
+
+1. UE5でPlayモードを開始
+2. ターミナルで `python C:\Users\kokek\patient_ue5_monitor.py`
+3. UE5画面左下のテキストボックスにメッセージ入力
+4. Enterキーまたは送信ボタンで送信
+5. 患者がリップシンク付きで応答
+
+### 解決した問題
+
+| 問題 | 原因 | 解決策 |
+|------|------|--------|
+| InputTextBoxが見えない | 背景色なし | Borderで囲んで背景色設定 |
+| OnTextCommitted二重発火 | Enter+フォーカス喪失両方で発火 | Commit Method == 1でフィルタ |
+| Unicode文字化け | cp932エンコード問題 | 絵文字をASCIIに置換 |
+
+---
+
+## 開発ロードマップ
+
+### Phase 1: スタンドアロン完成 ← **現在**
+- [x] LLMリアルタイムリップシンク
+- [x] GUIアプリ
+- [x] MetaHumanテンプレート化
+- [x] **UE5内チャットUI（UMGウィジェット）** ✅ 完了（2026-02-02）
+- [ ] 患者設定カスタマイズ（GUI内）
+- [ ] 音声入力（STT）
+
+### Phase 2: Pixel Streaming対応
+- [ ] Pixel Streaming設定
+- [ ] Webクライアント作成
+- [ ] サーバー構築
+
+### Phase 3: 配布・運用
+- [ ] パッケージ化
+- [ ] マニュアル作成
+- [ ] 複数患者対応
 
 ---
 
