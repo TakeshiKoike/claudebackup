@@ -6,3 +6,7 @@
 !CLAUDE_UE5.md
 !CLAUDE_Unity.md
 !.gitignore
+
+# 3D LipSyncプロジェクト関連
+!3D_LIPSYNC_PROJECT.md
+!BLENDER_MCP_USAGE.md

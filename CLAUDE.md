@@ -11,6 +11,7 @@
 |------|-----------|----------|
 | 1番さん | UE5.6 + MetaHuman + Audio2Face | [CLAUDE_UE5.md](CLAUDE_UE5.md) |
 | 2番さん | Unity + CC + uLipSync | [CLAUDE_Unity.md](CLAUDE_Unity.md) |
+| 3番さん | Three.js + Blender MCP + VOICEVOX | [3D_LIPSYNC_PROJECT.md](3D_LIPSYNC_PROJECT.md) |
 
 **注意**: 各担当は自分のファイルのみ編集してください。
 
