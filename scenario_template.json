@@ -1,0 +1,121 @@
+{
+  "$schema": "./scenario_schema.json",
+  "title": "教材タイトル",
+  "subtitle": "サブタイトル",
+  "version": "1.0",
+  "totalScenes": 12,
+  "totalCuts": 77,
+
+  "sceneFlow": [
+    {
+      "sceneId": 1,
+      "location": null,
+      "nextLocation": "hospital",
+      "showMap": false,
+      "comment": "イントロ - MAPなしで開始"
+    },
+    {
+      "sceneId": 2,
+      "location": "hospital",
+      "subLocation": "hospital_room",
+      "nextLocation": "home",
+      "showMap": true,
+      "comment": "退院前カンファ"
+    }
+  ],
+
+  "scenes": [
+    {
+      "id": 1,
+      "title": "イントロ",
+      "background": null,
+      "bgm": "main_theme",
+      "location": null,
+      "cuts": [
+        {
+          "id": "s01_01",
+          "speaker": "narration",
+          "text": "今回の主人公は...",
+          "characters": [],
+          "expression": null,
+          "type": "narration"
+        },
+        {
+          "id": "s01_02",
+          "speaker": "narration",
+          "text": "説明テキスト...",
+          "characters": ["protagonist_neutral"],
+          "type": "narration"
+        }
+      ],
+      "knowledge": {
+        "title": "知識解説タイトル",
+        "text": "【ポイント1】\n・項目1\n・項目2\n\n【ポイント2】\n・項目3"
+      },
+      "quiz": null
+    },
+    {
+      "id": 2,
+      "title": "シーン2タイトル",
+      "background": "hospital_room",
+      "bgm": "medical",
+      "location": "hospital",
+      "subLocation": "hospital_room",
+      "cuts": [
+        {
+          "id": "s02_01",
+          "speaker": "doctor",
+          "text": "セリフテキスト...",
+          "characters": ["protagonist", "doctor"],
+          "positions": {"protagonist": "left", "doctor": "right"},
+          "expressions": {"protagonist": "worried", "doctor": "neutral"},
+          "type": "dialogue"
+        },
+        {
+          "id": "s02_02",
+          "speaker": "protagonist",
+          "text": "（心の声）内省テキスト...",
+          "characters": ["protagonist", "doctor"],
+          "type": "thought"
+        }
+      ],
+      "knowledge": {
+        "title": "知識解説タイトル",
+        "text": "解説本文..."
+      },
+      "quiz": {
+        "question": "問題文？",
+        "options": [
+          {"text": "選択肢1", "correct": false},
+          {"text": "選択肢2（正解）", "correct": true},
+          {"text": "選択肢3", "correct": false},
+          {"text": "選択肢4", "correct": false}
+        ],
+        "multipleAnswer": false,
+        "explanation": "正解の解説..."
+      }
+    }
+  ],
+
+  "expressionGuide": {
+    "s01_01": [],
+    "s01_02": [
+      {"id": "protagonist", "expression": "protagonist_01_neutral", "position": "center"}
+    ],
+    "s02_01": [
+      {"id": "protagonist", "expression": "protagonist_04_worried", "position": "left"},
+      {"id": "doctor", "expression": "doctor_05_neutral", "position": "right"}
+    ]
+  },
+
+  "videoMapping": {
+    "s02_01_doctor": true,
+    "s02_02_protagonist": true
+  },
+
+  "audioMapping": {
+    "s01_01": "audio/s01_01.mp3",
+    "s01_02": "audio/s01_02.mp3",
+    "s02_01": "audio/s02_01.mp3"
+  }
+}

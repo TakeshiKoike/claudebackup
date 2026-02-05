@@ -1,0 +1,199 @@
+{
+  "meta": {
+    "title": "在宅療養を支える訪問看護",
+    "subtitle": "COPD事例 - 聖隷一男さん（78歳）の物語",
+    "version": "1.0.0",
+    "author": "聖隷クリストファー大学",
+    "institution": "聖隷クリストファー大学",
+    "targetAudience": "看護学生・訪問看護師",
+    "createdDate": "2026-01-03"
+  },
+
+  "theme": {
+    "primaryColor": "#2d5a27",
+    "secondaryColor": "#4a7c43",
+    "accentColor": "#8bc34a",
+    "bgDark": "#1a1a2e",
+    "bgLight": "#f5f5f5"
+  },
+
+  "titleScreen": {
+    "backgroundImage": "maps/map_town.png",
+    "showPatientInfo": true,
+    "patientInfo": {
+      "name": "聖隷一男",
+      "age": 78,
+      "gender": "男性",
+      "diagnosis": "COPD（慢性閉塞性肺疾患）",
+      "careLevel": "要介護2",
+      "treatment": "在宅酸素療法（安静時2L、労作時4L）"
+    }
+  },
+
+  "characters": {
+    "protagonist": {
+      "id": "kazuo",
+      "name": "聖隷一男",
+      "age": 78,
+      "role": "patient",
+      "description": "COPD患者、元公務員、在宅酸素療法中",
+      "folder": "kazuo_expressions",
+      "voice": "ja-JP-Chirp3-HD-Charon",
+      "hasSpecialExpressions": true,
+      "specialExpressionPrefix": "m"
+    },
+    "others": [
+      {
+        "id": "ichiko",
+        "name": "聖隷市子",
+        "age": 73,
+        "role": "wife",
+        "description": "一男の妻、主介護者",
+        "folder": "ichiko_expressions",
+        "voice": "ja-JP-Chirp3-HD-Leda"
+      },
+      {
+        "id": "yamada",
+        "name": "山田看護師",
+        "age": 35,
+        "role": "nurse",
+        "description": "訪問看護師",
+        "folder": "yamada_expressions",
+        "voice": "ja-JP-Chirp3-HD-Zephyr"
+      },
+      {
+        "id": "doctor",
+        "name": "主治医",
+        "age": 50,
+        "role": "doctor",
+        "description": "呼吸器内科医",
+        "folder": "doctor_expressions",
+        "voice": "ja-JP-Chirp3-HD-Iapetus"
+      },
+      {
+        "id": "pharmacist",
+        "name": "薬剤師",
+        "age": 40,
+        "role": "pharmacist",
+        "description": "調剤薬局の薬剤師",
+        "folder": "pharmacist_expressions",
+        "voice": "ja-JP-Chirp3-HD-Kore"
+      },
+      {
+        "id": "sato",
+        "name": "佐藤ケアマネ",
+        "age": 45,
+        "role": "careManager",
+        "description": "居宅介護支援事業所のケアマネジャー",
+        "folder": "sato_expressions",
+        "voice": "ja-JP-Chirp3-HD-Vindemiatrix"
+      }
+    ],
+    "narrator": {
+      "name": "ナレーション",
+      "voice": "ja-JP-Chirp3-HD-Aoede"
+    }
+  },
+
+  "expressions": {
+    "general": [
+      {"id": "01", "name": "neutral", "label": "通常"},
+      {"id": "02", "name": "smile", "label": "笑顔"},
+      {"id": "03", "name": "thinking", "label": "考え中"},
+      {"id": "04", "name": "worried", "label": "心配"},
+      {"id": "05", "name": "tired", "label": "疲れ"},
+      {"id": "06", "name": "surprised", "label": "驚き"},
+      {"id": "07", "name": "relieved", "label": "安心"},
+      {"id": "08", "name": "grateful", "label": "感謝"},
+      {"id": "09", "name": "determined", "label": "決意"}
+    ],
+    "medical": [
+      {"id": "m01", "name": "mild_distress", "label": "軽度の苦しさ"},
+      {"id": "m02", "name": "moderate_distress", "label": "中程度の苦しさ"},
+      {"id": "m03", "name": "severe_distress", "label": "重度の苦しさ"},
+      {"id": "m04", "name": "coughing", "label": "咳き込み"},
+      {"id": "m05", "name": "using_oxygen", "label": "酸素吸入中"},
+      {"id": "m06", "name": "resting", "label": "休息中"},
+      {"id": "m07", "name": "recovering", "label": "回復中"},
+      {"id": "m08", "name": "breathing_exercise", "label": "呼吸練習"},
+      {"id": "m09", "name": "post_exertion", "label": "労作後"}
+    ]
+  },
+
+  "backgrounds": [
+    {"id": "hospital_room", "file": "backgrounds/bg_hospital_room.png", "label": "病室", "scenes": [2]},
+    {"id": "home_living", "file": "backgrounds/bg_home_living.png", "label": "自宅リビング", "scenes": [3, 9, 10]},
+    {"id": "home_bedroom", "file": "backgrounds/bg_home_bedroom.png", "label": "自宅寝室", "scenes": [4, 5, 6, 11]},
+    {"id": "pharmacy", "file": "backgrounds/bg_pharmacy.png", "label": "薬局", "scenes": [7]},
+    {"id": "clinic", "file": "backgrounds/bg_clinic.png", "label": "クリニック診察室", "scenes": [8]}
+  ],
+
+  "maps": [
+    {"id": "map_town", "file": "maps/map_town.png", "label": "街並みMAP", "type": "main"},
+    {"id": "map_hospital", "file": "maps/map_hospital.png", "label": "病院内MAP", "type": "sub", "parent": "hospital"},
+    {"id": "map_home", "file": "maps/map_home.png", "label": "自宅内MAP", "type": "sub", "parent": "home"}
+  ],
+
+  "bgm": [
+    {"id": "main_theme", "file": "bgm/bgm_main_theme.mp3", "label": "メインテーマ", "description": "タイトル・エンディング用", "scenes": [1, 12]},
+    {"id": "daily", "file": "bgm/bgm_daily.mp3", "label": "日常", "description": "日常シーン用", "scenes": [3, 10]},
+    {"id": "medical", "file": "bgm/bgm_medical.mp3", "label": "医療・緊張", "description": "医療・緊張シーン用", "scenes": [2, 8, 11]},
+    {"id": "heartwarming", "file": "bgm/bgm_heartwarming.mp3", "label": "心温まる", "description": "心温まるシーン用", "scenes": [4, 5, 6, 7, 9]}
+  ],
+
+  "locations": [
+    {"id": "hospital", "label": "病院", "icon": "🏥", "color": "#e74c3c", "markerClass": "hospital", "hasSubMap": true},
+    {"id": "home", "label": "自宅", "icon": "🏠", "color": "#3498db", "markerClass": "home", "hasSubMap": true},
+    {"id": "pharmacy", "label": "薬局", "icon": "💊", "color": "#2ecc71", "markerClass": "pharmacy", "hasSubMap": false},
+    {"id": "clinic", "label": "クリニック", "icon": "🩺", "color": "#9b59b6", "markerClass": "clinic", "hasSubMap": false},
+    {"id": "nursing_station", "label": "訪問看護ST", "icon": "🏥", "color": "#e91e63", "markerClass": "nursing", "hasSubMap": false}
+  ],
+
+  "subLocations": {
+    "hospital": [
+      {"id": "hospital_room", "label": "病室", "scenes": [2]}
+    ],
+    "home": [
+      {"id": "home_living", "label": "リビング", "scenes": [3, 9, 10]},
+      {"id": "home_bedroom", "label": "寝室", "scenes": [4, 5, 6, 11]},
+      {"id": "home_bathroom", "label": "浴室", "scenes": [5]}
+    ]
+  },
+
+  "sceneFlow": [
+    {"sceneId": 1, "location": null, "nextLocation": "hospital", "showMap": false},
+    {"sceneId": 2, "location": "hospital", "subLocation": "hospital_room", "nextLocation": "home", "showMap": true},
+    {"sceneId": 3, "location": "home", "subLocation": "home_living", "nextLocation": "home", "showMap": true},
+    {"sceneId": 4, "location": "home", "subLocation": "home_bedroom", "nextLocation": "home", "showMap": true},
+    {"sceneId": 5, "location": "home", "subLocation": "home_bedroom", "nextLocation": "home", "showMap": true},
+    {"sceneId": 6, "location": "home", "subLocation": "home_bedroom", "nextLocation": "pharmacy", "showMap": true},
+    {"sceneId": 7, "location": "pharmacy", "subLocation": null, "nextLocation": "clinic", "showMap": true},
+    {"sceneId": 8, "location": "clinic", "subLocation": null, "nextLocation": "home", "showMap": true},
+    {"sceneId": 9, "location": "home", "subLocation": "home_living", "nextLocation": "home", "showMap": true},
+    {"sceneId": 10, "location": "home", "subLocation": "home_living", "nextLocation": "home", "showMap": true},
+    {"sceneId": 11, "location": "home", "subLocation": "home_bedroom", "nextLocation": null, "showMap": true},
+    {"sceneId": 12, "location": null, "subLocation": null, "nextLocation": null, "showMap": false}
+  ],
+
+  "features": {
+    "enableMaps": true,
+    "enableSubMaps": true,
+    "enableBgm": true,
+    "enableVoice": true,
+    "enableVideo": true,
+    "enableQuiz": true,
+    "enableKnowledge": true,
+    "enableSceneSelect": true,
+    "enableProgress": true,
+    "enableAutoPlay": false
+  },
+
+  "assets": {
+    "imageFormat": "png",
+    "audioFormat": "mp3",
+    "videoFormat": "mp4",
+    "characterSize": {"width": 1024, "height": 1024},
+    "backgroundSize": {"width": 1920, "height": 1080},
+    "mapSize": {"width": 1920, "height": 1080}
+  }
+}

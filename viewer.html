@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビジュアルノベル教材ビューアー</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-color: #2d5a27;
+            --secondary-color: #4a7c43;
+            --accent-color: #8bc34a;
+            --bg-dark: #1a1a2e;
+            --text-light: #fff;
+        }
+
+        body {
+            font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ファイル選択画面 */
+        #loadScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--bg-dark), #16213e);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            color: white;
+            text-align: center;
+        }
+
+        #loadScreen h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        #loadScreen p {
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+
+        .load-box {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .load-box h2 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .file-input-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .file-input-wrapper label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .file-input-wrapper input[type="file"]:hover {
+            border-color: var(--accent-color);
+            background: rgba(255,255,255,0.15);
+        }
+
+        #startBtn {
+            padding: 15px 50px;
+            font-size: 1.2em;
+            background: var(--accent-color);
+            color: #333;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        #startBtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(139, 195, 74, 0.4);
+        }
+
+        #startBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .demo-btn {
+            margin-top: 20px;
+            padding: 10px 30px;
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .demo-btn:hover {
+            border-color: white;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* タイトル画面 */
+        #titleScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--bg-dark), #16213e);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            color: white;
+            text-align: center;
+        }
+
+        #titleScreen h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #titleScreen h2 {
+            font-size: 1.3em;
+            font-weight: normal;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .title-info {
+            background: rgba(255,255,255,0.1);
+            padding: 25px 40px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            line-height: 1.8;
+            text-align: left;
+        }
+
+        .title-info p {
+            font-size: 0.95em;
+            margin: 5px 0;
+        }
+
+        #playBtn {
+            padding: 20px 60px;
+            font-size: 1.4em;
+            background: linear-gradient(135deg, #fff, #e8e8e8);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            font-weight: bold;
+        }
+
+        #playBtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        /* メインゲーム画面 */
+        #gameScreen {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        #backgroundLayer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-color: #2d2d44;
+            transition: background 0.5s ease;
+        }
+
+        #characterLayer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 220px;
+            pointer-events: none;
+        }
+
+        .character-slot {
+            position: absolute;
+            bottom: 220px;
+            max-width: 300px;
+            max-height: 400px;
+        }
+
+        .character-slot.left { left: 10%; }
+        .character-slot.center { left: 50%; transform: translateX(-50%); }
+        .character-slot.right { right: 10%; }
+
+        .character-slot img {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+            border-radius: 10px;
+        }
+
+        /* キャラクタープレースホルダー */
+        .character-placeholder {
+            width: 200px;
+            height: 300px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+            border-radius: 100px 100px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .character-placeholder.speaking {
+            border-color: var(--accent-color);
+            box-shadow: 0 10px 40px rgba(139, 195, 74, 0.4);
+            transform: scale(1.05);
+        }
+
+        .character-placeholder .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            margin-bottom: 15px;
+            border: 4px solid rgba(255,255,255,0.5);
+        }
+
+        .character-placeholder .char-name {
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .character-placeholder .char-expression {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .character-slot.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 実際のキャラクター画像 */
+        .character-image {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .character-image img {
+            max-width: 280px;
+            max-height: 380px;
+            object-fit: contain;
+            border-radius: 15px;
+            filter: drop-shadow(0 8px 25px rgba(0,0,0,0.4));
+            transition: all 0.3s ease;
+        }
+
+        .character-image.speaking img {
+            filter: drop-shadow(0 8px 35px rgba(139, 195, 74, 0.5));
+            transform: scale(1.05);
+        }
+
+        .character-image .char-label {
+            margin-top: 10px;
+            padding: 5px 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 15px;
+            font-size: 0.85em;
+            text-align: center;
+        }
+
+        #dialogBox {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.85));
+            padding: 20px 30px;
+            min-height: 200px;
+        }
+
+        #speakerName {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        #speakerName.narrator { background: #6b8e23; }
+        #speakerName.thought { background: #4682b4; font-style: italic; }
+
+        #dialogText {
+            color: white;
+            font-size: 1.15em;
+            line-height: 1.8;
+            min-height: 80px;
+        }
+
+        #dialogText.thought {
+            font-style: italic;
+            color: #b0c4de;
+        }
+
+        #navButtons {
+            position: absolute;
+            bottom: 15px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .nav-btn.prev { background: #666; color: white; }
+        .nav-btn.next { background: var(--accent-color); color: #333; }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #progressBar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        #progressFill {
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        #sceneHeader {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        /* コントロールパネル */
+        #controlPanel {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover { background: rgba(0,0,0,0.9); }
+
+        /* 知識解説パネル */
+        #knowledgePanel {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .knowledge-content {
+            background: white;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            border-radius: 20px;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .knowledge-content h3 {
+            color: var(--primary-color);
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .knowledge-content .text {
+            font-size: 1em;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            color: #333;
+        }
+
+        .knowledge-close {
+            margin-top: 25px;
+            padding: 12px 40px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        /* クイズパネル */
+        #quizPanel {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .quiz-content {
+            background: white;
+            max-width: 600px;
+            width: 90%;
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .quiz-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .quiz-question {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quiz-option {
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-color);
+            background: #f9fff9;
+        }
+
+        .quiz-option.selected {
+            border-color: var(--primary-color);
+            background: #e8f5e9;
+        }
+
+        .quiz-option.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .quiz-option.wrong {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .quiz-buttons {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .quiz-btn {
+            padding: 12px 35px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .quiz-btn.submit {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .quiz-btn.next {
+            background: var(--accent-color);
+            color: #333;
+            display: none;
+        }
+
+        .quiz-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .quiz-result.correct {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .quiz-result.wrong {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* シーン選択パネル */
+        #sceneSelectPanel {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scene-select-content {
+            background: white;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            border-radius: 20px;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .scene-select-content h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .scene-select-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .scene-select-item {
+            padding: 15px 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s;
+        }
+
+        .scene-select-item:hover {
+            background: #e8f5e9;
+        }
+
+        .scene-select-item.current {
+            background: var(--accent-color);
+        }
+
+        .scene-select-item .num {
+            background: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+        }
+
+        .scene-select-close {
+            margin-top: 20px;
+            padding: 10px 30px;
+            background: #666;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* エラー表示 */
+        .error-message {
+            color: #f44336;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ファイル読み込み画面 -->
+    <div id="loadScreen">
+        <h1>ビジュアルノベル教材ビューアー</h1>
+        <p>JSONファイルを読み込んで教材を再生します</p>
+
+        <div class="load-box">
+            <h2>シナリオJSONを選択</h2>
+            <div class="file-input-wrapper">
+                <label>scenario.json または エディタで作成したJSON</label>
+                <input type="file" id="jsonFile" accept=".json">
+            </div>
+            <div id="loadError" class="error-message"></div>
+            <button id="startBtn" disabled onclick="startViewer()">教材を開始</button>
+        </div>
+
+        <button class="demo-btn" onclick="loadDemo()">デモデータで試す</button>
+    </div>
+
+    <!-- タイトル画面 -->
+    <div id="titleScreen">
+        <h1 id="gameTitle">教材タイトル</h1>
+        <h2 id="gameSubtitle">サブタイトル</h2>
+        <div class="title-info" id="patientInfo"></div>
+        <button id="playBtn" onclick="startGame()">はじめる</button>
+    </div>
+
+    <!-- メインゲーム画面 -->
+    <div id="gameScreen">
+        <div id="progressBar"><div id="progressFill"></div></div>
+        <div id="backgroundLayer"></div>
+
+        <div id="characterLayer">
+            <div class="character-slot left" id="charLeft"></div>
+            <div class="character-slot center" id="charCenter"></div>
+            <div class="character-slot right" id="charRight"></div>
+        </div>
+
+        <div id="dialogBox">
+            <span id="speakerName">ナレーション</span>
+            <div id="dialogText">テキスト</div>
+            <div id="navButtons">
+                <button class="nav-btn prev" id="prevBtn" onclick="prevCut()">← 戻る</button>
+                <button class="nav-btn next" id="nextBtn" onclick="nextCut()">次へ →</button>
+            </div>
+        </div>
+
+        <div id="sceneHeader">Scene 1</div>
+
+        <div id="controlPanel">
+            <button class="control-btn" onclick="showSceneSelect()">シーン選択</button>
+            <button class="control-btn" onclick="backToTitle()">タイトルへ</button>
+        </div>
+    </div>
+
+    <!-- 知識解説パネル -->
+    <div id="knowledgePanel">
+        <div class="knowledge-content">
+            <h3 id="knowledgeTitle">知識解説</h3>
+            <div class="text" id="knowledgeText"></div>
+            <button class="knowledge-close" onclick="closeKnowledge()">閉じる</button>
+        </div>
+    </div>
+
+    <!-- クイズパネル -->
+    <div id="quizPanel">
+        <div class="quiz-content">
+            <h3>確認クイズ</h3>
+            <div class="quiz-question" id="quizQuestion"></div>
+            <div class="quiz-options" id="quizOptions"></div>
+            <div class="quiz-result" id="quizResult"></div>
+            <div class="quiz-buttons">
+                <button class="quiz-btn submit" id="quizSubmit" onclick="submitQuiz()">回答する</button>
+                <button class="quiz-btn next" id="quizNext" onclick="closeQuiz()">次へ進む</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- シーン選択パネル -->
+    <div id="sceneSelectPanel">
+        <div class="scene-select-content">
+            <h3>シーン選択</h3>
+            <div class="scene-select-list" id="sceneSelectList"></div>
+            <button class="scene-select-close" onclick="closeSceneSelect()">閉じる</button>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let scenarioData = null;
+        let currentSceneIndex = 0;
+        let currentCutIndex = 0;
+        let selectedQuizOptions = [];
+
+        // ファイル読み込み
+        document.getElementById('jsonFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    const data = JSON.parse(ev.target.result);
+
+                    // データ形式の判定と変換
+                    if (data.scenes) {
+                        scenarioData = data;
+                    } else if (data.meta && data.patient) {
+                        // エディタ形式のデータを変換
+                        scenarioData = convertEditorData(data);
+                    } else {
+                        throw new Error('不明なデータ形式です');
+                    }
+
+                    document.getElementById('startBtn').disabled = false;
+                    document.getElementById('loadError').textContent = '✓ 読み込み成功: ' + (scenarioData.scenes?.length || 0) + 'シーン';
+                    document.getElementById('loadError').style.color = '#4caf50';
+                } catch (err) {
+                    document.getElementById('loadError').textContent = 'エラー: ' + err.message;
+                    document.getElementById('loadError').style.color = '#f44336';
+                    document.getElementById('startBtn').disabled = true;
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // エディタデータを変換
+        function convertEditorData(data) {
+            return {
+                title: data.meta?.title || '無題',
+                subtitle: data.meta?.subtitle || '',
+                meta: data.meta,
+                patient: data.patient,
+                characters: data.characters || [],
+                scenes: data.scenes || [],
+                speakerNames: buildSpeakerNames(data.characters || [])
+            };
+        }
+
+        // 話者名マップを構築
+        function buildSpeakerNames(characters) {
+            const names = {
+                narration: 'ナレーション',
+                thought: '心の声'
+            };
+            characters.forEach(c => {
+                names[c.id] = c.name;
+            });
+            return names;
+        }
+
+        // ビューアー開始
+        function startViewer() {
+            if (!scenarioData) return;
+
+            document.getElementById('loadScreen').style.display = 'none';
+            document.getElementById('titleScreen').style.display = 'flex';
+
+            // タイトル設定
+            document.getElementById('gameTitle').textContent = scenarioData.title || scenarioData.meta?.title || '教材';
+            document.getElementById('gameSubtitle').textContent = scenarioData.subtitle || scenarioData.meta?.subtitle || '';
+
+            // 患者情報
+            const patient = scenarioData.patient;
+            if (patient) {
+                document.getElementById('patientInfo').innerHTML = `
+                    <p><strong>患者名:</strong> ${patient.name || '---'}</p>
+                    <p><strong>年齢:</strong> ${patient.age || '---'}歳 / ${patient.gender || '---'}</p>
+                    <p><strong>疾患:</strong> ${patient.diagnosis || '---'}</p>
+                    <p><strong>治療:</strong> ${patient.treatment || '---'}</p>
+                `;
+            }
+
+            // テーマカラー適用
+            if (scenarioData.theme) {
+                document.documentElement.style.setProperty('--primary-color', scenarioData.theme.primaryColor || '#2d5a27');
+                document.documentElement.style.setProperty('--accent-color', scenarioData.theme.accentColor || '#8bc34a');
+            }
+        }
+
+        // ゲーム開始
+        function startGame() {
+            document.getElementById('titleScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            currentSceneIndex = 0;
+            currentCutIndex = 0;
+            renderScene();
+        }
+
+        // シーン描画
+        function renderScene() {
+            const scene = scenarioData.scenes[currentSceneIndex];
+            if (!scene) return;
+
+            const cut = scene.cuts[currentCutIndex];
+            if (!cut) return;
+
+            // 背景
+            const bgLayer = document.getElementById('backgroundLayer');
+            const basePath = scenarioData.assetsPath || 'demo_assets';
+
+            const bgImageMap = {
+                'hospital_room': `${basePath}/backgrounds/bg_hospital_room.png`,
+                'home_living': `${basePath}/backgrounds/bg_home_living.png`,
+                'home_bedroom': `${basePath}/backgrounds/bg_home_bedroom.png`,
+                'pharmacy': `${basePath}/backgrounds/bg_pharmacy.png`,
+                'clinic': `${basePath}/backgrounds/bg_clinic.png`
+            };
+
+            const bgColorMap = {
+                'hospital_room': 'linear-gradient(135deg, #4a6fa5, #2c3e50)',
+                'home_living': 'linear-gradient(135deg, #8b7355, #5d4e37)',
+                'home_bedroom': 'linear-gradient(135deg, #6b8e6b, #3d5c3d)',
+                'pharmacy': 'linear-gradient(135deg, #5f9ea0, #2f4f4f)',
+                'clinic': 'linear-gradient(135deg, #708090, #2f4f4f)'
+            };
+
+            if (scene.background && bgImageMap[scene.background]) {
+                bgLayer.style.backgroundImage = `url('${bgImageMap[scene.background]}')`;
+                bgLayer.style.backgroundSize = 'cover';
+                bgLayer.style.backgroundPosition = 'center';
+                bgLayer.style.backgroundColor = bgColorMap[scene.background] || '#2d2d44';
+            } else {
+                bgLayer.style.backgroundImage = 'none';
+                bgLayer.style.background = 'linear-gradient(135deg, #2d5a27, #1e3a1a)';
+            }
+
+            // 話者名
+            const speakerEl = document.getElementById('speakerName');
+            const speakerName = scenarioData.speakerNames?.[cut.speaker] || cut.speaker || 'ナレーション';
+            speakerEl.textContent = speakerName;
+            speakerEl.className = '';
+
+            if (cut.speaker === 'narration' || cut.type === 'narration') {
+                speakerEl.classList.add('narrator');
+            } else if (cut.speaker === 'thought' || cut.type === 'thought') {
+                speakerEl.classList.add('thought');
+            }
+
+            // テキスト
+            const textEl = document.getElementById('dialogText');
+            textEl.textContent = cut.text;
+            textEl.className = '';
+            if (cut.type === 'thought') {
+                textEl.classList.add('thought');
+            }
+
+            // シーンヘッダー
+            document.getElementById('sceneHeader').textContent =
+                `Scene ${scene.id}: ${scene.title} (${currentCutIndex + 1}/${scene.cuts.length})`;
+
+            // プログレス
+            const progress = ((currentCutIndex + 1) / scene.cuts.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            // ナビボタン
+            document.getElementById('prevBtn').disabled = (currentSceneIndex === 0 && currentCutIndex === 0);
+            document.getElementById('nextBtn').textContent =
+                currentCutIndex >= scene.cuts.length - 1 ? 'シーン終了' : '次へ →';
+
+            // キャラクター表示
+            renderCharacters(cut, scene);
+        }
+
+        // キャラクター描画
+        function renderCharacters(cut, scene) {
+            const leftSlot = document.getElementById('charLeft');
+            const centerSlot = document.getElementById('charCenter');
+            const rightSlot = document.getElementById('charRight');
+
+            // スロットをクリア
+            leftSlot.innerHTML = '';
+            centerSlot.innerHTML = '';
+            rightSlot.innerHTML = '';
+            leftSlot.classList.add('hidden');
+            centerSlot.classList.add('hidden');
+            rightSlot.classList.add('hidden');
+
+            // ナレーションや心の声の場合はキャラクター非表示
+            if (cut.speaker === 'narration' || cut.type === 'narration') {
+                return;
+            }
+
+            // キャラクター情報を取得
+            const characters = scenarioData.characters || [];
+            const charInfo = getCharacterInfo(cut.speaker);
+
+            // 表情を取得
+            const expression = cut.expression || 'neutral';
+            const expressionLabel = getExpressionLabel(expression);
+
+            // メインスピーカーを中央に表示
+            if (charInfo) {
+                centerSlot.classList.remove('hidden');
+                centerSlot.innerHTML = createCharacterElement(charInfo, expression, expressionLabel, true);
+            }
+
+            // サブキャラクター（cutに指定されている場合）
+            if (cut.characters && Array.isArray(cut.characters)) {
+                cut.characters.forEach((charId, index) => {
+                    if (charId !== cut.speaker) {
+                        const subChar = getCharacterInfo(charId);
+                        if (subChar) {
+                            const slot = index === 0 ? leftSlot : rightSlot;
+                            slot.classList.remove('hidden');
+                            slot.innerHTML = createCharacterElement(subChar, 'neutral', '通常', false);
+                        }
+                    }
+                });
+            }
+        }
+
+        // キャラクター情報を取得
+        function getCharacterInfo(speakerId) {
+            if (!speakerId || speakerId === 'narration' || speakerId === 'thought') return null;
+
+            const characters = scenarioData.characters || [];
+            const found = characters.find(c => c.id === speakerId);
+
+            if (found) return found;
+
+            // speakerNamesから名前を取得
+            const name = scenarioData.speakerNames?.[speakerId];
+            if (name) {
+                return { id: speakerId, name: name };
+            }
+
+            return { id: speakerId, name: speakerId };
+        }
+
+        // キャラクター要素を生成
+        function createCharacterElement(charInfo, expression, expressionLabel, isSpeaking) {
+            // 画像パスがある場合は実際の画像を使用
+            const imagePath = getCharacterImagePath(charInfo.id, expression);
+
+            if (imagePath) {
+                return `
+                    <div class="character-image ${isSpeaking ? 'speaking' : ''}">
+                        <img src="${imagePath}" alt="${charInfo.name}" onerror="this.parentElement.innerHTML=createPlaceholderHTML('${charInfo.id}', '${charInfo.name}', '${charInfo.role}', '${expressionLabel}', ${isSpeaking})">
+                        <div class="char-label">${charInfo.name} - ${expressionLabel}</div>
+                    </div>
+                `;
+            }
+
+            // フォールバック：プレースホルダー
+            const emoji = getCharacterEmoji(charInfo.id, charInfo.role);
+            const colorClass = getCharacterColor(charInfo.id);
+
+            return `
+                <div class="character-placeholder ${isSpeaking ? 'speaking' : ''}" style="--char-color: ${colorClass}">
+                    <div class="avatar" style="background: ${colorClass}">${emoji}</div>
+                    <div class="char-name">${charInfo.name}</div>
+                    <div class="char-expression">${expressionLabel}</div>
+                </div>
+            `;
+        }
+
+        // プレースホルダーHTML生成（画像読み込み失敗時用）
+        function createPlaceholderHTML(id, name, role, expressionLabel, isSpeaking) {
+            const emoji = getCharacterEmoji(id, role);
+            const colorClass = getCharacterColor(id);
+            return `'<div class="character-placeholder ${isSpeaking ? 'speaking' : ''}" style="--char-color: ${colorClass}"><div class="avatar" style="background: ${colorClass}">${emoji}</div><div class="char-name">${name}</div><div class="char-expression">${expressionLabel}</div></div>'`;
+        }
+
+        // キャラクター画像パスを取得
+        function getCharacterImagePath(charId, expression) {
+            const basePath = scenarioData.assetsPath || 'demo_assets';
+
+            // 一般表情マッピング（番号_名前）
+            const generalExpressionMap = {
+                'smile': '01_smile',
+                'worried': '02_worried',
+                'surprised': '03_surprised',
+                'thinking': '04_thinking',
+                'neutral': '05_neutral',
+                'relieved': '06_relieved',
+                'serious': '07_serious',
+                'determined': '07_serious',
+                'confused': '08_confused',
+                'grateful': '09_grateful',
+                'tired': '06_relieved'
+            };
+
+            // kazuo専用の医療表情マッピング
+            const kazuoMedicalMap = {
+                'mild_distress': 'medical_01_breathless',
+                'moderate_distress': 'medical_02_dyspnea',
+                'severe_distress': 'medical_04_cyanosis',
+                'coughing': 'medical_07_coughing',
+                'using_oxygen': 'medical_03_pursed_lip',
+                'resting': 'medical_05_neutral',
+                'recovering': 'medical_09_recovering',
+                'breathing_exercise': 'medical_03_pursed_lip',
+                'post_exertion': 'medical_06_fatigue',
+                'breathless': 'medical_01_breathless',
+                'dyspnea': 'medical_02_dyspnea'
+            };
+
+            // kazuoの場合
+            if (charId === 'kazuo') {
+                // 医療表情をチェック
+                if (kazuoMedicalMap[expression]) {
+                    return `${basePath}/characters/kazuo_expressions/kazuo_${kazuoMedicalMap[expression]}.png`;
+                }
+                // 一般表情
+                const expFile = generalExpressionMap[expression] || '05_neutral';
+                return `${basePath}/characters/kazuo_expressions/kazuo_general_${expFile}.png`;
+            }
+
+            // その他のキャラクター（ichiko, doctor, yamada, etc.）
+            const expFile = generalExpressionMap[expression] || '05_neutral';
+            return `${basePath}/characters/${charId}_expressions/${charId}_${expFile}.png`;
+        }
+
+        // キャラクターの絵文字を取得
+        function getCharacterEmoji(id, role) {
+            const emojiMap = {
+                'kazuo': '👴',
+                'ichiko': '👵',
+                'yamada': '👩‍⚕️',
+                'doctor': '👨‍⚕️',
+                'pharmacist': '💊',
+                'sato': '📋',
+                'patient': '🤒',
+                'nurse': '👩‍⚕️',
+                'wife': '👵',
+                'careManager': '📋'
+            };
+            return emojiMap[id] || emojiMap[role] || '👤';
+        }
+
+        // キャラクターの色を取得
+        function getCharacterColor(id) {
+            const colorMap = {
+                'kazuo': 'linear-gradient(135deg, #3498db, #2980b9)',
+                'ichiko': 'linear-gradient(135deg, #e91e63, #c2185b)',
+                'yamada': 'linear-gradient(135deg, #4caf50, #388e3c)',
+                'doctor': 'linear-gradient(135deg, #9c27b0, #7b1fa2)',
+                'pharmacist': 'linear-gradient(135deg, #00bcd4, #0097a7)',
+                'sato': 'linear-gradient(135deg, #ff9800, #f57c00)'
+            };
+            return colorMap[id] || 'linear-gradient(135deg, #607d8b, #455a64)';
+        }
+
+        // 表情ラベルを取得
+        function getExpressionLabel(expression) {
+            const labelMap = {
+                'neutral': '通常',
+                'smile': '笑顔',
+                'thinking': '考え中',
+                'worried': '心配',
+                'tired': '疲れ',
+                'surprised': '驚き',
+                'relieved': '安心',
+                'grateful': '感謝',
+                'determined': '決意',
+                'mild_distress': '軽度の苦しさ',
+                'moderate_distress': '中程度の苦しさ',
+                'severe_distress': '重度の苦しさ',
+                'coughing': '咳き込み',
+                'using_oxygen': '酸素吸入中',
+                'resting': '休息中',
+                'recovering': '回復中',
+                'breathing_exercise': '呼吸練習',
+                'post_exertion': '労作後'
+            };
+            return labelMap[expression] || expression;
+        }
+
+        // 前のカット
+        function prevCut() {
+            if (currentCutIndex > 0) {
+                currentCutIndex--;
+                renderScene();
+            } else if (currentSceneIndex > 0) {
+                currentSceneIndex--;
+                const prevScene = scenarioData.scenes[currentSceneIndex];
+                currentCutIndex = prevScene.cuts.length - 1;
+                renderScene();
+            }
+        }
+
+        // 次のカット
+        function nextCut() {
+            const scene = scenarioData.scenes[currentSceneIndex];
+
+            if (currentCutIndex < scene.cuts.length - 1) {
+                currentCutIndex++;
+                renderScene();
+            } else {
+                // シーン終了
+                endScene();
+            }
+        }
+
+        // シーン終了
+        function endScene() {
+            const scene = scenarioData.scenes[currentSceneIndex];
+
+            // 知識解説
+            if (scene.knowledge && scene.knowledge.title) {
+                showKnowledge(scene.knowledge);
+            } else if (scene.quiz && scene.quiz.question) {
+                showQuiz(scene.quiz);
+            } else {
+                goToNextScene();
+            }
+        }
+
+        // 知識解説表示
+        function showKnowledge(knowledge) {
+            document.getElementById('knowledgeTitle').textContent = knowledge.title;
+            document.getElementById('knowledgeText').textContent = knowledge.text;
+            document.getElementById('knowledgePanel').style.display = 'flex';
+        }
+
+        // 知識解説閉じる
+        function closeKnowledge() {
+            document.getElementById('knowledgePanel').style.display = 'none';
+
+            const scene = scenarioData.scenes[currentSceneIndex];
+            if (scene.quiz && scene.quiz.question) {
+                showQuiz(scene.quiz);
+            } else {
+                goToNextScene();
+            }
+        }
+
+        // クイズ表示
+        function showQuiz(quiz) {
+            document.getElementById('quizQuestion').textContent = quiz.question;
+
+            const optionsEl = document.getElementById('quizOptions');
+            optionsEl.innerHTML = quiz.options.map((opt, i) => `
+                <div class="quiz-option" data-index="${i}" onclick="selectQuizOption(${i})">
+                    ${opt.text}
+                </div>
+            `).join('');
+
+            selectedQuizOptions = [];
+            document.getElementById('quizResult').style.display = 'none';
+            document.getElementById('quizSubmit').style.display = 'inline-block';
+            document.getElementById('quizNext').style.display = 'none';
+            document.getElementById('quizPanel').style.display = 'flex';
+        }
+
+        // クイズ選択
+        function selectQuizOption(index) {
+            const options = document.querySelectorAll('.quiz-option');
+            const scene = scenarioData.scenes[currentSceneIndex];
+            const isMultiple = scene.quiz?.multipleAnswer;
+
+            if (isMultiple) {
+                options[index].classList.toggle('selected');
+                if (selectedQuizOptions.includes(index)) {
+                    selectedQuizOptions = selectedQuizOptions.filter(i => i !== index);
+                } else {
+                    selectedQuizOptions.push(index);
+                }
+            } else {
+                options.forEach(opt => opt.classList.remove('selected'));
+                options[index].classList.add('selected');
+                selectedQuizOptions = [index];
+            }
+        }
+
+        // クイズ回答
+        function submitQuiz() {
+            const scene = scenarioData.scenes[currentSceneIndex];
+            const quiz = scene.quiz;
+            const options = document.querySelectorAll('.quiz-option');
+
+            let isCorrect = true;
+            quiz.options.forEach((opt, i) => {
+                const selected = selectedQuizOptions.includes(i);
+                if (opt.correct) {
+                    options[i].classList.add('correct');
+                    if (!selected) isCorrect = false;
+                } else if (selected) {
+                    options[i].classList.add('wrong');
+                    isCorrect = false;
+                }
+            });
+
+            const resultEl = document.getElementById('quizResult');
+            resultEl.textContent = isCorrect ? '正解です！' : '不正解です';
+            resultEl.className = 'quiz-result ' + (isCorrect ? 'correct' : 'wrong');
+            resultEl.style.display = 'block';
+
+            document.getElementById('quizSubmit').style.display = 'none';
+            document.getElementById('quizNext').style.display = 'inline-block';
+        }
+
+        // クイズ閉じる
+        function closeQuiz() {
+            document.getElementById('quizPanel').style.display = 'none';
+            goToNextScene();
+        }
+
+        // 次のシーンへ
+        function goToNextScene() {
+            if (currentSceneIndex < scenarioData.scenes.length - 1) {
+                currentSceneIndex++;
+                currentCutIndex = 0;
+                renderScene();
+            } else {
+                // 終了
+                alert('お疲れ様でした！教材が終了しました。');
+                backToTitle();
+            }
+        }
+
+        // シーン選択
+        function showSceneSelect() {
+            const listEl = document.getElementById('sceneSelectList');
+            listEl.innerHTML = scenarioData.scenes.map((scene, i) => `
+                <div class="scene-select-item ${i === currentSceneIndex ? 'current' : ''}" onclick="goToScene(${i})">
+                    <span class="num">${scene.id}</span>
+                    <span>${scene.title}</span>
+                </div>
+            `).join('');
+            document.getElementById('sceneSelectPanel').style.display = 'flex';
+        }
+
+        function closeSceneSelect() {
+            document.getElementById('sceneSelectPanel').style.display = 'none';
+        }
+
+        function goToScene(index) {
+            currentSceneIndex = index;
+            currentCutIndex = 0;
+            closeSceneSelect();
+            renderScene();
+        }
+
+        // タイトルへ戻る
+        function backToTitle() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('titleScreen').style.display = 'flex';
+        }
+
+        // デモデータ
+        function loadDemo() {
+            scenarioData = {
+                title: "在宅療養を支える訪問看護",
+                subtitle: "COPD事例 - デモ版",
+                assetsPath: "demo_assets",
+                meta: { title: "在宅療養を支える訪問看護", subtitle: "COPD事例" },
+                patient: {
+                    name: "聖隷一男",
+                    age: 78,
+                    gender: "男性",
+                    diagnosis: "COPD（慢性閉塞性肺疾患）",
+                    treatment: "在宅酸素療法（安静時2L、労作時4L）"
+                },
+                theme: { primaryColor: "#2d5a27", accentColor: "#8bc34a" },
+                speakerNames: {
+                    narration: "ナレーション",
+                    thought: "心の声",
+                    kazuo: "聖隷一男",
+                    ichiko: "聖隷市子",
+                    doctor: "主治医",
+                    yamada: "山田看護師",
+                    pharmacist: "薬剤師",
+                    sato: "佐藤ケアマネ"
+                },
+                characters: [
+                    { id: "kazuo", name: "聖隷一男", role: "patient" },
+                    { id: "ichiko", name: "聖隷市子", role: "wife" },
+                    { id: "yamada", name: "山田看護師", role: "nurse" },
+                    { id: "doctor", name: "主治医", role: "doctor" },
+                    { id: "pharmacist", name: "薬剤師", role: "pharmacist" },
+                    { id: "sato", name: "佐藤ケアマネ", role: "careManager" }
+                ],
+                scenes: [
+                    {
+                        id: 1,
+                        title: "イントロ",
+                        background: "",
+                        cuts: [
+                            { id: "s01_01", speaker: "narration", text: "今回の主人公は聖隷一男さん、78歳の男性です。" },
+                            { id: "s01_02", speaker: "narration", text: "3年前にCOPDと診断され、在宅酸素療法を開始しました。" },
+                            { id: "s01_03", speaker: "narration", text: "一男さんの視点で、訪問看護を体験してみましょう。" }
+                        ],
+                        knowledge: {
+                            title: "COPDとは",
+                            text: "COPD（慢性閉塞性肺疾患）は、タバコ煙などの有害物質を長期に吸入することで生じる肺の炎症性疾患です。\n\n【主な症状】\n・息切れ\n・慢性的な咳・痰\n\n【危険因子】\n・喫煙が最大の危険因子"
+                        }
+                    },
+                    {
+                        id: 2,
+                        title: "退院前カンファレンス",
+                        background: "hospital_room",
+                        cuts: [
+                            { id: "s02_01", speaker: "doctor", expression: "neutral", text: "聖隷さん、入院中の治療で症状は改善しました。" },
+                            { id: "s02_02", speaker: "kazuo", type: "thought", expression: "worried", text: "（心の声）やっぱり悪くなっているのか...でも家に帰りたい。" },
+                            { id: "s02_03", speaker: "doctor", expression: "thinking", text: "NPPVを自宅でも続けることをお勧めしますが、いかがですか？" },
+                            { id: "s02_04", speaker: "kazuo", expression: "worried", text: "先生、あの機械は眠れないし...酸素だけでなんとかなりませんか？" },
+                            { id: "s02_05", speaker: "doctor", expression: "serious", text: "そうですか...では、訪問看護を利用しながら様子を見ましょう。" },
+                            { id: "s02_06", speaker: "kazuo", expression: "relieved", text: "ありがとうございます。家に帰れるんですね。" }
+                        ],
+                        knowledge: {
+                            title: "NPPVとは",
+                            text: "NPPV（非侵襲的陽圧換気療法）は、マスクを介して呼吸を補助する治療法です。\n\n・気管挿管が不要\n・COPD急性増悪時の第一選択\n・マスクの不快感から継続が難しい患者も"
+                        },
+                        quiz: {
+                            question: "COPD急性増悪時に最初に選択される治療は？",
+                            options: [
+                                { text: "気管挿管", correct: false },
+                                { text: "NPPV（非侵襲的陽圧換気療法）", correct: true },
+                                { text: "高流量酸素", correct: false },
+                                { text: "ネブライザー", correct: false }
+                            ]
+                        }
+                    },
+                    {
+                        id: 3,
+                        title: "退院後の日常",
+                        background: "home_living",
+                        cuts: [
+                            { id: "s03_01", speaker: "kazuo", expression: "relieved", text: "やっぱり家が一番落ち着くな。" },
+                            { id: "s03_02", speaker: "ichiko", expression: "smile", text: "お父さん、無理しないでね。酸素ちゃんとつけてる？" },
+                            { id: "s03_03", speaker: "kazuo", expression: "smile", text: "ああ、大丈夫だよ。心配しすぎだ。" },
+                            { id: "s03_04", speaker: "kazuo", type: "thought", expression: "thinking", text: "（心の声）でも、本当にこのまま大丈夫なのかな..." },
+                            { id: "s03_05", speaker: "ichiko", expression: "thinking", text: "明日から訪問看護師さんが来てくれるって。" },
+                            { id: "s03_06", speaker: "kazuo", expression: "neutral", text: "そうか...どんな人だろうな。" }
+                        ],
+                        knowledge: {
+                            title: "在宅酸素療法（HOT）",
+                            text: "在宅酸素療法は、自宅で酸素吸入を行う治療法です。\n\n【適応】\n・慢性呼吸不全（PaO2 55mmHg以下）\n・肺高血圧を伴う場合\n\n【注意点】\n・火気厳禁\n・流量は医師の指示通りに\n・労作時は流量を上げる"
+                        }
+                    },
+                    {
+                        id: 4,
+                        title: "初回訪問看護",
+                        background: "home_bedroom",
+                        cuts: [
+                            { id: "s04_01", speaker: "yamada", expression: "smile", text: "聖隷さん、はじめまして。訪問看護師の山田です。" },
+                            { id: "s04_02", speaker: "kazuo", expression: "neutral", text: "ああ、どうも。よろしくお願いします。" },
+                            { id: "s04_03", speaker: "yamada", expression: "neutral", text: "今日はお体の状態を確認させてくださいね。息苦しさはいかがですか？" },
+                            { id: "s04_04", speaker: "kazuo", expression: "thinking", text: "うーん、動くと少し息が上がるけど、まあ大丈夫かな。" },
+                            { id: "s04_05", speaker: "yamada", expression: "thinking", text: "そうですか。SpO2を測ってみましょう。" },
+                            { id: "s04_06", speaker: "yamada", expression: "neutral", text: "安静時で94%ですね。歩いた後も測ってみましょう。" },
+                            { id: "s04_07", speaker: "kazuo", expression: "mild_distress", text: "はぁ...はぁ...少し歩いただけで..." }
+                        ],
+                        knowledge: {
+                            title: "SpO2モニタリング",
+                            text: "SpO2（経皮的動脈血酸素飽和度）は呼吸状態の重要な指標です。\n\n【基準値】\n・正常：96-100%\n・COPD患者：90%以上を維持\n\n【労作時の評価】\n・6分間歩行テスト\n・日常生活動作での変化"
+                        },
+                        quiz: {
+                            question: "COPD患者のSpO2管理目標として適切なのは？",
+                            options: [
+                                { text: "常に100%を維持する", correct: false },
+                                { text: "90%以上を維持する", correct: true },
+                                { text: "85%以上であれば問題ない", correct: false },
+                                { text: "SpO2は重要ではない", correct: false }
+                            ]
+                        }
+                    },
+                    {
+                        id: 5,
+                        title: "呼吸リハビリテーション",
+                        background: "home_bedroom",
+                        cuts: [
+                            { id: "s05_01", speaker: "yamada", expression: "smile", text: "今日は呼吸法の練習をしましょう。" },
+                            { id: "s05_02", speaker: "kazuo", expression: "thinking", text: "呼吸法？そんなことで楽になるのかな..." },
+                            { id: "s05_03", speaker: "yamada", expression: "neutral", text: "口すぼめ呼吸といって、ゆっくり吐くことで息苦しさが和らぎます。" },
+                            { id: "s05_04", speaker: "yamada", expression: "smile", text: "鼻から吸って...口をすぼめてゆっくり吐いて..." },
+                            { id: "s05_05", speaker: "kazuo", expression: "breathing_exercise", text: "ふぅー...なるほど、少し楽かも。" },
+                            { id: "s05_06", speaker: "yamada", expression: "smile", text: "いいですね！毎日練習してみてください。" },
+                            { id: "s05_07", speaker: "kazuo", expression: "grateful", text: "ありがとう。やってみるよ。" }
+                        ],
+                        knowledge: {
+                            title: "口すぼめ呼吸",
+                            text: "口すぼめ呼吸はCOPD患者の呼吸困難を軽減する効果的な技法です。\n\n【方法】\n1. 鼻から2秒かけて吸う\n2. 口をすぼめて4秒かけて吐く\n\n【効果】\n・気道内圧の上昇\n・末梢気道の虚脱防止\n・呼吸効率の改善"
+                        }
+                    }
+                ]
+            };
+
+            document.getElementById('loadError').textContent = '✓ デモデータを読み込みました';
+            document.getElementById('loadError').style.color = '#4caf50';
+            document.getElementById('startBtn').disabled = false;
+        }
+    </script>
+</body>
+</html>

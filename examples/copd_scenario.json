@@ -1,0 +1,356 @@
+{
+  "title": "在宅療養を支える訪問看護",
+  "subtitle": "COPD事例 - 聖隷一男さん（78歳）の物語",
+  "version": "1.0",
+  "totalScenes": 12,
+  "totalCuts": 77,
+
+  "speakerNames": {
+    "narration": "ナレーション",
+    "kazuo": "聖隷一男",
+    "ichiko": "市子",
+    "yamada": "山田看護師",
+    "doctor": "主治医",
+    "pharmacist": "薬剤師",
+    "sato": "佐藤ケアマネ"
+  },
+
+  "scenes": [
+    {
+      "id": 1,
+      "title": "イントロ",
+      "background": null,
+      "bgm": "main_theme",
+      "location": null,
+      "cuts": [
+        {"id": "s01_01", "speaker": "narration", "text": "今回の主人公は聖隷一男さん、78歳の男性です。元公務員で、定年後は妻の市子さんとゴルフや旅行を楽しんでいました。"},
+        {"id": "s01_02", "speaker": "narration", "text": "3年前にCOPD（慢性閉塞性肺疾患）と診断され、在宅酸素療法を開始。先月、コロナ感染から急性増悪を起こし入院しましたが、退院して自宅療養を始めたところです。"},
+        {"id": "s01_03", "speaker": "narration", "text": "一男さんの視点で、訪問看護や地域の多職種連携を体験してみましょう。"}
+      ],
+      "knowledge": {
+        "title": "COPDとは",
+        "text": "COPD（Chronic Obstructive Pulmonary Disease）は、タバコ煙などの有害物質を長期に吸入することで生じる肺の炎症性疾患です。\n\n【特徴】\n・肺胞の破壊（肺気腫）と気道の炎症により気流制限が生じる\n・日本では約530万人以上の患者がいると推定\n\n【主な症状】\n・息切れ\n・慢性的な咳・痰\n\n【危険因子】\n・喫煙が最大の危険因子"
+      }
+    },
+    {
+      "id": 2,
+      "title": "退院前カンファレンス",
+      "background": "hospital_room",
+      "bgm": "medical",
+      "location": "hospital",
+      "subLocation": "hospital_room",
+      "cuts": [
+        {"id": "s02_01", "speaker": "doctor", "text": "聖隷さん、入院中の治療で心不全の症状は改善しました。ただ、肺の状態は以前より悪化しています。", "characters": ["kazuo", "doctor"]},
+        {"id": "s02_02", "speaker": "kazuo", "text": "（心の声）やっぱり悪くなっているのか...でも家に帰りたい。", "characters": ["kazuo", "doctor"], "type": "thought"},
+        {"id": "s02_03", "speaker": "doctor", "text": "夜間のNPPV（非侵襲的陽圧換気療法）を自宅でも続けることをお勧めしますが、いかがですか？", "characters": ["kazuo", "doctor"]},
+        {"id": "s02_04", "speaker": "kazuo", "text": "先生、あの機械は眠れないし、つけるのも大変で...酸素だけでなんとかなりませんか？", "characters": ["kazuo", "doctor"]},
+        {"id": "s02_05", "speaker": "doctor", "text": "ご本人の意思を尊重します。ただ、急性増悪のリスクは高いことをご理解ください。何かあったらすぐに連絡してください。", "characters": ["kazuo", "doctor"]},
+        {"id": "s02_06", "speaker": "kazuo", "text": "わかりました。悪くなるなら、それも寿命かなと思っています。", "characters": ["kazuo", "doctor"]}
+      ],
+      "knowledge": {
+        "title": "NPPVとは",
+        "text": "NPPV（非侵襲的陽圧換気療法）は、マスクを介して陽圧をかけ呼吸を補助する治療法です。\n\n【特徴】\n・気管挿管が不要なため「非侵襲的」\n・COPD急性増悪時の第一選択治療\n\n【課題】\n・マスクの不快感や圧迫感から継続が難しい患者も\n・患者の意思決定を尊重することが重要"
+      },
+      "quiz": {
+        "question": "COPD急性増悪時の人工呼吸管理として、最初に選択されることが多いのはどれか？",
+        "options": [
+          {"text": "気管挿管による人工呼吸", "correct": false},
+          {"text": "NPPV（非侵襲的陽圧換気療法）", "correct": true},
+          {"text": "高流量鼻カニュラ酸素療法", "correct": false},
+          {"text": "ネブライザー吸入", "correct": false}
+        ],
+        "explanation": "COPD急性増悪時はNPPVが第一選択として推奨されています。"
+      }
+    },
+    {
+      "id": 3,
+      "title": "退院・帰宅",
+      "background": "home_living",
+      "bgm": "daily",
+      "location": "home",
+      "subLocation": "home_living",
+      "cuts": [
+        {"id": "s03_01", "speaker": "kazuo", "text": "やっと家に帰ってこられた。やっぱり自分の家が一番落ち着くな。", "characters": ["kazuo", "ichiko"]},
+        {"id": "s03_02", "speaker": "ichiko", "text": "お父さん、おかえりなさい。無理しないでね。ベッドの準備はしてあるから。", "characters": ["kazuo", "ichiko"]},
+        {"id": "s03_03", "speaker": "kazuo", "text": "ありがとう。入院中は夜も眠れなかったから、今日はゆっくり休めそうだ。", "characters": ["kazuo", "ichiko"]},
+        {"id": "s03_04", "speaker": "ichiko", "text": "酸素の機械も業者さんが設置してくれたわ。使い方は覚えてる？", "characters": ["kazuo", "ichiko"]},
+        {"id": "s03_05", "speaker": "kazuo", "text": "ああ、3年も使っているから大丈夫だよ。安静時は2リットル、動くときは4リットルに上げればいいんだろう？", "characters": ["kazuo", "ichiko"]},
+        {"id": "s03_06", "speaker": "ichiko", "text": "明日から訪問看護師さんが来てくれるって。週2回、火曜と木曜に来てくれるそうよ。", "characters": ["kazuo", "ichiko"]}
+      ],
+      "knowledge": {
+        "title": "在宅酸素療法（HOT）とは",
+        "text": "Home Oxygen Therapyの略で、自宅で酸素吸入を行う治療法です。\n\n【機器の種類】\n・酸素濃縮器（主に自宅用）\n・液体酸素\n・携帯用ボンベ（外出用）\n\n【重要な注意点】\n・火気厳禁（2m以内）\n・酸素流量は医師の指示を守る\n・月1回の外来受診が必要（保険適用条件）"
+      },
+      "quiz": {
+        "question": "在宅酸素療法について正しいのはどれか？",
+        "options": [
+          {"text": "酸素流量は自己判断で変更してよい", "correct": false},
+          {"text": "酸素吸入中の喫煙は問題ない", "correct": false},
+          {"text": "月1回以上の外来受診が必要である", "correct": true},
+          {"text": "入浴中は酸素吸入を中止する", "correct": false}
+        ],
+        "explanation": "在宅酸素療法は保険適用の条件として月1回以上の外来受診が必要です。"
+      }
+    },
+    {
+      "id": 4,
+      "title": "訪問看護（初回）",
+      "background": "home_bedroom",
+      "bgm": "heartwarming",
+      "location": "home",
+      "subLocation": "home_bedroom",
+      "cuts": [
+        {"id": "s04_01", "speaker": "yamada", "text": "聖隷さん、はじめまして。訪問看護ステーションの山田です。今日からよろしくお願いします。", "characters": ["kazuo", "yamada"]},
+        {"id": "s04_02", "speaker": "kazuo", "text": "よろしくお願いします。こうして家に来てもらえると助かります。", "characters": ["kazuo", "yamada"]},
+        {"id": "s04_03", "speaker": "yamada", "text": "まず、お体の状態を確認させてくださいね。血圧と脈拍、酸素飽和度を測りますね。", "characters": ["kazuo", "yamada"]},
+        {"id": "s04_04", "speaker": "yamada", "text": "血圧120/75、脈拍78回、SpO2は96%ですね。酸素2リットルで安定しています。", "characters": ["kazuo", "yamada"]},
+        {"id": "s04_05", "speaker": "yamada", "text": "胸の音を聴かせてください...少しヒューヒューという音がしますね。痰は出ますか？", "characters": ["kazuo", "yamada"]},
+        {"id": "s04_06", "speaker": "kazuo", "text": "ええ、白っぽい痰が出ることはありますが、自分で出せています。", "characters": ["kazuo", "yamada"]},
+        {"id": "s04_07", "speaker": "yamada", "text": "それは良かったです。痰の色が黄色や緑色に変わったり、熱が出たりしたら、すぐに連絡してくださいね。感染の兆候かもしれませんから。", "characters": ["kazuo", "yamada"]}
+      ],
+      "knowledge": {
+        "title": "COPDの呼吸音と観察ポイント",
+        "text": "【聴診で聞こえる音】\n・笛声音（wheeze）：ヒューヒュー。気道狭窄\n・類鼾音（rhonchi）：グーグー。痰の貯留\n\n【急性増悪の徴候】\n・痰の量の増加、色の変化（膿性）\n・呼吸困難の悪化\n・発熱\n・全身倦怠感の増強"
+      },
+      "quiz": {
+        "question": "COPD患者の酸素療法で正しいのはどれか？",
+        "options": [
+          {"text": "高濃度酸素を投与する", "correct": false},
+          {"text": "CO2ナルコーシスに注意する", "correct": true},
+          {"text": "SpO2 100%を目標とする", "correct": false},
+          {"text": "酸素流量は患者の判断で調整する", "correct": false}
+        ],
+        "explanation": "COPD患者では高濃度酸素投与によりCO2ナルコーシスのリスクがあるため、注意が必要です。"
+      }
+    },
+    {
+      "id": 5,
+      "title": "入浴介助",
+      "background": "home_bedroom",
+      "bgm": "heartwarming",
+      "location": "home",
+      "subLocation": "home_bedroom",
+      "cuts": [
+        {"id": "s05_01", "speaker": "yamada", "text": "聖隷さん、今日はお風呂に入りましょうか。奥様が準備してくださっていますね。", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s05_02", "speaker": "ichiko", "text": "タオルと着替えは用意してあります。お風呂の温度は39度にしてあるわ。", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s05_03", "speaker": "yamada", "text": "ありがとうございます。聖隷さん、入浴前に酸素を4リットルに上げておきましょうね。", "characters": ["kazuo", "yamada"]},
+        {"id": "s05_04", "speaker": "kazuo", "text": "入浴は体力使うからね。苦しくならないか少し心配だな。", "characters": ["kazuo", "yamada"]},
+        {"id": "s05_05", "speaker": "yamada", "text": "ゆっくり入りましょう。洗髪や体を洗うのは私がお手伝いしますね。腕を上げる動作は息を吐きながら行いましょう。", "characters": ["kazuo", "yamada"]},
+        {"id": "s05_06", "speaker": "kazuo", "text": "久しぶりのお風呂だ。やっぱり気持ちいいな。一人だとなかなか入れないから、助かるなあ。", "characters": ["kazuo", "yamada"]},
+        {"id": "s05_07", "speaker": "yamada", "text": "お湯に浸かるのは5分程度にしておきましょう。長湯は心臓に負担がかかりますからね。", "characters": ["kazuo", "yamada"]}
+      ],
+      "knowledge": {
+        "title": "COPD患者の入浴介助のポイント",
+        "text": "【入浴介助の6つのポイント】\n①入浴前後で酸素流量を上げる（労作時指示量）\n②湯温は38-40度のぬるめに\n③長湯を避ける（5-10分程度）\n④洗髪時は前かがみを避ける\n⑤脱衣所と浴室の温度差に注意\n⑥入浴後は十分な休息を取る\n\n腕を上げる動作は胸郭の動きを制限するため、息を吐きながら行う。"
+      },
+      "quiz": {
+        "question": "COPD患者の入浴介助で正しいのはどれか？",
+        "options": [
+          {"text": "42度以上の熱い湯に入れる", "correct": false},
+          {"text": "入浴中は酸素吸入を中止する", "correct": false},
+          {"text": "洗髪時は長時間前かがみの姿勢をとらせる", "correct": false},
+          {"text": "労作時は酸素流量を増やす", "correct": true}
+        ],
+        "explanation": "入浴は労作であるため、酸素流量を労作時の指示量に増やして行います。"
+      }
+    },
+    {
+      "id": 6,
+      "title": "呼吸リハビリ",
+      "background": "home_bedroom",
+      "bgm": "heartwarming",
+      "location": "home",
+      "subLocation": "home_bedroom",
+      "cuts": [
+        {"id": "s06_01", "speaker": "yamada", "text": "聖隷さん、今日は呼吸リハビリをしましょう。体力を維持するためにとても大切なんですよ。", "characters": ["kazuo", "yamada"]},
+        {"id": "s06_02", "speaker": "kazuo", "text": "リハビリか...正直、苦しくなるのが怖くてあまりやっていないんだ。", "characters": ["kazuo", "yamada"]},
+        {"id": "s06_03", "speaker": "yamada", "text": "そうですよね。でも、動かないでいると筋力が落ちて、もっと息切れしやすくなってしまうんです。", "characters": ["kazuo", "yamada"]},
+        {"id": "s06_04", "speaker": "yamada", "text": "まず、口すぼめ呼吸を練習しましょう。鼻から吸って、口をすぼめてゆっくり吐きます。吐く時間を吸う時間の2倍くらいにするのがコツです。", "characters": ["kazuo", "yamada"]},
+        {"id": "s06_05", "speaker": "kazuo", "text": "こうですか？フーッ...", "characters": ["kazuo", "yamada"]},
+        {"id": "s06_06", "speaker": "yamada", "text": "上手です！この呼吸法は、気道が狭くなるのを防いで、息を吐きやすくしてくれます。苦しくなった時にも使えますよ。", "characters": ["kazuo", "yamada"]},
+        {"id": "s06_07", "speaker": "kazuo", "text": "体力が戻ったら、家族と外食に行きたいと思ってるんだ。温泉旅行も夢だけどね。", "characters": ["kazuo", "yamada"]},
+        {"id": "s06_08", "speaker": "yamada", "text": "それは素敵な目標ですね！外食に行けるように、一緒に頑張りましょう。", "characters": ["kazuo", "yamada"]}
+      ],
+      "knowledge": {
+        "title": "口すぼめ呼吸の効果",
+        "text": "【口すぼめ呼吸のメカニズム】\n①呼気時の気道内圧を高め、気道の虚脱を防ぐ\n②呼気時間を延長し、肺内の空気を効率よく排出\n③呼吸数を減らし、呼吸仕事量を軽減\n④日常生活動作中の息切れを軽減\n\nCOPD患者の基本的なセルフケア技術です。\n\n【呼吸リハビリの効果】\n・運動耐容能の向上\n・呼吸困難感の軽減\n・QOLの改善\n※肺機能（FEV1）自体は改善しない"
+      },
+      "quiz": {
+        "question": "COPD患者の呼吸困難時に有効な呼吸法はどれか？",
+        "options": [
+          {"text": "胸式呼吸", "correct": false},
+          {"text": "口すぼめ呼吸", "correct": true},
+          {"text": "努力呼吸", "correct": false},
+          {"text": "過換気", "correct": false}
+        ],
+        "explanation": "口すぼめ呼吸は気道内圧を高めて気道の虚脱を防ぎ、息切れを軽減します。"
+      }
+    },
+    {
+      "id": 7,
+      "title": "薬局",
+      "background": "pharmacy",
+      "bgm": "heartwarming",
+      "location": "pharmacy",
+      "cuts": [
+        {"id": "s07_01", "speaker": "kazuo", "text": "処方箋を持ってきました。", "characters": ["kazuo", "pharmacist"]},
+        {"id": "s07_02", "speaker": "pharmacist", "text": "聖隷さん、こんにちは。今回のお薬を確認しますね。吸入薬のスピリーバは、毎日同じ時間に使っていますか？", "characters": ["kazuo", "pharmacist"]},
+        {"id": "s07_03", "speaker": "kazuo", "text": "朝と夜に使っています。忘れたことはないですよ。", "characters": ["kazuo", "pharmacist"]},
+        {"id": "s07_04", "speaker": "pharmacist", "text": "素晴らしいですね。吸入後はうがいを忘れずにしてくださいね。口腔カンジダの予防になります。", "characters": ["kazuo", "pharmacist"]},
+        {"id": "s07_05", "speaker": "pharmacist", "text": "プレドニゾロンは炎症を抑えるお薬ですが、長期使用で骨粗鬆症のリスクがありますので、カルシウムを意識して摂ってくださいね。", "characters": ["kazuo", "pharmacist"]},
+        {"id": "s07_06", "speaker": "kazuo", "text": "わかりました。牛乳を飲むようにします。", "characters": ["kazuo", "pharmacist"]}
+      ],
+      "knowledge": {
+        "title": "COPD治療薬の種類",
+        "text": "【気管支拡張薬】\n・LAMA（長時間作用性抗コリン薬）：スピリーバなど\n・LABA（長時間作用性β2刺激薬）：セレベントなど\n・SABA（短時間作用性β2刺激薬）：発作時レスキュー\n\n【抗炎症薬】\n・ICS（吸入ステロイド）：増悪予防\n・経口ステロイド：急性増悪時\n\n【その他】\n・去痰薬、鎮咳薬\n・マグミット（便秘予防→いきみ防止）"
+      },
+      "quiz": {
+        "question": "吸入ステロイド薬使用後にうがいをする目的はどれか？",
+        "options": [
+          {"text": "味覚障害の予防", "correct": false},
+          {"text": "口腔カンジダ症の予防", "correct": true},
+          {"text": "歯周病の予防", "correct": false},
+          {"text": "口臭の予防", "correct": false}
+        ],
+        "explanation": "吸入ステロイドは口腔内に残留すると口腔カンジダ症の原因となるため、使用後のうがいが重要です。"
+      }
+    },
+    {
+      "id": 8,
+      "title": "かかりつけ医受診",
+      "background": "clinic",
+      "bgm": "medical",
+      "location": "clinic",
+      "cuts": [
+        {"id": "s08_01", "speaker": "doctor", "text": "聖隷さん、退院後1ヶ月ですね。調子はいかがですか？", "characters": ["kazuo", "doctor"]},
+        {"id": "s08_02", "speaker": "kazuo", "text": "おかげさまで、大きく悪くなることはなく過ごせています。", "characters": ["kazuo", "doctor"]},
+        {"id": "s08_03", "speaker": "doctor", "text": "訪問看護の記録を見ると、SpO2も安定していますね。体重が少し減っているのが気になりますが...", "characters": ["kazuo", "doctor"]},
+        {"id": "s08_04", "speaker": "kazuo", "text": "食欲はあるんですが、あまり量が食べられなくて。", "characters": ["kazuo", "doctor"]},
+        {"id": "s08_05", "speaker": "doctor", "text": "COPDの方は呼吸にエネルギーを使うので、体重が減りやすいんです。少量でも高カロリーなものを摂るようにしてください。", "characters": ["kazuo", "doctor"]},
+        {"id": "s08_06", "speaker": "doctor", "text": "感染予防も大切です。人混みは避けて、手洗い・うがいを徹底してくださいね。インフルエンザと肺炎球菌のワクチンは接種していますか？", "characters": ["kazuo", "doctor"]},
+        {"id": "s08_07", "speaker": "kazuo", "text": "インフルエンザは毎年打っています。肺炎球菌は5年前に打ちました。", "characters": ["kazuo", "doctor"]},
+        {"id": "s08_08", "speaker": "doctor", "text": "では次回、肺炎球菌ワクチンの再接種も検討しましょう。", "characters": ["kazuo", "doctor"]}
+      ],
+      "knowledge": {
+        "title": "COPD患者の栄養管理",
+        "text": "【なぜ体重が減るのか】\nCOPD患者は呼吸筋の仕事量増加により、安静時でも健常者の1.2-1.5倍のエネルギーを消費します。\n\n【低栄養のリスク】\n・呼吸筋力低下\n・免疫機能低下\n・生命予後の悪化（BMI<21は予後不良因子）\n\n【栄養指導のポイント】\n・高カロリー・高タンパク食\n・少量頻回食（1日5-6回）\n・炭水化物過剰摂取は避ける（CO2産生↑）"
+      },
+      "quiz": {
+        "question": "COPD患者の栄養指導として適切なのはどれか？",
+        "options": [
+          {"text": "低カロリー食を勧める", "correct": false},
+          {"text": "水分制限を指導する", "correct": false},
+          {"text": "高タンパク食を勧める", "correct": true},
+          {"text": "炭水化物中心の食事を勧める", "correct": false}
+        ],
+        "explanation": "COPD患者は呼吸によるエネルギー消費が大きいため、高カロリー・高タンパク食が推奨されます。"
+      }
+    },
+    {
+      "id": 9,
+      "title": "ケアマネ訪問",
+      "background": "home_living",
+      "bgm": "heartwarming",
+      "location": "home",
+      "subLocation": "home_living",
+      "cuts": [
+        {"id": "s09_01", "speaker": "sato", "text": "聖隷さん、奥様、こんにちは。ケアマネジャーの佐藤です。サービスの利用状況を確認させてください。", "characters": ["kazuo", "ichiko", "sato"]},
+        {"id": "s09_02", "speaker": "ichiko", "text": "訪問看護は週2回来てもらっていて、とても助かっています。お風呂も安心して入れるようになりました。", "characters": ["kazuo", "ichiko", "sato"]},
+        {"id": "s09_03", "speaker": "sato", "text": "それは良かったです。聖隷さん、他に困っていることはありますか？", "characters": ["kazuo", "ichiko", "sato"]},
+        {"id": "s09_04", "speaker": "kazuo", "text": "買い物に行けなくなったのが困っているかな。車を運転しなくなったから。", "characters": ["kazuo", "ichiko", "sato"]},
+        {"id": "s09_05", "speaker": "sato", "text": "では、訪問介護で買い物支援を追加することもできますよ。また、配食サービスという選択肢もあります。", "characters": ["kazuo", "ichiko", "sato"]},
+        {"id": "s09_06", "speaker": "ichiko", "text": "娘たちが週末に連れ出してくれているけど、毎回は申し訳なくて...", "characters": ["kazuo", "ichiko", "sato"]},
+        {"id": "s09_07", "speaker": "sato", "text": "介護者の負担軽減も大切です。ご家族だけで抱え込まず、使えるサービスは活用してくださいね。", "characters": ["kazuo", "ichiko", "sato"]}
+      ],
+      "knowledge": {
+        "title": "要介護2で利用できるサービス例",
+        "text": "【居宅サービス】\n・訪問介護（ホームヘルプ）\n・訪問看護\n・訪問リハビリテーション\n・通所介護（デイサービス）\n・短期入所（ショートステイ）\n\n【その他】\n・福祉用具貸与\n・住宅改修\n・配食サービス（自治体独自）\n\n区分支給限度額：約197,050円/月"
+      },
+      "quiz": {
+        "question": "介護保険の保険者はどれか？",
+        "options": [
+          {"text": "都道府県", "correct": false},
+          {"text": "市町村", "correct": true},
+          {"text": "介護保険審査会", "correct": false},
+          {"text": "地域包括支援センター", "correct": false}
+        ],
+        "explanation": "介護保険の保険者は市町村です。"
+      }
+    },
+    {
+      "id": 10,
+      "title": "妻との会話",
+      "background": "home_living",
+      "bgm": "daily",
+      "location": "home",
+      "subLocation": "home_living",
+      "cuts": [
+        {"id": "s10_01", "speaker": "ichiko", "text": "お父さん、最近少し元気になってきたみたいで嬉しいわ。", "characters": ["kazuo", "ichiko"]},
+        {"id": "s10_02", "speaker": "kazuo", "text": "そうかな。まだまだ入院前のようにはいかないけどね。", "characters": ["kazuo", "ichiko"]},
+        {"id": "s10_03", "speaker": "ichiko", "text": "無理しなくていいのよ。苦しそうなのを見ているのが一番辛いから。", "characters": ["kazuo", "ichiko"]},
+        {"id": "s10_04", "speaker": "kazuo", "text": "市子には迷惑をかけているな。家事も全部やってもらって...", "characters": ["kazuo", "ichiko"]},
+        {"id": "s10_05", "speaker": "ichiko", "text": "何言ってるの。50年以上一緒にいるんだから、今さらよ。", "characters": ["kazuo", "ichiko"]},
+        {"id": "s10_06", "speaker": "kazuo", "text": "体力が戻ったら、また二人で外食に行きたいな。旅行は難しいかもしれないけど。", "characters": ["kazuo", "ichiko"]},
+        {"id": "s10_07", "speaker": "ichiko", "text": "近場でいいじゃない。孫たちも連れて、みんなで美味しいもの食べに行きましょう。", "characters": ["kazuo", "ichiko"]},
+        {"id": "s10_08", "speaker": "kazuo", "text": "そうだな。それを目標に、リハビリも頑張るよ。", "characters": ["kazuo", "ichiko"]}
+      ],
+      "knowledge": {
+        "title": "介護者ケアの重要性",
+        "text": "在宅療養では、介護者である家族の心身の健康も重要です。\n\n【介護者のアセスメント項目】\n・身体的健康状態\n・精神的健康状態（不安、抑うつ）\n・介護負担感\n・睡眠状況\n・社会的交流の有無\n\n【具体的な支援】\n・傾聴、共感的理解\n・レスパイトケア（ショートステイ等）\n・社会資源の情報提供\n・家族間の調整役"
+      }
+    },
+    {
+      "id": 11,
+      "title": "急変時の対応",
+      "background": "home_bedroom",
+      "bgm": "medical",
+      "location": "home",
+      "subLocation": "home_bedroom",
+      "cuts": [
+        {"id": "s11_01", "speaker": "yamada", "text": "聖隷さん、今日は急に具合が悪くなった時の対応について確認しておきましょう。", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s11_02", "speaker": "kazuo", "text": "入院中も説明を受けたけど、改めて教えてください。", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s11_03", "speaker": "yamada", "text": "まず、いつもより息苦しさが強くなったら、酸素を4リットルに上げて、口すぼめ呼吸をしながら楽な姿勢をとってください。", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s11_04", "speaker": "yamada", "text": "それでも改善しない場合や、次のような症状があったらすぐに連絡してください。①発熱がある ②痰の色が黄色や緑色に変わった ③胸の痛みがある ④意識がぼんやりする ⑤唇や爪が紫色になる", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s11_05", "speaker": "kazuo", "text": "わかりました。緊急連絡先は冷蔵庫に貼ってあります。", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s11_06", "speaker": "yamada", "text": "奥様も、何か気になることがあれば遠慮なく連絡してくださいね。24時間対応していますから。", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s11_07", "speaker": "ichiko", "text": "夜中でも大丈夫なんですか？申し訳ない気がして...", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s11_08", "speaker": "yamada", "text": "遠慮しないでください。早めに連絡していただいた方が、大事に至らずに済むことが多いんですよ。", "characters": ["kazuo", "yamada", "ichiko"]},
+        {"id": "s11_09", "speaker": "ichiko", "text": "わかりました。何かあったらすぐに連絡しますね。", "characters": ["kazuo", "yamada", "ichiko"]}
+      ],
+      "knowledge": {
+        "title": "COPD急性増悪の徴候",
+        "text": "【主要症状】\n・呼吸困難の悪化\n・痰の量の増加、色の変化（膿性）\n・発熱\n\n【その他の症状】\n・全身倦怠感の増強\n・チアノーゼ（唇・爪が紫色）\n・意識レベルの低下\n・下肢浮腫（右心不全の悪化）\n\n【急性増悪の主な原因】\n・気道感染（約7割）\n・大気汚染\n・原因不明（約3割）"
+      },
+      "quiz": {
+        "question": "COPD急性増悪の徴候として正しいのはどれか？（2つ選べ）",
+        "options": [
+          {"text": "膿性痰の増加", "correct": true},
+          {"text": "呼吸困難の軽減", "correct": false},
+          {"text": "食欲の増進", "correct": false},
+          {"text": "発熱", "correct": true}
+        ],
+        "multipleAnswer": true,
+        "explanation": "膿性痰の増加と発熱は急性増悪の主要な徴候です。"
+      }
+    },
+    {
+      "id": 12,
+      "title": "エンディング",
+      "background": null,
+      "bgm": "main_theme",
+      "location": null,
+      "cuts": [
+        {"id": "s12_01", "speaker": "narration", "text": "退院から3ヶ月。聖隷一男さんは、訪問看護師や多くの専門職に支えられながら、妻の市子さんと自宅での療養生活を続けています。"},
+        {"id": "s12_02", "speaker": "narration", "text": "入院前ほどの体力は戻っていませんが、毎日の口すぼめ呼吸と軽い運動を続け、少しずつ活動範囲を広げています。"},
+        {"id": "s12_03", "speaker": "narration", "text": "先日、念願だった家族での外食を実現。孫たちに囲まれて、一男さんは笑顔を見せていました。"},
+        {"id": "s12_04", "speaker": "narration", "text": "地域には、一男さんのような療養者を支えるさまざまな専門職がいます。訪問看護師、ケアマネジャー、かかりつけ医、薬剤師..."},
+        {"id": "s12_05", "speaker": "narration", "text": "それぞれが連携して、療養者と家族の「その人らしい生活」を支えています。"},
+        {"id": "s12_06", "speaker": "narration", "text": "皆さんも、地域の多職種連携について学び、チームの一員として活躍してください。【 完 】"}
+      ],
+      "knowledge": {
+        "title": "在宅療養を支える多職種連携",
+        "text": "【主な専門職と役割】\n・医師：診断・治療方針の決定\n・訪問看護師：状態観察・医療処置・療養相談\n・ケアマネジャー：ケアプラン作成・サービス調整\n・薬剤師：服薬管理・指導\n・理学療法士：リハビリテーション\n・介護福祉士：生活援助\n・地域包括支援センター：相談・調整\n\n多職種が情報を共有し、目標を共有することで、切れ目のない支援が可能になります。"
+      }
+    }
+  ]
+}

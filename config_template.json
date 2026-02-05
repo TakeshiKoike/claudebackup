@@ -1,0 +1,139 @@
+{
+  "$schema": "./config_schema.json",
+  "meta": {
+    "title": "教材タイトル",
+    "subtitle": "サブタイトル・主人公情報",
+    "version": "1.0.0",
+    "author": "作成者",
+    "institution": "所属機関",
+    "targetAudience": "対象者（例：看護学生、訪問看護師）",
+    "createdDate": "2026-01-29"
+  },
+
+  "theme": {
+    "primaryColor": "#2d5a27",
+    "secondaryColor": "#4a7c43",
+    "accentColor": "#8bc34a",
+    "bgDark": "#1a1a2e",
+    "bgLight": "#f5f5f5"
+  },
+
+  "titleScreen": {
+    "backgroundImage": "maps/map_town.png",
+    "showPatientInfo": true,
+    "patientInfo": {
+      "name": "患者名",
+      "age": 78,
+      "gender": "男性",
+      "diagnosis": "疾患名",
+      "careLevel": "要介護度",
+      "treatment": "治療内容"
+    }
+  },
+
+  "characters": {
+    "protagonist": {
+      "id": "kazuo",
+      "name": "聖隷一男",
+      "role": "patient",
+      "folder": "kazuo_expressions",
+      "voice": "ja-JP-Chirp3-HD-Charon",
+      "hasSpecialExpressions": true,
+      "specialExpressionPrefix": "medical"
+    },
+    "others": [
+      {
+        "id": "ichiko",
+        "name": "聖隷市子",
+        "role": "family",
+        "folder": "ichiko_expressions",
+        "voice": "ja-JP-Chirp3-HD-Leda"
+      },
+      {
+        "id": "yamada",
+        "name": "山田看護師",
+        "role": "nurse",
+        "folder": "yamada_expressions",
+        "voice": "ja-JP-Chirp3-HD-Zephyr"
+      },
+      {
+        "id": "doctor",
+        "name": "主治医",
+        "role": "doctor",
+        "folder": "doctor_expressions",
+        "voice": "ja-JP-Chirp3-HD-Iapetus"
+      }
+    ],
+    "narrator": {
+      "name": "ナレーション",
+      "voice": "ja-JP-Chirp3-HD-Aoede"
+    }
+  },
+
+  "expressions": {
+    "general": [
+      {"id": "01", "name": "neutral", "label": "通常"},
+      {"id": "02", "name": "smile", "label": "笑顔"},
+      {"id": "03", "name": "thinking", "label": "考え中"},
+      {"id": "04", "name": "worried", "label": "心配"},
+      {"id": "05", "name": "tired", "label": "疲れ"},
+      {"id": "06", "name": "surprised", "label": "驚き"},
+      {"id": "07", "name": "relieved", "label": "安心"},
+      {"id": "08", "name": "grateful", "label": "感謝"},
+      {"id": "09", "name": "determined", "label": "決意"}
+    ],
+    "special": [
+      {"id": "m01", "name": "mild_distress", "label": "軽度の苦しさ"},
+      {"id": "m02", "name": "moderate_distress", "label": "中程度の苦しさ"},
+      {"id": "m03", "name": "severe_distress", "label": "重度の苦しさ"}
+    ]
+  },
+
+  "backgrounds": [
+    {"id": "hospital_room", "file": "backgrounds/bg_hospital_room.png", "label": "病室"},
+    {"id": "home_living", "file": "backgrounds/bg_home_living.png", "label": "自宅リビング"},
+    {"id": "home_bedroom", "file": "backgrounds/bg_home_bedroom.png", "label": "自宅寝室"},
+    {"id": "pharmacy", "file": "backgrounds/bg_pharmacy.png", "label": "薬局"},
+    {"id": "clinic", "file": "backgrounds/bg_clinic.png", "label": "クリニック"}
+  ],
+
+  "maps": [
+    {"id": "map_town", "file": "maps/map_town.png", "label": "街並みMAP", "type": "main"},
+    {"id": "map_hospital", "file": "maps/map_hospital.png", "label": "病院内MAP", "type": "sub"},
+    {"id": "map_home", "file": "maps/map_home.png", "label": "自宅内MAP", "type": "sub"}
+  ],
+
+  "bgm": [
+    {"id": "main_theme", "file": "bgm/bgm_main_theme.mp3", "label": "メインテーマ", "scenes": [1, 12]},
+    {"id": "daily", "file": "bgm/bgm_daily.mp3", "label": "日常", "scenes": [3, 10]},
+    {"id": "medical", "file": "bgm/bgm_medical.mp3", "label": "医療・緊張", "scenes": [2, 8, 11]},
+    {"id": "heartwarming", "file": "bgm/bgm_heartwarming.mp3", "label": "心温まる", "scenes": [4, 5, 6, 7, 9]}
+  ],
+
+  "locations": [
+    {"id": "hospital", "label": "病院", "icon": "🏥", "color": "#e74c3c", "markerClass": "hospital"},
+    {"id": "home", "label": "自宅", "icon": "🏠", "color": "#3498db", "markerClass": "home"},
+    {"id": "pharmacy", "label": "薬局", "icon": "💊", "color": "#2ecc71", "markerClass": "pharmacy"},
+    {"id": "clinic", "label": "クリニック", "icon": "🩺", "color": "#9b59b6", "markerClass": "clinic"}
+  ],
+
+  "features": {
+    "enableMaps": true,
+    "enableSubMaps": true,
+    "enableBgm": true,
+    "enableVoice": true,
+    "enableVideo": true,
+    "enableQuiz": true,
+    "enableKnowledge": true,
+    "enableSceneSelect": true,
+    "enableProgress": true
+  },
+
+  "assets": {
+    "imageFormat": "png",
+    "audioFormat": "mp3",
+    "videoFormat": "mp4",
+    "characterSize": {"width": 1024, "height": 1024},
+    "backgroundSize": {"width": 1920, "height": 1080}
+  }
+}
