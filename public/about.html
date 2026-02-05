@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E8K9FG83WD"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-E8K9FG83WD');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="カンゴ☆デラックス運営者情報 - 小池武嗣について">
+    <title>運営者情報 | カンゴ☆デラックス</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --primary-dark: #1B5E20;
+            --text-color: #1C1814;
+            --bg-color: #FDF8F3;
+            --card-bg: #FFFFFF;
+            --border-color: #1c1814;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-color);
+            padding: 10px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo a {
+            color: var(--primary-color);
+        }
+
+        .logo .star {
+            color: #FFD700;
+        }
+
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 120px 20px 80px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            padding-bottom: 16px;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .profile-section {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 48px;
+            align-items: flex-start;
+        }
+
+        .profile-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), #4CAF50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 64px;
+            flex-shrink: 0;
+        }
+
+        .profile-info h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .profile-info .title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .profile-info p {
+            margin-bottom: 12px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--primary-color);
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .section p {
+            margin-bottom: 16px;
+        }
+
+        .section ul {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        .section li {
+            margin-bottom: 8px;
+        }
+
+        .expertise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .expertise-item {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .expertise-item h3 {
+            font-size: 14px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .expertise-item p {
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .footer {
+            background: var(--text-color);
+            color: white;
+        }
+
+        .footer-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 48px 80px;
+            gap: 40px;
+        }
+
+        .footer-logo {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .footer-nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        .footer-nav a {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .footer-nav a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-legal a {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .footer-legal a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding: 22px 80px;
+            text-align: center;
+        }
+
+        .copyright {
+            font-size: 12px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .header {
+                padding: 10px 20px;
+            }
+
+            .main-content {
+                padding: 100px 20px 60px;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .profile-section {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .profile-image {
+                width: 150px;
+                height: 150px;
+                font-size: 48px;
+            }
+
+            .footer-main {
+                flex-direction: column;
+                padding: 40px 20px;
+            }
+
+            .footer-nav {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <a href="/">カンゴ<span class="star">☆</span>デラックス</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1 class="page-title">運営者情報</h1>
+
+        <div class="profile-section">
+            <div class="profile-image">👨‍⚕️</div>
+            <div class="profile-info">
+                <h2>小池 武嗣（こいけ たけし）</h2>
+                <p class="title">聖隷クリストファー大学 看護学部 教員<br>大阪公立大学大学院 情報学研究科 博士後期課程</p>
+                <p>看護師・保健師として臨床経験を経た後、看護教育の世界へ。沖縄県座間味島での2年間の離島保健師経験を持つ。現在は「DX技術を活用した次世代型看護教育システムの構築」をテーマに博士論文を執筆中。</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>サイトについて</h2>
+            <p>「カンゴ☆デラックス」は、看護とデジタル技術（DX）と教育の交差点をテーマにした情報発信サイトです。</p>
+            <p>最新のデジタル看護ニュースのキュレーション、VR/MR・生成AIを活用した看護教育の実践報告、そして運営者個人の視点からのコラムを通じて、看護の未来をデジタルでつなぐことを目指しています。</p>
+        </div>
+
+        <div class="section">
+            <h2>専門分野</h2>
+            <div class="expertise-grid">
+                <div class="expertise-item">
+                    <h3>VR/MR教育</h3>
+                    <p>Meta Quest 3、Apple Vision Pro等を活用した看護シミュレーション教育</p>
+                </div>
+                <div class="expertise-item">
+                    <h3>生成AI活用</h3>
+                    <p>ChatGPT、Claude等の生成AIを看護教育に活用する方法論</p>
+                </div>
+                <div class="expertise-item">
+                    <h3>デジタル模擬患者</h3>
+                    <p>AIを活用したデジタル模擬患者（SIMPA）システムの開発</p>
+                </div>
+                <div class="expertise-item">
+                    <h3>メタバース看護教育</h3>
+                    <p>3D仮想空間を活用した遠隔看護教育環境の構築</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>経歴</h2>
+            <ul>
+                <li>看護師・保健師資格取得</li>
+                <li>沖縄県座間味村 離島保健師（2年間）</li>
+                <li>聖隷クリストファー大学 看護学部 教員（現職）</li>
+                <li>大阪公立大学大学院 情報学研究科 博士後期課程（在学中）</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>研究発表・論文</h2>
+            <ul>
+                <li>MEDINFO 2025（国際医療情報学会）発表予定</li>
+                <li>KES 2025（知識ベースシステム国際会議）発表予定</li>
+                <li>日本シミュレーション医療教育学会 多数発表</li>
+                <li>Clinical Simulation in Nursing 投稿中</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>お問い合わせ</h2>
+            <p>研修・講演のご依頼、取材のお問い合わせ、その他ご質問は<a href="/contact.html" style="color: var(--primary-color); text-decoration: underline;">お問い合わせページ</a>よりご連絡ください。</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-main">
+            <span class="footer-logo">カンゴ☆デラックス</span>
+            <nav class="footer-nav">
+                <a href="/news/">デジタル看護ニュース</a>
+                <a href="/dx/">看護教育DX</a>
+                <a href="/column/">コイケ・デラックス</a>
+                <a href="/contact.html">お問い合わせ</a>
+            </nav>
+            <nav class="footer-legal">
+                <a href="/about.html">運営者情報</a>
+                <a href="/privacy.html">プライバシーポリシー</a>
+                <a href="/terms.html">利用規約</a>
+            </nav>
+        </div>
+        <div class="footer-bottom">
+            <p class="copyright">©︎2024 カンゴ☆デラックス All Rights Reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

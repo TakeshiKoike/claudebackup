@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // newsコレクション: 読み取りは誰でもOK、書き込みは認証ユーザーのみ
+    match /news/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}

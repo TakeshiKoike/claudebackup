@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E8K9FG83WD"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-E8K9FG83WD');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="カンゴ☆デラックスへのお問い合わせ">
+    <title>お問い合わせ | カンゴ☆デラックス</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --primary-dark: #1B5E20;
+            --text-color: #1C1814;
+            --bg-color: #FDF8F3;
+            --card-bg: #FFFFFF;
+            --border-color: #1c1814;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-color);
+            padding: 10px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo a {
+            color: var(--primary-color);
+        }
+
+        .logo .star {
+            color: #FFD700;
+        }
+
+        .main-content {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 120px 20px 80px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .intro {
+            margin-bottom: 40px;
+        }
+
+        .intro p {
+            margin-bottom: 12px;
+        }
+
+        .contact-types {
+            display: grid;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .contact-card {
+            background: var(--card-bg);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .contact-card h2 {
+            font-size: 18px;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .contact-card p {
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .contact-card ul {
+            margin-left: 20px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .contact-card li {
+            margin-bottom: 6px;
+        }
+
+        .contact-form {
+            background: var(--card-bg);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 32px;
+        }
+
+        .contact-form h2 {
+            font-size: 20px;
+            margin-bottom: 24px;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group label .required {
+            color: #e53935;
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .note {
+            margin-top: 16px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .footer {
+            background: var(--text-color);
+            color: white;
+        }
+
+        .footer-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 48px 80px;
+            gap: 40px;
+        }
+
+        .footer-logo {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .footer-nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        .footer-nav a {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .footer-nav a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-legal a {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .footer-legal a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding: 22px 80px;
+            text-align: center;
+        }
+
+        .copyright {
+            font-size: 12px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .header {
+                padding: 10px 20px;
+            }
+
+            .main-content {
+                padding: 100px 20px 60px;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .contact-form {
+                padding: 24px 16px;
+            }
+
+            .footer-main {
+                flex-direction: column;
+                padding: 40px 20px;
+            }
+
+            .footer-nav {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <a href="/">カンゴ<span class="star">☆</span>デラックス</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1 class="page-title">お問い合わせ</h1>
+
+        <div class="intro">
+            <p>「カンゴ☆デラックス」へのお問い合わせありがとうございます。</p>
+            <p>以下のフォームよりお気軽にご連絡ください。</p>
+        </div>
+
+        <div class="contact-types">
+            <div class="contact-card">
+                <h2>📚 研修・講演のご依頼</h2>
+                <p>VR/MR看護教育、生成AI活用、シミュレーション教育などのテーマで研修・講演を承ります。</p>
+                <ul>
+                    <li>看護学校・大学での特別講義</li>
+                    <li>病院・施設内研修</li>
+                    <li>学会・研究会での講演</li>
+                    <li>企業向けセミナー</li>
+                </ul>
+            </div>
+
+            <div class="contact-card">
+                <h2>💻 導入支援・コンサルティング</h2>
+                <p>VR機器の導入、生成AIの教育活用など、看護教育DXの導入をサポートします。</p>
+                <ul>
+                    <li>機器選定・導入サポート</li>
+                    <li>教材開発支援</li>
+                    <li>教員向けトレーニング</li>
+                </ul>
+            </div>
+
+            <div class="contact-card">
+                <h2>📝 取材・メディア掲載</h2>
+                <p>看護教育DXに関する取材、記事執筆、コメント提供などお受けしています。</p>
+            </div>
+        </div>
+
+        <div class="contact-form">
+            <h2>お問い合わせフォーム</h2>
+            <form id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+                <div class="form-group">
+                    <label>お問い合わせ種別<span class="required">*</span></label>
+                    <select name="type" required>
+                        <option value="">選択してください</option>
+                        <option value="研修・講演">研修・講演のご依頼</option>
+                        <option value="導入支援">導入支援・コンサルティング</option>
+                        <option value="取材">取材・メディア掲載</option>
+                        <option value="その他">その他のお問い合わせ</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>お名前<span class="required">*</span></label>
+                    <input type="text" name="name" required placeholder="山田 太郎">
+                </div>
+
+                <div class="form-group">
+                    <label>所属・組織名</label>
+                    <input type="text" name="organization" placeholder="○○大学 / ○○病院">
+                </div>
+
+                <div class="form-group">
+                    <label>メールアドレス<span class="required">*</span></label>
+                    <input type="email" name="email" required placeholder="example@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label>電話番号</label>
+                    <input type="tel" name="phone" placeholder="090-1234-5678">
+                </div>
+
+                <div class="form-group">
+                    <label>お問い合わせ内容<span class="required">*</span></label>
+                    <textarea name="message" required placeholder="お問い合わせ内容をご記入ください。&#10;研修・講演の場合は、ご希望の日時、対象人数、テーマなどをお知らせいただけると幸いです。"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">送信する</button>
+
+                <p class="note">※ 通常3営業日以内にご返信いたします。<br>※ 送信いただいた個人情報は、お問い合わせへの対応にのみ使用いたします。詳しくは<a href="/privacy.html" style="color: var(--primary-color);">プライバシーポリシー</a>をご確認ください。</p>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-main">
+            <span class="footer-logo">カンゴ☆デラックス</span>
+            <nav class="footer-nav">
+                <a href="/news/">デジタル看護ニュース</a>
+                <a href="/dx/">看護教育DX</a>
+                <a href="/column/">コイケ・デラックス</a>
+                <a href="/contact.html">お問い合わせ</a>
+            </nav>
+            <nav class="footer-legal">
+                <a href="/about.html">運営者情報</a>
+                <a href="/privacy.html">プライバシーポリシー</a>
+                <a href="/terms.html">利用規約</a>
+            </nav>
+        </div>
+        <div class="footer-bottom">
+            <p class="copyright">©︎2024 カンゴ☆デラックス All Rights Reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

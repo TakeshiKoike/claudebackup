@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E8K9FG83WD"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-E8K9FG83WD');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>記事詳細 | デジタル看護ニュース | カンゴ☆デラックス</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root { --primary-color: #2E7D32; --accent-color: #1565C0; --text-color: #1C1814; --bg-color: #FDF8F3; --card-bg: #FFFFFF; --border-color: #1c1814; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg-color); color: var(--text-color); line-height: 1.8; }
+        a { text-decoration: none; color: inherit; transition: all 0.3s; }
+
+        .header { position: fixed; top: 0; left: 0; right: 0; background: var(--bg-color); padding: 10px 80px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid var(--border-color); }
+        .logo { font-size: 24px; font-weight: 700; color: var(--primary-color); }
+        .logo .star { color: #FFD700; }
+        .nav { display: flex; gap: 32px; }
+        .nav a { font-size: 14px; font-weight: 600; }
+        .nav a:hover { color: var(--primary-color); }
+
+        .article-container { max-width: 800px; margin: 100px auto 60px; padding: 0 24px; }
+
+        .breadcrumb { font-size: 13px; color: #666; margin-bottom: 24px; }
+        .breadcrumb a { color: var(--accent-color); }
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        .article-header { margin-bottom: 32px; }
+        .article-category { display: inline-block; background: var(--accent-color); color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+        .article-title { font-size: 28px; font-weight: 700; line-height: 1.5; margin-bottom: 16px; }
+        .article-meta { display: flex; gap: 16px; font-size: 13px; color: #666; }
+
+        .article-image { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; margin-bottom: 32px; background: linear-gradient(135deg, #1565C0, #42A5F5); }
+        .article-image.no-image { display: flex; align-items: center; justify-content: center; color: white; font-size: 60px; }
+
+        .article-comment { background: #E3F2FD; border-left: 4px solid var(--accent-color); padding: 20px 24px; border-radius: 0 8px 8px 0; margin-bottom: 32px; }
+        .article-comment-label { font-size: 12px; font-weight: 600; color: var(--accent-color); margin-bottom: 8px; }
+        .article-comment-text { font-size: 15px; line-height: 1.8; }
+
+        .article-description { font-size: 16px; line-height: 2; margin-bottom: 40px; color: #333; }
+
+        .read-original { display: flex; justify-content: center; margin-bottom: 40px; }
+        .read-original-btn { display: inline-flex; align-items: center; gap: 12px; background: var(--accent-color); color: white; padding: 16px 40px; border-radius: 30px; font-size: 16px; font-weight: 600; transition: all 0.3s; }
+        .read-original-btn:hover { background: #1976D2; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3); }
+        .read-original-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        .back-link { text-align: center; margin-bottom: 60px; }
+        .back-link a { display: inline-flex; align-items: center; gap: 8px; color: var(--accent-color); font-weight: 600; }
+        .back-link a:hover { text-decoration: underline; }
+
+        .loading { text-align: center; padding: 100px 24px; color: #666; }
+        .error { text-align: center; padding: 100px 24px; color: #c00; }
+
+        .footer { background: var(--text-color); color: white; padding: 40px 80px; text-align: center; }
+        .footer-copyright { font-size: 12px; color: #999; }
+
+        @media (max-width: 768px) {
+            .header { padding: 10px 20px; }
+            .nav { display: none; }
+            .article-container { margin-top: 80px; }
+            .article-title { font-size: 22px; }
+            .footer { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo"><a href="/">カンゴ<span class="star">☆</span>デラックス</a></div>
+        <nav class="nav">
+            <a href="/news/">デジタル看護ニュース</a>
+            <a href="/dx/">看護教育DX</a>
+            <a href="/column/">コイケ・デラックス</a>
+            <a href="/contact.html">お問い合わせ</a>
+        </nav>
+    </header>
+
+    <main class="article-container" id="articleContainer">
+        <div class="loading" id="loading">記事を読み込み中...</div>
+    </main>
+
+    <footer class="footer">
+        <p class="footer-copyright">&copy; 2025 カンゴ☆デラックス All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrFGMmKivoNTUWfKglADPw2bWFNaFXgTg",
+            authDomain: "kango-dx-news.firebaseapp.com",
+            projectId: "kango-dx-news",
+            storageBucket: "kango-dx-news.firebasestorage.app",
+            messagingSenderId: "888488038184",
+            appId: "1:888488038184:web:fa504d57c3f7577ec68a1d"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const categoryNames = {
+            'digital': 'デジタル',
+            'general': '看護全般',
+            'education': '看護教育',
+            'society': '社会・国際',
+            'other': 'その他'
+        };
+
+        async function loadArticle() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id');
+
+            if (!articleId) {
+                showError('記事IDが指定されていません');
+                return;
+            }
+
+            try {
+                // 閲覧数をカウントアップ
+                db.collection('news').doc(articleId).update({
+                    views: firebase.firestore.FieldValue.increment(1)
+                });
+
+                const doc = await db.collection('news').doc(articleId).get();
+
+                if (!doc.exists) {
+                    showError('記事が見つかりませんでした');
+                    return;
+                }
+
+                const article = doc.data();
+                renderArticle(article);
+                document.title = `${article.title} | デジタル看護ニュース | カンゴ☆デラックス`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('記事の読み込みに失敗しました');
+            }
+        }
+
+        function renderArticle(article) {
+            const container = document.getElementById('articleContainer');
+            const date = article.addedAt ? article.addedAt.toDate().toLocaleDateString('ja-JP') : '';
+            const categoryName = categoryNames[article.category] || 'その他';
+
+            const imageHtml = article.image
+                ? `<img src="${article.image}" alt="${article.title}" class="article-image" onerror="this.className='article-image no-image'; this.innerHTML='📰';">`
+                : `<div class="article-image no-image">📰</div>`;
+
+            const commentHtml = article.comment
+                ? `<div class="article-comment">
+                       <div class="article-comment-label">小池のひとこと</div>
+                       <div class="article-comment-text">${article.comment}</div>
+                   </div>`
+                : '';
+
+            container.innerHTML = `
+                <nav class="breadcrumb">
+                    <a href="/">ホーム</a> &gt; <a href="/news/">デジタル看護ニュース</a> &gt; 記事詳細
+                </nav>
+
+                <article class="article-header">
+                    <span class="article-category">${categoryName}</span>
+                    <h1 class="article-title">${article.title}</h1>
+                    <div class="article-meta">
+                        <span>📅 ${date}</span>
+                        <span>👁 ${article.views || 1} views</span>
+                    </div>
+                </article>
+
+                ${imageHtml}
+
+                ${commentHtml}
+
+                <div class="article-description">
+                    ${article.description || ''}
+                </div>
+
+                <div class="read-original">
+                    <a href="${article.url}" target="_blank" rel="noopener" class="read-original-btn">
+                        元記事を読む
+                        <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                    </a>
+                </div>
+
+                <div class="back-link">
+                    <a href="/news/">← 記事一覧に戻る</a>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            document.getElementById('articleContainer').innerHTML = `
+                <div class="error">${message}</div>
+                <div class="back-link"><a href="/news/">← 記事一覧に戻る</a></div>
+            `;
+        }
+
+        loadArticle();
+    </script>
+</body>
+</html>

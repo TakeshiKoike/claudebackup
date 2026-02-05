@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E8K9FG83WD"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-E8K9FG83WD');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カンゴ☆デラックス</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #009E44;
+            --primary-light: #00B74F;
+            --dark: #1c1814;
+            --cream: #f2f2e9;
+            --white: #FFFFFF;
+            --text: #1c1814;
+            --text-light: #666;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--cream);
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: opacity 0.3s;
+        }
+
+        a:hover {
+            opacity: 0.7;
+        }
+
+        /* ========== ヘッダー ========== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--dark);
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo h1 {
+            color: var(--white);
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+        }
+
+        .logo .star {
+            color: #FFD700;
+        }
+
+        .category-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-nav a {
+            color: var(--white);
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+
+        .category-nav a:hover {
+            background: rgba(255,255,255,0.2);
+            opacity: 1;
+        }
+
+        .sidebar-contact {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--primary);
+            color: var(--white);
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .sidebar-contact:hover {
+            opacity: 1;
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .sidebar-contact svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* ========== メインエリア ========== */
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+            padding-top: 72px;
+        }
+
+        /* 左サイドバー */
+        .sidebar {
+            width: 24%;
+            min-width: 280px;
+            background: var(--dark);
+            color: var(--white);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: sticky;
+            top: 72px;
+            height: calc(100vh - 72px);
+        }
+
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-text {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .sidebar-divider {
+            width: 100%;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 16px 0;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            opacity: 1;
+        }
+
+        /* 右メインコンテンツ */
+        .content {
+            flex: 1;
+            background: var(--cream);
+        }
+
+        /* ========== ヒーローセクション ========== */
+        .hero {
+            position: relative;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        .hero-slider {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1;
+            transform: translateX(100%);
+            transition: transform 0.6s ease, opacity 0.6s ease, visibility 0.6s ease;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #1c1814;
+        }
+
+        .hero-slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 2;
+            transform: translateX(0);
+        }
+
+        .hero-slide.prev {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        .hero-slide:nth-child(1) { background-color: #1a2a3a; }
+        .hero-slide:nth-child(2) { background-color: #1a2a2a; }
+        .hero-slide:nth-child(3) { background-color: #2a1a2a; }
+
+        .hero-slide-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+            padding: 80px 40px 40px;
+        }
+
+        .hero-category {
+            display: inline-block;
+            background: var(--primary);
+            color: var(--white);
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .hero-title {
+            color: var(--white);
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .hero-desc {
+            color: rgba(255,255,255,0.8);
+            font-size: 1rem;
+            max-width: 600px;
+        }
+
+        .hero-link {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 24px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .hero-slide:hover .hero-link {
+            background: var(--primary-light);
+            transform: translateX(5px);
+        }
+
+        a.hero-slide {
+            display: block;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .carousel-dot.active {
+            background: var(--white);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .hero-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 10;
+            border: none;
+        }
+
+        .hero-arrow:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .hero-arrow.prev { left: 20px; }
+        .hero-arrow.next { right: 20px; }
+
+        .hero-arrow svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--dark);
+        }
+
+        /* ========== 記事セクション ========== */
+        .articles-section {
+            padding: 60px 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+        }
+
+        .section-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--dark);
+        }
+
+        .section-more {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--dark);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .section-more svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 記事グリッド */
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 24px;
+        }
+
+        .article-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .article-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+
+        .article-image {
+            aspect-ratio: 4/3;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .article-image.no-image {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .article-category {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--white);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .article-category.digital { color: #1565C0; }
+        .article-category.nursing { color: #E91E63; }
+        .article-category.deluxe { color: #FF9800; }
+        .article-category.education { color: #2E7D32; }
+        .article-category.blog { color: #9C27B0; }
+
+        .article-content {
+            padding: 16px;
+        }
+
+        .article-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* ローディング */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--cream);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== カテゴリセクション ========== */
+        .categories-section {
+            padding: 60px 40px;
+            background: var(--white);
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .category-card {
+            position: relative;
+            aspect-ratio: 16/9;
+            border-radius: 16px;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%);
+        }
+
+        .category-card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 24px;
+            color: var(--white);
+        }
+
+        .category-card-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .category-card-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 12px;
+        }
+
+        .category-card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        /* ========== フッター ========== */
+        .footer {
+            background: var(--dark);
+            color: var(--white);
+            padding: 60px 40px 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            font-weight: 900;
+            margin-bottom: 16px;
+        }
+
+        .footer-brand p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .footer-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-links a {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-copyright {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* ========== レスポンシブ ========== */
+        @media (max-width: 1400px) {
+            .articles-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (max-width: 1200px) {
+            .articles-grid { grid-template-columns: repeat(3, 1fr); }
+            .sidebar { display: none; }
+            .categories-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .header { padding: 0 20px; }
+            .category-nav { display: none; }
+            .articles-grid { grid-template-columns: repeat(2, 1fr); }
+            .categories-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .hero-title { font-size: 1.8rem; }
+            .hero { height: 500px; }
+        }
+
+        @media (max-width: 480px) {
+            .articles-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <a href="#" class="logo">
+            <h1>カンゴ<span class="star">☆</span>デラックス</h1>
+        </a>
+
+        <nav class="category-nav">
+            <a href="/digital/">デジタル系ニュース</a>
+            <a href="/nursing/">看護系ニュース</a>
+            <a href="/deluxe/">デラックスニュース</a>
+            <a href="/dx/">看護教育トピックス</a>
+            <a href="/blog/">KOKEKUNブログ</a>
+        </nav>
+    </header>
+
+    <!-- メインエリア -->
+    <div class="main-container">
+        <!-- 左サイドバー -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <p class="sidebar-text">「看護×DX×教育」の交差点。<br>VR・MR・生成AI・シミュレーション教育など、最先端のデジタル技術を活用した看護教育の未来を創造します。</p>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-section">
+                <a href="/contact.html" class="sidebar-contact">
+                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    お問い合わせ
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-section">
+                <span class="sidebar-title">Follow Us</span>
+                <div class="social-links">
+                    <a href="#" aria-label="Instagram">📷</a>
+                    <a href="#" aria-label="Facebook">👤</a>
+                    <a href="#" aria-label="X">𝕏</a>
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-section">
+                <span class="sidebar-title">About</span>
+                <p class="sidebar-text">看護DX・AI・VRシミュレーション教育の研究と実践。研修・講演のご依頼も承ります。</p>
+            </div>
+        </aside>
+
+        <!-- 右メインコンテンツ -->
+        <main class="content">
+            <!-- ヒーローセクション -->
+            <section class="hero">
+                <div class="hero-slider" id="heroSlider">
+                    <!-- スライドはJSで動的に生成 -->
+                </div>
+
+                <div class="carousel-dots" id="carouselDots">
+                    <!-- ドットはJSで動的に生成 -->
+                </div>
+
+                <button class="hero-arrow prev" aria-label="前へ">
+                    <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                </button>
+                <button class="hero-arrow next" aria-label="次へ">
+                    <svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+                </button>
+            </section>
+
+            <!-- 記事一覧セクション -->
+            <section class="articles-section">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <span class="section-label">Latest Articles</span>
+                        <h2 class="section-title">最新記事</h2>
+                    </div>
+                    <a href="#" class="section-more">
+                        すべて見る
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                    </a>
+                </div>
+
+                <div class="articles-grid" id="articlesGrid">
+                    <!-- 記事はFirebaseから読み込み -->
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>記事を読み込み中...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- カテゴリセクション -->
+            <section class="categories-section">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <span class="section-label">Categories</span>
+                        <h2 class="section-title">カテゴリから探す</h2>
+                    </div>
+                </div>
+
+                <div class="categories-grid">
+                    <a href="/digital/" class="category-card" style="background: linear-gradient(135deg, #1565C0, #42A5F5);">
+                        <div class="category-card-content">
+                            <h3 class="category-card-title">💻 デジタル系のニュース</h3>
+                            <p class="category-card-desc">AI・VR・DXなど、デジタル技術に関する最新ニュース。</p>
+                            <span class="category-card-link">記事を見る →</span>
+                        </div>
+                    </a>
+
+                    <a href="/nursing/" class="category-card" style="background: linear-gradient(135deg, #E91E63, #F48FB1);">
+                        <div class="category-card-content">
+                            <h3 class="category-card-title">🏥 看護系のニュース</h3>
+                            <p class="category-card-desc">看護に関する最新ニュースをお届け。</p>
+                            <span class="category-card-link">記事を見る →</span>
+                        </div>
+                    </a>
+
+                    <a href="/deluxe/" class="category-card" style="background: linear-gradient(135deg, #FF9800, #FFB74D);">
+                        <div class="category-card-content">
+                            <h3 class="category-card-title">⭐ デラックスニュース</h3>
+                            <p class="category-card-desc">KOKEKUNが気になったニュース。</p>
+                            <span class="category-card-link">記事を見る →</span>
+                        </div>
+                    </a>
+
+                    <a href="/dx/" class="category-card" style="background: linear-gradient(135deg, #2E7D32, #4CAF50);">
+                        <div class="category-card-content">
+                            <h3 class="category-card-title">🎓 看護教育トピックス</h3>
+                            <p class="category-card-desc">看護教育に関するトピックス。研修・講演も。</p>
+                            <span class="category-card-link">記事を見る →</span>
+                        </div>
+                    </a>
+
+                    <a href="/blog/" class="category-card" style="background: linear-gradient(135deg, #9C27B0, #CE93D8);">
+                        <div class="category-card-content">
+                            <h3 class="category-card-title">✍️ KOKEKUNブログ</h3>
+                            <p class="category-card-desc">KOKEKUNのブログ。日々の思いや気づき。</p>
+                            <span class="category-card-link">記事を見る →</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>カンゴ<span class="star">☆</span>デラックス</h2>
+                <p>「看護×DX×教育」の交差点。最先端のデジタル技術を活用した看護教育の未来を創造します。</p>
+                <div class="social-links">
+                    <a href="#">📷</a>
+                    <a href="#">👤</a>
+                    <a href="#">𝕏</a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="footer-title">カテゴリ</h4>
+                <ul class="footer-links">
+                    <li><a href="/digital/">デジタル系ニュース</a></li>
+                    <li><a href="/nursing/">看護系ニュース</a></li>
+                    <li><a href="/deluxe/">デラックスニュース</a></li>
+                    <li><a href="/dx/">看護教育トピックス</a></li>
+                    <li><a href="/blog/">KOKEKUNブログ</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-title">サービス</h4>
+                <ul class="footer-links">
+                    <li><a href="#">VR/MR教育</a></li>
+                    <li><a href="#">研修・講演</a></li>
+                    <li><a href="#">コンサルティング</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-title">About</h4>
+                <ul class="footer-links">
+                    <li><a href="#">運営者について</a></li>
+                    <li><a href="#">お問い合わせ</a></li>
+                    <li><a href="#">プライバシーポリシー</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2025 カンゴ☆デラックス All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // ========== Firebase設定 ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrFGMmKivoNTUWfKglADPw2bWFNaFXgTg",
+            authDomain: "kango-dx-news.firebaseapp.com",
+            projectId: "kango-dx-news",
+            storageBucket: "kango-dx-news.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ========== グローバル変数 ==========
+        let allArticles = [];
+        let heroArticles = [];
+        let currentSlide = 0;
+        let autoSlideInterval;
+
+        // ========== 記事読み込み ==========
+        async function loadArticles() {
+            try {
+                const snapshot = await db.collection('news')
+                    .orderBy('addedAt', 'desc')
+                    .limit(20)
+                    .get();
+
+                allArticles = [];
+                snapshot.forEach(doc => {
+                    allArticles.push({ id: doc.id, ...doc.data() });
+                });
+
+                // ヒーロー用（isHero: trueの記事のみ、最大4件）
+                heroArticles = allArticles.filter(a => a.isHero === true).slice(0, 4);
+
+                // 記事グリッド表示
+                renderArticles(allArticles.slice(0, 10));
+
+                // ヒーロースライダー表示
+                renderHeroSlider();
+                initSlider();
+
+            } catch (error) {
+                console.error('Error loading articles:', error);
+                document.getElementById('articlesGrid').innerHTML = `
+                    <div class="loading">
+                        <p>記事の読み込みに失敗しました</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ========== 記事カード描画 ==========
+        function renderArticles(articles) {
+            const grid = document.getElementById('articlesGrid');
+
+            if (articles.length === 0) {
+                grid.innerHTML = '<div class="loading"><p>記事がありません</p></div>';
+                return;
+            }
+
+            grid.innerHTML = articles.map(article => {
+                const categoryClass = getCategoryClass(article.category);
+                const categoryName = getCategoryName(article.category);
+                const date = formatDate(article.addedAt);
+                const hasImage = article.image && article.image.trim() !== '';
+                const articleLink = getArticleLink(article.category, article.id);
+
+                return `
+                    <a href="${articleLink}" class="article-card">
+                        <div class="article-image ${hasImage ? '' : 'no-image'}"
+                             style="${hasImage ? `background-image: url('${article.image}')` : ''}">
+                            ${!hasImage ? '📰' : ''}
+                            <span class="article-category ${categoryClass}">${categoryName}</span>
+                        </div>
+                        <div class="article-content">
+                            <h3 class="article-title">${article.title || article.comment || 'タイトルなし'}</h3>
+                            <div class="article-meta">
+                                <span>${date} ・ 👁 ${article.views || 0}</span>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // ========== ヒーロースライダー描画 ==========
+        function renderHeroSlider() {
+            const slider = document.getElementById('heroSlider');
+            const dots = document.getElementById('carouselDots');
+
+            // 固定の3枚のスライド
+            const heroSlides = [
+                {
+                    title: '「看護×DX×教育」の交差点',
+                    desc: 'VR・MR・生成AI・シミュレーション教育など、最先端のデジタル技術を活用した看護教育の未来を創造します。',
+                    image: '/images/hero-dx.png',
+                    category: 'DX'
+                },
+                {
+                    title: '「看護×AI×教育」の交差点',
+                    desc: '生成AI・機械学習を活用した看護教育の新しい可能性を探求します。',
+                    image: '/images/hero-ai.png',
+                    category: 'AI'
+                },
+                {
+                    title: '「看護×VR×教育」の交差点',
+                    desc: 'VR・MRを活用した臨場感あふれるシミュレーション教育で、実践的なスキルを身につけます。',
+                    image: '/images/hero-vr.png',
+                    category: 'VR'
+                }
+            ];
+
+            slider.innerHTML = heroSlides.map((slide, index) => {
+                return `
+                    <div class="hero-slide ${index === 0 ? 'active' : ''}" style="background-image: url('${slide.image}');">
+                        <div class="hero-slide-content">
+                            <span class="hero-category">${slide.category}</span>
+                            <h2 class="hero-title">${slide.title}</h2>
+                            <p class="hero-desc">${slide.desc}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            dots.innerHTML = heroSlides.map((_, index) =>
+                `<div class="carousel-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>`
+            ).join('');
+        }
+
+        // ========== スライダー初期化 ==========
+        function initSlider() {
+            const slides = document.querySelectorAll('.hero-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+            const prevBtn = document.querySelector('.hero-arrow.prev');
+            const nextBtn = document.querySelector('.hero-arrow.next');
+
+            if (slides.length <= 1) return;
+
+            function showSlide(index, direction = 'next') {
+                const prevIndex = currentSlide;
+
+                // 全スライドをリセット
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active', 'prev');
+                    if (i === prevIndex && direction === 'next') {
+                        slide.classList.add('prev');
+                    }
+                });
+
+                // 新しいスライドをアクティブに
+                setTimeout(() => {
+                    slides[index].classList.add('active');
+                }, 50);
+
+                dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+                currentSlide = index;
+            }
+
+            function nextSlide() {
+                const nextIndex = (currentSlide + 1) % slides.length;
+                showSlide(nextIndex, 'next');
+            }
+
+            function prevSlide() {
+                const prevIndex = (currentSlide - 1 + slides.length) % slides.length;
+                showSlide(prevIndex, 'prev');
+            }
+
+            function startAutoSlide() {
+                autoSlideInterval = setInterval(nextSlide, 5000);
+            }
+
+            function resetAutoSlide() {
+                clearInterval(autoSlideInterval);
+                startAutoSlide();
+            }
+
+            nextBtn.addEventListener('click', () => { nextSlide(); resetAutoSlide(); });
+            prevBtn.addEventListener('click', () => { prevSlide(); resetAutoSlide(); });
+            dots.forEach((dot, i) => {
+                dot.addEventListener('click', () => { showSlide(i, i > currentSlide ? 'next' : 'prev'); resetAutoSlide(); });
+            });
+
+            startAutoSlide();
+        }
+
+        // ========== ユーティリティ関数 ==========
+        function getCategoryClass(category) {
+            const classes = {
+                'digital': 'digital',
+                'nursing': 'nursing',
+                'deluxe': 'deluxe',
+                'education': 'education',
+                'blog': 'blog'
+            };
+            return classes[category] || 'digital';
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'digital': 'デジタル系ニュース',
+                'nursing': '看護系ニュース',
+                'deluxe': 'デラックスニュース',
+                'education': '看護教育トピックス',
+                'blog': 'KOKEKUNブログ'
+            };
+            return names[category] || 'デジタル系ニュース';
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return '';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function getArticleLink(category, articleId) {
+            const categoryPaths = {
+                'digital': '/digital/',
+                'nursing': '/nursing/',
+                'deluxe': '/deluxe/',
+                'education': '/dx/',
+                'blog': '/blog/'
+            };
+            const basePath = categoryPaths[category] || '/digital/';
+            return `${basePath}article.html?id=${articleId}`;
+        }
+
+        // ========== 初期化 ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            loadArticles();
+        });
+    </script>
+</body>
+</html>
