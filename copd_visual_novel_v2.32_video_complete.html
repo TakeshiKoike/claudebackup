@@ -1,0 +1,2328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在宅療養を支える訪問看護 - COPD事例</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-color: #2d5a27;
+            --secondary-color: #4a7c43;
+            --accent-color: #8bc34a;
+            --bg-dark: #1a1a2e;
+            --bg-light: #f5f5f5;
+            --text-dark: #333;
+            --text-light: #fff;
+        }
+
+        body {
+            font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* タイトル画面 */
+        #titleScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('maps/map_town.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            color: white;
+            text-align: center;
+        }
+
+        #titleScreen h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #titleScreen h2 {
+            font-size: 1.3em;
+            font-weight: normal;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .title-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px 40px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .title-info p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        #startButton {
+            padding: 20px 60px;
+            font-size: 1.4em;
+            background: linear-gradient(135deg, #fff, #e8e8e8);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            font-weight: bold;
+        }
+
+        #startButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        /* MAP画面 */
+        #mapScreen, #hospitalMapScreen, #homeMapScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg-dark);
+            z-index: 2000;
+            display: none;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .map-wrapper {
+            position: relative;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .map-wrapper img {
+            max-width: 100vw;
+            max-height: 100vh;
+            object-fit: contain;
+        }
+
+        .location-marker {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            transform: translate(-50%, -100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .location-marker:hover {
+            transform: translate(-50%, -100%) scale(1.15);
+        }
+
+        .marker-icon {
+            width: 100%;
+            height: 100%;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        .marker-icon span {
+            transform: rotate(45deg);
+            font-size: 28px;
+        }
+
+        .marker-icon.home { background: #3498db; }
+        .marker-icon.hospital { background: #e74c3c; }
+        .marker-icon.pharmacy { background: #2ecc71; }
+        .marker-icon.clinic { background: #9b59b6; }
+        .marker-icon.nursing { background: #e91e63; }
+
+        .marker-label {
+            position: absolute;
+            top: 65px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .location-marker.next-destination .marker-icon {
+            animation: pulse-marker 1.5s infinite;
+        }
+
+        /* 無効なマーカー（まだ選択できない） */
+        .location-marker.disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .location-marker.disabled .marker-icon {
+            filter: grayscale(100%);
+        }
+
+        /* 訪問済みマーカー */
+        .location-marker.completed .marker-icon {
+            opacity: 0.6;
+        }
+
+        .location-marker.completed::after {
+            content: "✓";
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #4CAF50;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes pulse-marker {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.8); }
+            50% { box-shadow: 0 0 25px 15px rgba(255, 215, 0, 0.3); }
+        }
+
+        .location-marker.next-destination::after {
+            content: "▼ 次へ";
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FFD700;
+            color: #333;
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            animation: bounce-arrow 1s infinite;
+        }
+
+        @keyframes bounce-arrow {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(5px); }
+        }
+
+        .location-marker.visited .marker-icon {
+            opacity: 0.5;
+        }
+
+        .location-marker.current .marker-icon {
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+
+        .map-header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .map-header h3 {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .map-header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .map-legend h4 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        /* メインゲーム画面 */
+        #gameScreen {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        #backgroundLayer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-color: #2d2d44;
+            transition: background-image 0.5s ease;
+        }
+
+        #characterLayer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 220px;
+            pointer-events: none;
+        }
+
+        .character-slot {
+            position: absolute;
+            bottom: 220px;
+            max-width: 300px;
+            max-height: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .character-slot.left { left: 10%; }
+        .character-slot.center { left: 50%; transform: translateX(-50%); }
+        .character-slot.right { right: 10%; }
+
+        .character-slot img,
+        .character-slot video {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+            border-radius: 10px;
+        }
+
+        .character-slot video {
+            background: transparent;
+        }
+
+        #dialogBox {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.85));
+            padding: 20px 30px;
+            min-height: 200px;
+        }
+
+        #speakerName {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        #speakerName.narrator { background: #6b8e23; }
+        #speakerName.thought { background: #4682b4; font-style: italic; }
+
+        #dialogText {
+            color: white;
+            font-size: 1.15em;
+            line-height: 1.8;
+            min-height: 80px;
+        }
+
+        #dialogText.thought {
+            font-style: italic;
+            color: #b0c4de;
+        }
+
+        #navButtons {
+            position: absolute;
+            bottom: 15px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .nav-btn.prev { background: #666; color: white; }
+        .nav-btn.next { background: var(--accent-color); color: var(--text-dark); }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #progressBar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        #progressFill {
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        #sceneHeader {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        .back-to-map {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-map:hover { background: rgba(0,0,0,0.9); }
+
+        #audioControls {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1500;
+        }
+
+        .audio-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .audio-btn:hover { background: rgba(0,0,0,0.9); }
+        .audio-btn.off { background: #c62828; }
+
+        /* ナビゲーションコントロール */
+        #navControlPanel {
+            position: fixed;
+            top: 15px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 3500;
+        }
+
+        .nav-control-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-control-btn:hover { background: rgba(0,0,0,0.9); }
+
+        /* シーン選択パネル */
+        #sceneSelectPanel {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 4000;
+        }
+
+        .scene-select-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .scene-select-content h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .scene-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .scene-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scene-item:hover { background: #e0e0e0; }
+        .scene-item.completed { background: #e8f5e9; }
+        .scene-item.current { background: #fff3e0; border: 2px solid #ff9800; }
+        .scene-item.locked { opacity: 0.5; pointer-events: none; }
+
+        .scene-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .scene-item.completed .scene-number { background: #4CAF50; }
+        .scene-item.locked .scene-number { background: #9e9e9e; }
+
+        .scene-title { flex: 1; font-weight: 500; }
+
+        .scene-close-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        /* 知識解説パネル */
+        #knowledgePanel {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            padding: 20px;
+        }
+
+        .knowledge-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .knowledge-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .knowledge-header h3 { font-size: 1.3em; }
+
+        .knowledge-body {
+            padding: 25px;
+            line-height: 1.8;
+            color: var(--text-dark);
+            white-space: pre-line;
+        }
+
+        .knowledge-close {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .knowledge-close:hover { background: var(--primary-color); }
+
+        /* クイズパネル */
+        #quizPanel {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            padding: 20px;
+        }
+
+        .quiz-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 650px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .quiz-header {
+            background: #ff9800;
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quiz-question {
+            padding: 20px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: var(--text-dark);
+            border-bottom: 1px solid #eee;
+        }
+
+        .quiz-options { padding: 15px; }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover:not(.disabled) {
+            border-color: #ff9800;
+            background: #fff3e0;
+        }
+
+        .quiz-option.selected {
+            border-color: #2196f3;
+            background: #e3f2fd;
+        }
+
+        .quiz-option.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .quiz-option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .quiz-feedback {
+            display: none;
+            padding: 20px;
+            margin: 15px;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        .quiz-feedback.show { display: block; }
+
+        .quiz-feedback.correct {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        .quiz-feedback.incorrect {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            color: #c62828;
+        }
+
+        .quiz-submit {
+            display: block;
+            width: calc(100% - 30px);
+            margin: 15px;
+            padding: 15px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .quiz-submit:hover:not(:disabled) { background: #f57c00; }
+        .quiz-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+        .quiz-continue {
+            display: none;
+            width: calc(100% - 30px);
+            margin: 15px;
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .quiz-continue:hover { background: var(--secondary-color); }
+
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            #titleScreen h1 { font-size: 1.8em; }
+            #titleScreen h2 { font-size: 1.1em; }
+            .title-info { padding: 15px 20px; }
+            #startButton { padding: 15px 40px; font-size: 1.2em; }
+
+            .location-marker { width: 50px; height: 50px; }
+            .marker-icon span { font-size: 22px; }
+
+            .character-slot { max-width: 180px; max-height: 250px; }
+            .character-slot img { max-height: 250px; }
+            .character-slot.left { left: 5%; }
+            .character-slot.right { right: 5%; }
+
+            #dialogBox { padding: 15px 20px; min-height: 180px; }
+            #dialogText { font-size: 1em; }
+            #navButtons { right: 20px; gap: 10px; }
+            .nav-btn { padding: 10px 20px; font-size: 0.9em; }
+
+            #characterLayer { padding-bottom: 190px; }
+            .character-slot { bottom: 190px; }
+            #audioControls { top: 60px; }
+
+            .map-legend { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- タイトル画面 -->
+    <div id="titleScreen">
+        <h1>在宅療養を支える訪問看護</h1>
+        <h2>COPD事例 〜聖隷一男さんの物語〜</h2>
+        <div class="title-info">
+            <p>患者：聖隷一男さん（78歳）</p>
+            <p>疾患：COPD（慢性閉塞性肺疾患）</p>
+            <p>治療：在宅酸素療法</p>
+            <p>全12シーン・77カット・10問のクイズ</p>
+        </div>
+        <button id="startButton">学習を開始する</button>
+    </div>
+
+    <!-- MAP画面 -->
+    <div id="mapScreen">
+        <div class="map-header">
+            <h3 id="mapTitle">MAPで場所を選んでください</h3>
+            <p id="mapInstruction">光っているマーカーをクリック</p>
+        </div>
+        <div class="map-container">
+            <div class="map-wrapper" id="mapWrapper">
+                <img src="maps/map_town.png" alt="街並みMAP" id="mapImage">
+                <!-- 病院マーカー（左下の赤十字建物） -->
+                <div class="location-marker" data-location="hospital" style="left: 15%; top: 72%;">
+                    <div class="marker-icon hospital"><span>🏥</span></div>
+                    <div class="marker-label">総合病院</div>
+                </div>
+                <!-- 自宅マーカー（中央の住宅街） -->
+                <div class="location-marker" data-location="home" style="left: 55%; top: 55%;">
+                    <div class="marker-icon home"><span>🏠</span></div>
+                    <div class="marker-label">聖隷さん宅</div>
+                </div>
+                <!-- 薬局マーカー（緑十字の建物） -->
+                <div class="location-marker" data-location="pharmacy" style="left: 38%; top: 48%;">
+                    <div class="marker-icon pharmacy"><span>💊</span></div>
+                    <div class="marker-label">薬局</div>
+                </div>
+                <!-- 訪問看護ステーションマーカー（中央道路沿い右側奥の駐車場のある建物） -->
+                <div class="location-marker" data-location="nursing" style="left: 52%; top: 25%;">
+                    <div class="marker-icon nursing"><span>👩‍⚕️</span></div>
+                    <div class="marker-label">訪問看護ステーション</div>
+                </div>
+                <!-- クリニックマーカー（右下の白い建物） -->
+                <div class="location-marker" data-location="clinic" style="left: 70%; top: 75%;">
+                    <div class="marker-icon clinic"><span>🩺</span></div>
+                    <div class="marker-label">クリニック</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 病院MAP画面 -->
+    <div id="hospitalMapScreen" style="display: none;">
+        <div class="map-header">
+            <h3 id="hospitalMapTitle">病院内MAP</h3>
+            <p id="hospitalMapInstruction">場所をクリックしてください</p>
+        </div>
+        <button class="back-to-map" id="backToTownFromHospital" style="position: absolute; top: 80px; left: 20px; z-index: 100;">← 街並みMAP</button>
+        <div class="map-container">
+            <div class="map-wrapper" id="hospitalMapWrapper">
+                <img src="maps/map_hospital.png" alt="病院内MAP" id="hospitalMapImage">
+                <!-- 病室マーカー -->
+                <div class="location-marker sub-marker" data-location="hospital_room" data-scene="2" style="left: 75%; top: 35%;">
+                    <div class="marker-icon hospital"><span>🛏️</span></div>
+                    <div class="marker-label">病室</div>
+                </div>
+                <!-- 待合室マーカー -->
+                <div class="location-marker sub-marker" data-location="waiting_room" style="left: 30%; top: 65%;">
+                    <div class="marker-icon hospital"><span>🪑</span></div>
+                    <div class="marker-label">待合室</div>
+                </div>
+                <!-- ナースステーションマーカー -->
+                <div class="location-marker sub-marker" data-location="nurse_station" style="left: 45%; top: 40%;">
+                    <div class="marker-icon hospital"><span>👩‍⚕️</span></div>
+                    <div class="marker-label">ナースステーション</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自宅MAP画面 -->
+    <div id="homeMapScreen" style="display: none;">
+        <div class="map-header">
+            <h3 id="homeMapTitle">自宅内MAP</h3>
+            <p id="homeMapInstruction">場所をクリックしてください</p>
+        </div>
+        <button class="back-to-map" id="backToTownFromHome" style="position: absolute; top: 80px; left: 20px; z-index: 100;">← 街並みMAP</button>
+        <div class="map-container">
+            <div class="map-wrapper" id="homeMapWrapper">
+                <img src="maps/map_home.png" alt="自宅内MAP" id="homeMapImage">
+                <!-- リビングマーカー -->
+                <div class="location-marker sub-marker" data-location="home_living" data-scene="3" style="left: 40%; top: 45%;">
+                    <div class="marker-icon home"><span>🛋️</span></div>
+                    <div class="marker-label">リビング</div>
+                </div>
+                <!-- 寝室マーカー -->
+                <div class="location-marker sub-marker" data-location="home_bedroom" data-scene="4" style="left: 60%; top: 80%;">
+                    <div class="marker-icon home"><span>🛏️</span></div>
+                    <div class="marker-label">寝室</div>
+                </div>
+                <!-- 浴室マーカー -->
+                <div class="location-marker sub-marker" data-location="home_bathroom" data-scene="5" style="left: 82%; top: 35%;">
+                    <div class="marker-icon home"><span>🛁</span></div>
+                    <div class="marker-label">浴室</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- メインゲーム画面 -->
+    <div id="gameScreen">
+        <div id="progressBar"><div id="progressFill"></div></div>
+        <div id="backgroundLayer"></div>
+        <div id="characterLayer">
+            <div class="character-slot left" id="charLeft"></div>
+            <div class="character-slot center" id="charCenter"></div>
+            <div class="character-slot right" id="charRight"></div>
+        </div>
+        <div id="sceneHeader"></div>
+        <button class="back-to-map" id="backToMap">← MAP</button>
+        <div id="dialogBox">
+            <div id="speakerName"></div>
+            <div id="dialogText"></div>
+            <div id="navButtons">
+                <button class="nav-btn prev" id="prevBtn">← 戻る</button>
+                <button class="nav-btn next" id="nextBtn">次へ →</button>
+            </div>
+        </div>
+        <div id="audioControls">
+            <button class="audio-btn" id="bgmToggle">BGM ON</button>
+            <button class="audio-btn" id="voiceToggle">音声 ON</button>
+        </div>
+    </div>
+
+    <!-- 知識解説パネル -->
+    <div id="knowledgePanel">
+        <div class="knowledge-content">
+            <div class="knowledge-header">
+                <span>📚</span>
+                <h3 id="knowledgeTitle"></h3>
+            </div>
+            <div class="knowledge-body" id="knowledgeText"></div>
+            <button class="knowledge-close" id="knowledgeClose">理解しました</button>
+        </div>
+    </div>
+
+    <!-- クイズパネル -->
+    <div id="quizPanel">
+        <div class="quiz-content">
+            <div class="quiz-header">
+                <h3><span>❓</span> 確認クイズ</h3>
+            </div>
+            <div class="quiz-question" id="quizQuestion"></div>
+            <div class="quiz-options" id="quizOptions"></div>
+            <div class="quiz-feedback" id="quizFeedback"></div>
+            <button class="quiz-submit" id="quizSubmit">回答する</button>
+            <button class="quiz-continue" id="quizContinue">次へ進む</button>
+        </div>
+    </div>
+
+    <!-- ナビゲーションコントロール -->
+    <div id="navControlPanel">
+        <button class="nav-control-btn" id="restartBtn">🔄 最初から</button>
+        <button class="nav-control-btn" id="sceneSelectBtn">📋 シーン選択</button>
+    </div>
+
+    <!-- シーン選択パネル -->
+    <div id="sceneSelectPanel">
+        <div class="scene-select-content">
+            <h3>📋 シーン選択</h3>
+            <div class="scene-list" id="sceneList"></div>
+            <button class="scene-close-btn" id="sceneSelectClose">閉じる</button>
+        </div>
+    </div>
+
+    <script>
+    // シーン→場所マッピング
+    const SCENE_LOCATION_MAP = {
+        1: null,        // イントロ
+        2: 'hospital',  // 退院前カンファ
+        3: 'home',      // 退院・帰宅
+        4: 'home',      // 訪問看護（初回）
+        5: 'home',      // 入浴介助
+        6: 'home',      // 呼吸リハビリ
+        7: 'pharmacy',  // 薬局
+        8: 'clinic',    // かかりつけ医
+        9: 'home',      // ケアマネ訪問
+        10: 'home',     // 妻との会話
+        11: 'home',     // 急変時の対応
+        12: 'clinic',   // クリニック受診
+        13: 'home',     // 回復確認訪問
+        14: null        // エンディング
+    };
+
+    // シーン遷移マッピング
+    const SCENE_FLOW = [
+        { sceneId: 1, nextLocation: 'hospital' },
+        { sceneId: 2, nextLocation: 'home' },
+        { sceneId: 3, nextLocation: 'home' },
+        { sceneId: 4, nextLocation: 'home' },
+        { sceneId: 5, nextLocation: 'home' },
+        { sceneId: 6, nextLocation: 'pharmacy' },
+        { sceneId: 7, nextLocation: 'clinic' },
+        { sceneId: 8, nextLocation: 'home' },
+        { sceneId: 9, nextLocation: 'home' },
+        { sceneId: 10, nextLocation: 'home' },
+        { sceneId: 11, nextLocation: 'clinic' },
+        { sceneId: 12, nextLocation: 'home' },
+        { sceneId: 13, nextLocation: null },
+        { sceneId: 14, nextLocation: null }
+    ];
+
+    // 表情ガイドデータ（cutIdをキーにした表情情報）
+    const expressionGuide = {};
+
+    // expression_guide.jsonから表情データを構築
+    const expressionGuideData = {
+        "scenes": [
+            {"sceneId": 1, "cuts": [{"cutId": "s01_01", "characters": []}, {"cutId": "s01_02", "characters": []}, {"cutId": "s01_03", "characters": []}]},
+            {"sceneId": 2, "cuts": [
+                {"cutId": "s02_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "doctor", "position": "right", "expression": "doctor_07_serious"}]},
+                {"cutId": "s02_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_04_thinking"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}]},
+                {"cutId": "s02_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "doctor", "position": "right", "expression": "doctor_04_thinking"}]},
+                {"cutId": "s02_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}]},
+                {"cutId": "s02_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_07_serious"}]},
+                {"cutId": "s02_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_07_serious"}, {"id": "doctor", "position": "right", "expression": "doctor_02_worried"}]}
+            ]},
+            {"sceneId": 3, "cuts": [
+                {"cutId": "s03_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_06_relieved"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}]},
+                {"cutId": "s03_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}]},
+                {"cutId": "s03_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_09_grateful"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}]},
+                {"cutId": "s03_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_04_thinking"}]},
+                {"cutId": "s03_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}]},
+                {"cutId": "s03_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}]}
+            ]},
+            {"sceneId": 4, "cuts": [
+                {"cutId": "s04_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s04_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_09_grateful"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s04_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s04_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s04_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_04_thinking"}]},
+                {"cutId": "s04_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s04_07", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}]}
+            ]},
+            {"sceneId": 5, "cuts": [
+                {"cutId": "s05_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s05_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}]},
+                {"cutId": "s05_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s05_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s05_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s05_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_06_relieved"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s05_07", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]}
+            ]},
+            {"sceneId": 6, "cuts": [
+                {"cutId": "s06_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s06_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s06_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}]},
+                {"cutId": "s06_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s06_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_03_pursed_lip"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s06_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s06_07", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s06_08", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]}
+            ]},
+            {"sceneId": 7, "cuts": [
+                {"cutId": "s07_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_05_neutral"}]},
+                {"cutId": "s07_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_01_smile"}]},
+                {"cutId": "s07_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_05_neutral"}]},
+                {"cutId": "s07_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_01_smile"}]},
+                {"cutId": "s07_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_07_serious"}]},
+                {"cutId": "s07_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_01_smile"}]}
+            ]},
+            {"sceneId": 8, "cuts": [
+                {"cutId": "s08_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_01_smile"}]},
+                {"cutId": "s08_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}]},
+                {"cutId": "s08_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_02_worried"}]},
+                {"cutId": "s08_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}]},
+                {"cutId": "s08_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}]},
+                {"cutId": "s08_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_07_serious"}]},
+                {"cutId": "s08_07", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}]},
+                {"cutId": "s08_08", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_01_smile"}]}
+            ]},
+            {"sceneId": 9, "cuts": [
+                {"cutId": "s09_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "sato", "position": "right", "expression": "sato_01_smile"}]},
+                {"cutId": "s09_02", "characters": [{"id": "ichiko", "position": "left", "expression": "ichiko_01_smile"}, {"id": "sato", "position": "right", "expression": "sato_05_neutral"}]},
+                {"cutId": "s09_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "sato", "position": "right", "expression": "sato_01_smile"}]},
+                {"cutId": "s09_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "sato", "position": "right", "expression": "sato_05_neutral"}]},
+                {"cutId": "s09_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "sato", "position": "right", "expression": "sato_01_smile"}]},
+                {"cutId": "s09_06", "characters": [{"id": "ichiko", "position": "left", "expression": "ichiko_02_worried"}, {"id": "sato", "position": "right", "expression": "sato_05_neutral"}]},
+                {"cutId": "s09_07", "characters": [{"id": "ichiko", "position": "left", "expression": "ichiko_05_neutral"}, {"id": "sato", "position": "right", "expression": "sato_07_serious"}]}
+            ]},
+            {"sceneId": 10, "cuts": [
+                {"cutId": "s10_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}]},
+                {"cutId": "s10_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}]},
+                {"cutId": "s10_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_02_worried"}]},
+                {"cutId": "s10_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}]},
+                {"cutId": "s10_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}]},
+                {"cutId": "s10_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}]},
+                {"cutId": "s10_07", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}]},
+                {"cutId": "s10_08", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_09_grateful"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}]}
+            ]},
+            {"sceneId": 11, "cuts": [
+                {"cutId": "s11_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "ichiko", "position": "right", "expression": "ichiko_02_worried"}]},
+                {"cutId": "s11_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "ichiko", "position": "right", "expression": "ichiko_02_worried"}]},
+                {"cutId": "s11_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}]},
+                {"cutId": "s11_04", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}]},
+                {"cutId": "s11_05", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s11_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_04_thinking"}]},
+                {"cutId": "s11_07", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s11_08", "characters": [{"id": "ichiko", "position": "left", "expression": "ichiko_02_worried"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}]},
+                {"cutId": "s11_09", "characters": [{"id": "ichiko", "position": "left", "expression": "ichiko_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]}
+            ]},
+            {"sceneId": 12, "cuts": [
+                {"cutId": "s11b_01", "characters": []},
+                {"cutId": "s11b_02", "characters": []},
+                {"cutId": "s11b_03", "characters": []},
+                {"cutId": "s11b_04", "characters": []}
+            ]},
+            {"sceneId": 13, "cuts": [
+                {"cutId": "s12_01", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_09_recovering"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s12_02", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_06_relieved"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s12_03", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s12_04", "characters": [{"id": "ichiko", "position": "left", "expression": "ichiko_09_grateful"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s12_05", "characters": [{"id": "ichiko", "position": "left", "expression": "ichiko_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]},
+                {"cutId": "s12_06", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}]},
+                {"cutId": "s12_07", "characters": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}]}
+            ]},
+            {"sceneId": 14, "cuts": [
+                {"cutId": "s13_01", "characters": []},
+                {"cutId": "s13_02", "characters": []},
+                {"cutId": "s13_03", "characters": []},
+                {"cutId": "s13_04", "characters": [{"id": "kazuo", "position": "center", "expression": "kazuo_general_09_grateful"}]},
+                {"cutId": "s13_05", "characters": []},
+                {"cutId": "s13_06", "characters": []}
+            ]}
+        ]
+    };
+
+    // cutIdをキーにしたマップを作成
+    expressionGuideData.scenes.forEach(scene => {
+        scene.cuts.forEach(cut => {
+            expressionGuide[cut.cutId] = cut.characters;
+        });
+    });
+
+    // シナリオデータ
+    const scenarioData = {
+        "scenes": [
+            {
+                "id": 1,
+                "title": "イントロ",
+                "background": "map_town",
+                "bgm": "main_theme",
+                "cuts": [
+                    {"id": "s01_01", "speaker": "narration", "text": "今回の主人公は聖隷一男さん、78歳の男性です。元公務員で、定年後は妻の市子さんとゴルフや旅行を楽しんでいました。"},
+                    {"id": "s01_02", "speaker": "narration", "text": "3年前にCOPD、慢性閉塞性肺疾患と診断され、在宅酸素療法を開始。先月、コロナ感染から急性増悪を起こし入院しましたが、退院して自宅療養を始めたところです。"},
+                    {"id": "s01_03", "speaker": "narration", "text": "一男さんの視点で、訪問看護や地域の多職種連携を体験してみましょう。"}
+                ],
+                "knowledge": {
+                    "title": "COPDとは",
+                    "text": "COPD（Chronic Obstructive Pulmonary Disease）は、タバコ煙などの有害物質を長期に吸入することで生じる肺の炎症性疾患です。\n\n・肺胞の破壊（肺気腫）と気道の炎症により気流制限が生じる\n・日本では約530万人以上の患者がいると推定\n・主な症状：息切れ、慢性的な咳・痰\n・喫煙が最大の危険因子"
+                }
+            },
+            {
+                "id": 2,
+                "title": "退院前カンファ",
+                "background": "hospital_room",
+                "bgm": "medical",
+                "cuts": [
+                    {"id": "s02_01", "speaker": "doctor", "text": "聖隷さん、入院中の治療で心不全の症状は改善しました。ただ、肺の状態は以前より悪化しています。", "characters": ["kazuo", "doctor"]},
+                    {"id": "s02_02", "speaker": "kazuo", "type": "thought", "text": "やっぱり悪くなっているのか。でも家に帰りたい。", "characters": ["kazuo", "doctor"]},
+                    {"id": "s02_03", "speaker": "doctor", "text": "夜間のNPPV、非侵襲的陽圧換気療法を自宅でも続けることをお勧めしますが、いかがですか？", "characters": ["kazuo", "doctor"]},
+                    {"id": "s02_04", "speaker": "kazuo", "text": "先生、あの機械は眠れないし、つけるのも大変で。酸素だけでなんとかなりませんか？", "characters": ["kazuo", "doctor"]},
+                    {"id": "s02_05", "speaker": "doctor", "text": "ご本人の意思を尊重します。ただ、急性増悪のリスクは高いことをご理解ください。何かあったらすぐに連絡してください。", "characters": ["kazuo", "doctor"]},
+                    {"id": "s02_06", "speaker": "kazuo", "text": "わかりました。悪くなるなら、それも寿命かなと思っています。", "characters": ["kazuo", "doctor"]}
+                ],
+                "knowledge": {
+                    "title": "NPPVとは",
+                    "text": "NPPV（非侵襲的陽圧換気療法）は、マスクを介して陽圧をかけ呼吸を補助する治療法です。\n\n・気管挿管が不要なため「非侵襲的」\n・COPD急性増悪時の第一選択治療\n・マスクの不快感から継続が難しい患者も\n・患者の意思決定を尊重することが重要"
+                },
+                "quiz": {
+                    "question": "COPD急性増悪時の人工呼吸管理として、最初に選択されることが多いのはどれか？",
+                    "options": [
+                        {"text": "気管挿管による人工呼吸", "correct": false},
+                        {"text": "NPPV（非侵襲的陽圧換気療法）", "correct": true},
+                        {"text": "高流量鼻カニュラ酸素療法", "correct": false},
+                        {"text": "ネブライザー吸入", "correct": false}
+                    ]
+                }
+            },
+            {
+                "id": 3,
+                "title": "退院・帰宅",
+                "background": "home_living",
+                "bgm": "daily",
+                "cuts": [
+                    {"id": "s03_01", "speaker": "kazuo", "text": "やっと家に帰ってこられた。やっぱり自分の家が一番落ち着くな。", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s03_02", "speaker": "ichiko", "text": "お父さん、おかえりなさい。無理しないでね。ベッドの準備はしてあるから。", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s03_03", "speaker": "kazuo", "text": "ありがとう。入院中は夜も眠れなかったから、今日はゆっくり休めそうだ。", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s03_04", "speaker": "ichiko", "text": "酸素の機械も業者さんが設置してくれたわ。使い方は覚えてる？", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s03_05", "speaker": "kazuo", "text": "ああ、3年も使っているから大丈夫だよ。安静時は2リットル、動くときは4リットルに上げればいいんだろう？", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s03_06", "speaker": "ichiko", "text": "明日から訪問看護師さんが来てくれるって。週2回、火曜と木曜に来てくれるそうよ。", "characters": ["kazuo", "ichiko"]}
+                ],
+                "knowledge": {
+                    "title": "在宅酸素療法（HOT）とは",
+                    "text": "Home Oxygen Therapyの略で、自宅で酸素吸入を行う治療法です。\n\n【機器の種類】\n・酸素濃縮器（主に自宅用）\n・液体酸素\n・携帯用ボンベ（外出用）\n\n【重要な注意点】\n・火気厳禁（2m以内）\n・酸素流量は医師の指示を守る\n・月1回の外来受診が必要"
+                },
+                "quiz": {
+                    "question": "在宅酸素療法について正しいのはどれか？",
+                    "options": [
+                        {"text": "酸素流量は自己判断で変更してよい", "correct": false},
+                        {"text": "酸素吸入中の喫煙は問題ない", "correct": false},
+                        {"text": "月1回以上の外来受診が必要である", "correct": true},
+                        {"text": "入浴中は酸素吸入を中止する", "correct": false}
+                    ]
+                }
+            },
+            {
+                "id": 4,
+                "title": "訪問看護（初回）",
+                "background": "home_bedroom",
+                "bgm": "heartwarming",
+                "cuts": [
+                    {"id": "s04_01", "speaker": "yamada", "text": "聖隷さん、はじめまして。訪問看護ステーションの山田です。今日からよろしくお願いします。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s04_02", "speaker": "kazuo", "text": "よろしくお願いします。こうして家に来てもらえると助かります。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s04_03", "speaker": "yamada", "text": "まず、お体の状態を確認させてくださいね。血圧と脈拍、酸素飽和度を測りますね。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s04_04", "speaker": "yamada", "text": "血圧120の75、脈拍78回、SpO2は96%ですね。酸素2リットルで安定しています。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s04_05", "speaker": "yamada", "text": "胸の音を聴かせてください。少しヒューヒューという音がしますね。痰は出ますか？", "characters": ["kazuo", "yamada"]},
+                    {"id": "s04_06", "speaker": "kazuo", "text": "ええ、白っぽい痰が出ることはありますが、自分で出せています。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s04_07", "speaker": "yamada", "text": "それは良かったです。痰の色が黄色や緑色に変わったり、熱が出たりしたら、すぐに連絡してくださいね。感染の兆候かもしれませんから。", "characters": ["kazuo", "yamada"]}
+                ],
+                "knowledge": {
+                    "title": "COPDの呼吸音と観察ポイント",
+                    "text": "【聴診で聞こえる音】\n・笛声音（wheeze）：ヒューヒュー。気道狭窄\n・類鼾音（rhonchi）：グーグー。痰の貯留\n\n【急性増悪の徴候】\n・痰の量の増加、色の変化（膿性）\n・呼吸困難の悪化\n・発熱\n・全身倦怠感の増強"
+                },
+                "quiz": {
+                    "question": "COPD患者の酸素療法で正しいのはどれか？",
+                    "options": [
+                        {"text": "高濃度酸素を投与する", "correct": false},
+                        {"text": "CO2ナルコーシスに注意する", "correct": true},
+                        {"text": "SpO2 100%を目標とする", "correct": false},
+                        {"text": "酸素流量は患者の判断で調整する", "correct": false}
+                    ]
+                }
+            },
+            {
+                "id": 5,
+                "title": "入浴介助",
+                "background": "home_bedroom",
+                "bgm": "heartwarming",
+                "cuts": [
+                    {"id": "s05_01", "speaker": "yamada", "text": "聖隷さん、今日はお風呂に入りましょうか。奥様が準備してくださっていますね。", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s05_02", "speaker": "ichiko", "text": "タオルと着替えは用意してあります。お風呂の温度は39度にしてあるわ。", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s05_03", "speaker": "yamada", "text": "ありがとうございます。聖隷さん、入浴前に酸素を4リットルに上げておきましょうね。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s05_04", "speaker": "kazuo", "text": "入浴は体力使うからね。苦しくならないか少し心配だな。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s05_05", "speaker": "yamada", "text": "ゆっくり入りましょう。洗髪や体を洗うのは私がお手伝いしますね。腕を上げる動作は息を吐きながら行いましょう。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s05_06", "speaker": "kazuo", "text": "久しぶりのお風呂だ。やっぱり気持ちいいな。一人だとなかなか入れないから、助かるなあ。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s05_07", "speaker": "yamada", "text": "お湯に浸かるのは5分程度にしておきましょう。長湯は心臓に負担がかかりますからね。", "characters": ["kazuo", "yamada"]}
+                ],
+                "knowledge": {
+                    "title": "COPD患者の入浴介助のポイント",
+                    "text": "【入浴介助の6つのポイント】\n①入浴前後で酸素流量を上げる\n②湯温は38-40度のぬるめに\n③長湯を避ける（5-10分程度）\n④洗髪時は前かがみを避ける\n⑤脱衣所と浴室の温度差に注意\n⑥入浴後は十分な休息を取る"
+                },
+                "quiz": {
+                    "question": "COPD患者の入浴介助で正しいのはどれか？",
+                    "options": [
+                        {"text": "42度以上の熱い湯に入れる", "correct": false},
+                        {"text": "入浴中は酸素吸入を中止する", "correct": false},
+                        {"text": "洗髪時は長時間前かがみの姿勢をとらせる", "correct": false},
+                        {"text": "労作時は酸素流量を増やす", "correct": true}
+                    ]
+                }
+            },
+            {
+                "id": 6,
+                "title": "呼吸リハビリ",
+                "background": "home_bedroom",
+                "bgm": "heartwarming",
+                "cuts": [
+                    {"id": "s06_01", "speaker": "yamada", "text": "聖隷さん、今日は呼吸リハビリをしましょう。体力を維持するためにとても大切なんですよ。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s06_02", "speaker": "kazuo", "text": "リハビリか。正直、苦しくなるのが怖くてあまりやっていないんだ。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s06_03", "speaker": "yamada", "text": "そうですよね。でも、動かないでいると筋力が落ちて、もっと息切れしやすくなってしまうんです。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s06_04", "speaker": "yamada", "text": "まず、口すぼめ呼吸を練習しましょう。鼻から吸って、口をすぼめてゆっくり吐きます。吐く時間を吸う時間の2倍くらいにするのがコツです。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s06_05", "speaker": "kazuo", "text": "こうですか？フーッ。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s06_06", "speaker": "yamada", "text": "上手です！この呼吸法は、気道が狭くなるのを防いで、息を吐きやすくしてくれます。苦しくなった時にも使えますよ。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s06_07", "speaker": "kazuo", "text": "体力が戻ったら、家族と外食に行きたいと思ってるんだ。温泉旅行も夢だけどね。", "characters": ["kazuo", "yamada"]},
+                    {"id": "s06_08", "speaker": "yamada", "text": "それは素敵な目標ですね！外食に行けるように、一緒に頑張りましょう。", "characters": ["kazuo", "yamada"]}
+                ],
+                "knowledge": {
+                    "title": "口すぼめ呼吸の効果",
+                    "text": "【口すぼめ呼吸のメカニズム】\n①呼気時の気道内圧を高め、気道の虚脱を防ぐ\n②呼気時間を延長し、肺内の空気を効率よく排出\n③呼吸数を減らし、呼吸仕事量を軽減\n④日常生活動作中の息切れを軽減"
+                },
+                "quiz": {
+                    "question": "COPD患者の呼吸困難時に有効な呼吸法はどれか？",
+                    "options": [
+                        {"text": "胸式呼吸", "correct": false},
+                        {"text": "口すぼめ呼吸", "correct": true},
+                        {"text": "努力呼吸", "correct": false},
+                        {"text": "過換気", "correct": false}
+                    ]
+                }
+            },
+            {
+                "id": 7,
+                "title": "薬局",
+                "background": "pharmacy",
+                "bgm": "heartwarming",
+                "cuts": [
+                    {"id": "s07_01", "speaker": "kazuo", "text": "処方箋を持ってきました。", "characters": ["kazuo", "pharmacist"]},
+                    {"id": "s07_02", "speaker": "pharmacist", "text": "聖隷さん、こんにちは。今回のお薬を確認しますね。吸入薬のスピリーバは、毎日同じ時間に使っていますか？", "characters": ["kazuo", "pharmacist"]},
+                    {"id": "s07_03", "speaker": "kazuo", "text": "朝と夜に使っています。忘れたことはないですよ。", "characters": ["kazuo", "pharmacist"]},
+                    {"id": "s07_04", "speaker": "pharmacist", "text": "素晴らしいですね。吸入後はうがいを忘れずにしてくださいね。口腔カンジダの予防になります。", "characters": ["kazuo", "pharmacist"]},
+                    {"id": "s07_05", "speaker": "pharmacist", "text": "プレドニゾロンは炎症を抑えるお薬ですが、長期使用で骨粗鬆症のリスクがありますので、カルシウムを意識して摂ってくださいね。", "characters": ["kazuo", "pharmacist"]},
+                    {"id": "s07_06", "speaker": "kazuo", "text": "わかりました。牛乳を飲むようにします。", "characters": ["kazuo", "pharmacist"]}
+                ],
+                "knowledge": {
+                    "title": "COPD治療薬の種類",
+                    "text": "【気管支拡張薬】\n・LAMA（長時間作用性抗コリン薬）\n・LABA（長時間作用性β2刺激薬）\n・SABA（短時間作用性β2刺激薬）\n\n【抗炎症薬】\n・ICS（吸入ステロイド）\n・経口ステロイド"
+                },
+                "quiz": {
+                    "question": "吸入ステロイド薬使用後にうがいをする目的はどれか？",
+                    "options": [
+                        {"text": "味覚障害の予防", "correct": false},
+                        {"text": "口腔カンジダ症の予防", "correct": true},
+                        {"text": "歯周病の予防", "correct": false},
+                        {"text": "口臭の予防", "correct": false}
+                    ]
+                }
+            },
+            {
+                "id": 8,
+                "title": "かかりつけ医受診",
+                "background": "clinic",
+                "bgm": "medical",
+                "cuts": [
+                    {"id": "s08_01", "speaker": "doctor", "text": "聖隷さん、退院後1ヶ月ですね。調子はいかがですか？", "characters": ["kazuo", "doctor"]},
+                    {"id": "s08_02", "speaker": "kazuo", "text": "おかげさまで、大きく悪くなることはなく過ごせています。", "characters": ["kazuo", "doctor"]},
+                    {"id": "s08_03", "speaker": "doctor", "text": "訪問看護の記録を見ると、SpO2も安定していますね。体重が少し減っているのが気になりますが。", "characters": ["kazuo", "doctor"]},
+                    {"id": "s08_04", "speaker": "kazuo", "text": "食欲はあるんですが、あまり量が食べられなくて。", "characters": ["kazuo", "doctor"]},
+                    {"id": "s08_05", "speaker": "doctor", "text": "COPDの方は呼吸にエネルギーを使うので、体重が減りやすいんです。少量でも高カロリーなものを摂るようにしてください。", "characters": ["kazuo", "doctor"]},
+                    {"id": "s08_06", "speaker": "doctor", "text": "感染予防も大切です。人混みは避けて、手洗いうがいを徹底してくださいね。インフルエンザと肺炎球菌のワクチンは接種していますか？", "characters": ["kazuo", "doctor"]},
+                    {"id": "s08_07", "speaker": "kazuo", "text": "インフルエンザは毎年打っています。肺炎球菌は5年前に打ちました。", "characters": ["kazuo", "doctor"]},
+                    {"id": "s08_08", "speaker": "doctor", "text": "では次回、肺炎球菌ワクチンの再接種も検討しましょう。", "characters": ["kazuo", "doctor"]}
+                ],
+                "knowledge": {
+                    "title": "COPD患者の栄養管理",
+                    "text": "【なぜ体重が減るのか】\nCOPD患者は呼吸筋の仕事量増加により、安静時でも健常者の1.2-1.5倍のエネルギーを消費します。\n\n【栄養指導のポイント】\n・高カロリー・高タンパク食\n・少量頻回食（1日5-6回）\n・炭水化物過剰摂取は避ける"
+                },
+                "quiz": {
+                    "question": "COPD患者の栄養指導として適切なのはどれか？",
+                    "options": [
+                        {"text": "低カロリー食を勧める", "correct": false},
+                        {"text": "水分制限を指導する", "correct": false},
+                        {"text": "高タンパク食を勧める", "correct": true},
+                        {"text": "炭水化物中心の食事を勧める", "correct": false}
+                    ]
+                }
+            },
+            {
+                "id": 9,
+                "title": "ケアマネ訪問",
+                "background": "home_living",
+                "bgm": "heartwarming",
+                "cuts": [
+                    {"id": "s09_01", "speaker": "sato", "text": "聖隷さん、奥様、こんにちは。ケアマネジャーの佐藤です。サービスの利用状況を確認させてください。", "characters": ["kazuo", "ichiko", "sato"]},
+                    {"id": "s09_02", "speaker": "ichiko", "text": "訪問看護のおかげで、私も少し楽になりました。", "characters": ["kazuo", "ichiko", "sato"]},
+                    {"id": "s09_03", "speaker": "sato", "text": "それは良かったです。介護する奥様の健康も大切ですからね。", "characters": ["kazuo", "ichiko", "sato"]},
+                    {"id": "s09_04", "speaker": "sato", "text": "訪問入浴や、レスパイト入院といったサービスもあります。必要なときは遠慮なく相談してくださいね。", "characters": ["kazuo", "ichiko", "sato"]},
+                    {"id": "s09_05", "speaker": "kazuo", "text": "そういうサービスがあるのは心強いです。", "characters": ["kazuo", "ichiko", "sato"]},
+                    {"id": "s09_06", "speaker": "sato", "text": "緊急時の連絡先はお渡ししましたね。24時間対応の訪問看護ステーションの番号です。", "characters": ["kazuo", "ichiko", "sato"]},
+                    {"id": "s09_07", "speaker": "sato", "text": "介護者の負担軽減も大切です。ご家族だけで抱え込まず、使えるサービスは活用してくださいね。", "characters": ["kazuo", "ichiko", "sato"]}
+                ],
+                "knowledge": {
+                    "title": "要介護2で利用できるサービス例",
+                    "text": "【居宅サービス】\n・訪問介護（ホームヘルプ）\n・訪問看護\n・訪問リハビリテーション\n・通所介護（デイサービス）\n・短期入所（ショートステイ）\n\n区分支給限度額：約197,050円/月"
+                },
+                "quiz": {
+                    "question": "介護保険の保険者はどれか？",
+                    "options": [
+                        {"text": "都道府県", "correct": false},
+                        {"text": "市町村", "correct": true},
+                        {"text": "介護保険審査会", "correct": false},
+                        {"text": "地域包括支援センター", "correct": false}
+                    ]
+                }
+            },
+            {
+                "id": 10,
+                "title": "妻との会話",
+                "background": "home_living",
+                "bgm": "daily",
+                "cuts": [
+                    {"id": "s10_01", "speaker": "ichiko", "text": "お父さん、最近少し顔色が良くなったんじゃない？", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s10_02", "speaker": "kazuo", "text": "そうか？山田さんが来てくれるようになって、お風呂にも入れるし、リハビリもできるからかな。", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s10_03", "speaker": "ichiko", "text": "私も安心できるわ。一人で見ていた時は、夜中に何かあったらどうしようって心配で。", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s10_04", "speaker": "kazuo", "text": "母さんには苦労をかけるな。", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s10_05", "speaker": "ichiko", "text": "何言ってるの。一緒にいられる時間を大切にしましょうよ。", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s10_06", "speaker": "kazuo", "text": "ああ、そうだな。来月、孫が遊びに来るって言ってたな。その日を楽しみにしているよ。", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s10_07", "speaker": "ichiko", "text": "近場でいいじゃない。孫たちも連れて、みんなで美味しいもの食べに行きましょう。", "characters": ["kazuo", "ichiko"]},
+                    {"id": "s10_08", "speaker": "kazuo", "text": "そうだな。それを目標に、リハビリも頑張るよ。", "characters": ["kazuo", "ichiko"]}
+                ],
+                "knowledge": {
+                    "title": "介護者ケアの重要性",
+                    "text": "在宅療養では、介護者である家族の心身の健康も重要です。\n\n【介護者のアセスメント項目】\n・身体的健康状態\n・精神的健康状態\n・介護負担感\n・睡眠状況\n\n【具体的な支援】\n・傾聴、共感的理解\n・レスパイトケア"
+                }
+            },
+            {
+                "id": 11,
+                "title": "急変時の対応",
+                "background": "home_bedroom",
+                "bgm": "medical",
+                "cuts": [
+                    {"id": "s11_01", "speaker": "ichiko", "text": "お父さん、大丈夫？息が荒いわよ。", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s11_02", "speaker": "kazuo", "text": "昨日から少し調子が悪くて。痰が出にくいんだ。", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s11_03", "speaker": "yamada", "text": "聖隷さん、訪問看護の山田です。朝、奥様から連絡をいただいて来ました。", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s11_04", "speaker": "yamada", "text": "SpO2は90%、少し下がっていますね。酸素を4リットルに上げましょう。熱はありますか？", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s11_05", "speaker": "kazuo", "text": "37度5分くらいあります。", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s11_06", "speaker": "yamada", "text": "痰の色は黄色くなっていませんか？", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s11_07", "speaker": "kazuo", "text": "言われてみれば、少し黄色っぽいかも。", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s11_08", "speaker": "yamada", "text": "感染の兆候かもしれません。主治医に連絡して、早めに受診しましょう。奥様、かかりつけ医の診察券を用意していただけますか？", "characters": ["kazuo", "yamada", "ichiko"]},
+                    {"id": "s11_09", "speaker": "ichiko", "text": "わかりました。すぐ用意します。", "characters": ["kazuo", "yamada", "ichiko"]}
+                ],
+                "knowledge": {
+                    "title": "COPD急性増悪の徴候",
+                    "text": "【主要症状】\n・呼吸困難の悪化\n・痰の量の増加、色の変化（膿性）\n・発熱\n\n【その他の症状】\n・全身倦怠感の増強\n・チアノーゼ（唇・爪が紫色）\n・意識レベルの低下"
+                },
+                "quiz": {
+                    "question": "COPD急性増悪の徴候として正しいのはどれか？（2つ選べ）",
+                    "options": [
+                        {"text": "膿性痰の増加", "correct": true},
+                        {"text": "呼吸困難の軽減", "correct": false},
+                        {"text": "食欲の増進", "correct": false},
+                        {"text": "発熱", "correct": true}
+                    ],
+                    "multipleAnswer": true
+                }
+            },
+            {
+                "id": 12,
+                "title": "クリニック受診",
+                "background": "clinic",
+                "bgm": "medical",
+                "cuts": [
+                    {"id": "s11b_01", "speaker": "narration", "text": "山田看護師の判断で、一男さんはその日のうちにかかりつけ医を受診しました。"},
+                    {"id": "s11b_02", "speaker": "narration", "text": "診察の結果、COPD急性増悪と診断。細菌感染による気道炎症が原因でした。"},
+                    {"id": "s11b_03", "speaker": "narration", "text": "抗生剤と去痰薬が処方され、自宅での療養を続けることになりました。"},
+                    {"id": "s11b_04", "speaker": "narration", "text": "数日後、一男さんの症状は徐々に改善していきました。"}
+                ],
+                "knowledge": {
+                    "title": "COPD急性増悪の治療",
+                    "text": "【外来治療の基本】\n・抗菌薬（細菌感染時）\n・気管支拡張薬の増量\n・全身性ステロイド（短期間）\n・酸素療法の調整\n\n【入院適応の判断】\n・重度の呼吸困難\n・意識障害\n・在宅酸素でも改善しない低酸素血症"
+                }
+            },
+            {
+                "id": 13,
+                "title": "回復確認訪問",
+                "background": "home_bedroom",
+                "bgm": "heartwarming",
+                "cuts": [
+                    {"id": "s12_01", "speaker": "yamada", "text": "聖隷さん、こんにちは。先週の受診後、調子はいかがですか？"},
+                    {"id": "s12_02", "speaker": "kazuo", "text": "おかげさまで、だいぶ楽になりました。抗生剤が効いたみたいで、痰も出やすくなったよ。"},
+                    {"id": "s12_03", "speaker": "yamada", "text": "良かったです。SpO2を測りますね。96%、酸素2リットルで安定していますね。"},
+                    {"id": "s12_04", "speaker": "ichiko", "text": "山田さんがすぐ来てくれて、本当に助かりました。一人だったらどうなっていたか。"},
+                    {"id": "s12_05", "speaker": "yamada", "text": "奥様がすぐに連絡してくださったおかげです。早めに対応できて、入院せずに済みましたね。"},
+                    {"id": "s12_06", "speaker": "kazuo", "text": "来週、孫が来るんだ。それまでにもっと元気になっておきたいな。"},
+                    {"id": "s12_07", "speaker": "yamada", "text": "いい目標ですね。無理のない範囲で、リハビリも続けていきましょう。"}
+                ],
+                "knowledge": {
+                    "title": "早期対応の重要性",
+                    "text": "【COPD患者の急変時対応のポイント】\n・症状の変化を早期に察知\n・24時間対応の連絡体制\n・家族への教育と連携\n・かかりつけ医との情報共有"
+                }
+            },
+            {
+                "id": 14,
+                "title": "エンディング",
+                "background": "map_town",
+                "bgm": "main_theme",
+                "cuts": [
+                    {"id": "s13_01", "speaker": "narration", "text": "早めの対応で、一男さんは入院せずに外来治療で回復しました。"},
+                    {"id": "s13_02", "speaker": "narration", "text": "在宅療養を支えるのは、訪問看護師だけではありません。"},
+                    {"id": "s13_03", "speaker": "narration", "text": "主治医、薬剤師、ケアマネジャー、そして何より家族。多くの人がチームとなって支えています。"},
+                    {"id": "s13_04", "speaker": "kazuo", "text": "家にいられるのは、みなさんのおかげだな。ありがとう。"},
+                    {"id": "s13_05", "speaker": "narration", "text": "患者さんの「家にいたい」という思いに寄り添いながら、その人らしい生活を支援する。それが在宅療養を支える訪問看護の役割です。"},
+                    {"id": "s13_06", "speaker": "narration", "text": "皆さんも、地域の多職種連携について学び、チームの一員として活躍してください。"}
+                ],
+                "knowledge": {
+                    "title": "在宅療養を支える多職種連携",
+                    "text": "【主な専門職と役割】\n・医師：診断・治療方針の決定\n・訪問看護師：状態観察・医療処置\n・ケアマネジャー：ケアプラン作成\n・薬剤師：服薬管理・指導\n・理学療法士：リハビリテーション\n・介護福祉士：生活援助"
+                }
+            }
+        ]
+    };
+
+    // キャラクター情報
+    const characters = {
+        kazuo: { name: "聖隷一男", folder: "kazuo_expressions" },
+        ichiko: { name: "聖隷市子", folder: "ichiko_expressions" },
+        yamada: { name: "山田看護師", folder: "yamada_expressions" },
+        doctor: { name: "主治医", folder: "doctor_expressions" },
+        pharmacist: { name: "薬剤師", folder: "pharmacist_expressions" },
+        sato: { name: "佐藤ケアマネ", folder: "sato_expressions" }
+    };
+
+    const backgrounds = {
+        hospital_room: "backgrounds/bg_hospital_room.png",
+        home_living: "backgrounds/bg_home_living.png",
+        home_bedroom: "backgrounds/bg_home_bedroom.png",
+        pharmacy: "backgrounds/bg_pharmacy.png",
+        clinic: "backgrounds/bg_clinic.png",
+        map_town: "maps/map_town.png",
+        map_hospital: "maps/map_hospital.png",
+        map_home: "maps/map_home.png"
+    };
+
+    const bgmFiles = {
+        main_theme: "bgm/bgm_main_theme.mp3",
+        daily: "bgm/bgm_daily.mp3",
+        medical: "bgm/bgm_medical.mp3",
+        heartwarming: "bgm/bgm_heartwarming.mp3"
+    };
+
+    const speakerNames = {
+        narration: "ナレーション",
+        kazuo: "聖隷一男",
+        ichiko: "市子",
+        yamada: "山田看護師",
+        doctor: "主治医",
+        pharmacist: "薬剤師",
+        sato: "佐藤ケアマネ"
+    };
+
+    // ゲーム状態
+    let currentSceneIndex = 0;
+    let currentCutIndex = 0;
+    let bgmEnabled = true;
+    let voiceEnabled = true;
+    let currentBgm = null;
+    let currentVoice = null;
+    let visitedLocations = new Set();
+    let waitingForMapSelection = false;
+    let completedScenes = new Set(); // 完了したシーンを追跡
+
+    // シーン→部屋マッピング（サブMAP用）
+    const SCENE_ROOM_MAP = {
+        2: 'hospital_room',     // 病室
+        3: 'home_living',       // リビング
+        4: 'home_bedroom',      // 寝室
+        5: 'home_bathroom',     // 浴室（入浴介助）
+        6: 'home_bedroom',      // 寝室（呼吸リハビリ）
+        9: 'home_living',       // リビング（ケアマネ訪問）
+        10: 'home_living',      // リビング（妻との会話）
+        11: 'home_bedroom',     // 寝室（急変時）
+        13: 'home_bedroom'      // 寝室（回復確認訪問）
+    };
+
+    // 初期化
+    function init() {
+        document.getElementById('startButton').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', restartGame);
+        document.getElementById('sceneSelectBtn').addEventListener('click', showSceneSelect);
+        document.getElementById('sceneSelectClose').addEventListener('click', closeSceneSelect);
+        document.getElementById('backToMap').addEventListener('click', showMap);
+        document.getElementById('bgmToggle').addEventListener('click', toggleBgm);
+        document.getElementById('voiceToggle').addEventListener('click', toggleVoice);
+        document.getElementById('knowledgeClose').addEventListener('click', closeKnowledge);
+        document.getElementById('quizSubmit').addEventListener('click', submitQuiz);
+        document.getElementById('quizContinue').addEventListener('click', closeQuiz);
+        document.getElementById('prevBtn').addEventListener('click', prevCut);
+        document.getElementById('nextBtn').addEventListener('click', nextCut);
+
+        // 街並みMAPマーカーイベント
+        document.querySelectorAll('#mapScreen .location-marker').forEach(marker => {
+            marker.addEventListener('click', () => handleMarkerClick(marker.dataset.location));
+        });
+
+        // 病院MAPマーカーイベント
+        document.querySelectorAll('#hospitalMapScreen .location-marker').forEach(marker => {
+            marker.addEventListener('click', () => handleSubMapMarkerClick('hospital', marker.dataset.location, marker.dataset.scene));
+        });
+
+        // 自宅MAPマーカーイベント
+        document.querySelectorAll('#homeMapScreen .location-marker').forEach(marker => {
+            marker.addEventListener('click', () => handleSubMapMarkerClick('home', marker.dataset.location, marker.dataset.scene));
+        });
+
+        // サブMAPから街並みMAPへ戻るボタン
+        document.getElementById('backToTownFromHospital').addEventListener('click', backToTownMap);
+        document.getElementById('backToTownFromHome').addEventListener('click', backToTownMap);
+    }
+
+    // ゲーム開始
+    function startGame() {
+        document.getElementById('titleScreen').style.display = 'none';
+        currentSceneIndex = 0;
+        currentCutIndex = 0;
+
+        // イントロシーンを開始
+        document.getElementById('mapScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+        renderScene();
+    }
+
+    // MAP表示（次の目的地に応じて適切なMAPを表示）
+    function showMap() {
+        stopVoice();
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('hospitalMapScreen').style.display = 'none';
+        document.getElementById('homeMapScreen').style.display = 'none';
+
+        const nextLoc = getNextLocation();
+
+        // 次の目的地が病院の場合は街並みMAP（病院へ移動するため）
+        // 次の目的地が自宅の場合、現在のシーンによって判断
+        const currentSceneId = scenarioData.scenes[currentSceneIndex].id;
+
+        // 現在自宅にいて、次も自宅の場合は自宅MAP
+        if (nextLoc === 'home' && [3, 4, 5, 6, 9, 10].includes(currentSceneId)) {
+            document.getElementById('homeMapScreen').style.display = 'block';
+            updateSubMapMarkers('home');
+            return;
+        }
+
+        // それ以外は街並みMAPへ
+        document.getElementById('mapScreen').style.display = 'block';
+        waitingForMapSelection = true;
+        updateMarkers();
+
+        if (nextLoc) {
+            document.getElementById('mapTitle').textContent = '次の場所へ移動';
+            document.getElementById('mapInstruction').textContent = '光っているマーカーをクリック';
+        } else {
+            document.getElementById('mapTitle').textContent = '学習完了！';
+            document.getElementById('mapInstruction').textContent = 'お疲れ様でした';
+        }
+    }
+
+    // 次の場所を取得
+    function getNextLocation() {
+        if (currentSceneIndex >= SCENE_FLOW.length - 1) return null;
+        return SCENE_FLOW[currentSceneIndex].nextLocation;
+    }
+
+    // マーカー更新（シナリオ順序に従い、次の目的地のみ有効化）
+    function updateMarkers() {
+        const nextLoc = getNextLocation();
+        const currentLoc = SCENE_LOCATION_MAP[scenarioData.scenes[currentSceneIndex].id];
+
+        // 街並みMAPのマーカーのみ更新（サブMAPは除外）
+        document.querySelectorAll('#mapScreen .location-marker').forEach(marker => {
+            const loc = marker.dataset.location;
+            marker.classList.remove('next-destination', 'current', 'visited', 'disabled');
+            marker.style.cursor = 'default';
+
+            if (loc === currentLoc) {
+                marker.classList.add('current');
+                visitedLocations.add(loc);
+            }
+
+            if (visitedLocations.has(loc)) {
+                marker.classList.add('visited');
+            }
+
+            if (waitingForMapSelection && loc === nextLoc) {
+                // 次の目的地は有効化
+                marker.classList.add('next-destination');
+                marker.style.cursor = 'pointer';
+            } else if (waitingForMapSelection) {
+                // 次の目的地以外は無効化（半透明）
+                marker.classList.add('disabled');
+            }
+        });
+    }
+
+    // マーカークリック処理（街並みMAP）
+    function handleMarkerClick(location) {
+        if (!waitingForMapSelection) return;
+
+        // 無効化されたマーカーは無視
+        const marker = document.querySelector(`#mapScreen [data-location="${location}"]`);
+        if (marker && marker.classList.contains('disabled')) return;
+
+        const nextLoc = getNextLocation();
+        if (location !== nextLoc) return;
+
+        // 病院または自宅の場合はサブMAPを表示
+        if (location === 'hospital') {
+            showHospitalMap();
+            return;
+        }
+        if (location === 'home') {
+            showHomeMap();
+            return;
+        }
+
+        waitingForMapSelection = false;
+        visitedLocations.add(location);
+
+        // 次のシーンへ
+        currentSceneIndex++;
+        currentCutIndex = 0;
+
+        document.getElementById('mapScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+        renderScene();
+    }
+
+    // 病院MAP表示
+    function showHospitalMap() {
+        document.getElementById('mapScreen').style.display = 'none';
+        document.getElementById('hospitalMapScreen').style.display = 'block';
+        updateSubMapMarkers('hospital');
+    }
+
+    // 自宅MAP表示
+    function showHomeMap() {
+        document.getElementById('mapScreen').style.display = 'none';
+        document.getElementById('homeMapScreen').style.display = 'block';
+        updateSubMapMarkers('home');
+    }
+
+    // 街並みMAPへ戻る
+    function backToTownMap() {
+        document.getElementById('hospitalMapScreen').style.display = 'none';
+        document.getElementById('homeMapScreen').style.display = 'none';
+        document.getElementById('mapScreen').style.display = 'block';
+    }
+
+    // サブMAPマーカー更新（シナリオ順序に従い、次に必要なマーカーのみ有効化）
+    function updateSubMapMarkers(mapType) {
+        const mapId = mapType === 'hospital' ? 'hospitalMapScreen' : 'homeMapScreen';
+
+        // 次のシーンを取得
+        const nextSceneIndex = currentSceneIndex + 1;
+        if (nextSceneIndex >= scenarioData.scenes.length) {
+            // すべてのマーカーを無効化
+            document.querySelectorAll(`#${mapId} .location-marker`).forEach(marker => {
+                marker.classList.add('disabled');
+                marker.classList.remove('next-destination');
+                marker.style.cursor = 'default';
+            });
+            return;
+        }
+
+        const nextSceneId = scenarioData.scenes[nextSceneIndex].id;
+        const requiredRoom = SCENE_ROOM_MAP[nextSceneId];
+
+        document.querySelectorAll(`#${mapId} .location-marker`).forEach(marker => {
+            const markerLocation = marker.dataset.location;
+
+            marker.classList.remove('next-destination', 'disabled', 'completed');
+
+            if (markerLocation === requiredRoom) {
+                // 次に必要な場所 - 動的にシーンIDを設定
+                marker.classList.add('next-destination');
+                marker.style.cursor = 'pointer';
+                marker.dataset.scene = nextSceneId;
+            } else {
+                // まだ必要ない場所は半透明に
+                marker.classList.add('disabled');
+                marker.style.cursor = 'default';
+            }
+        });
+    }
+
+    // サブMAPマーカークリック処理
+    function handleSubMapMarkerClick(mapType, location, sceneId) {
+        if (!sceneId) return; // シーンが設定されていない場所はスキップ
+
+        // 無効化されたマーカーは無視（CSS pointer-events: noneのバックアップ）
+        const mapId = mapType === 'hospital' ? 'hospitalMapScreen' : 'homeMapScreen';
+        const marker = document.querySelector(`#${mapId} [data-location="${location}"]`);
+        if (marker && marker.classList.contains('disabled')) return;
+
+        waitingForMapSelection = false;
+        visitedLocations.add(mapType);
+
+        // 指定されたシーンへ移動
+        const targetSceneIndex = scenarioData.scenes.findIndex(s => s.id === parseInt(sceneId));
+        if (targetSceneIndex === -1) return;
+
+        currentSceneIndex = targetSceneIndex;
+        currentCutIndex = 0;
+
+        document.getElementById('hospitalMapScreen').style.display = 'none';
+        document.getElementById('homeMapScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+        renderScene();
+    }
+
+    // シーン描画
+    function renderScene() {
+        const scene = scenarioData.scenes[currentSceneIndex];
+        const cut = scene.cuts[currentCutIndex];
+
+        // 背景設定
+        const bgLayer = document.getElementById('backgroundLayer');
+        if (scene.background) {
+            bgLayer.style.backgroundImage = `url('${backgrounds[scene.background]}')`;
+        } else {
+            bgLayer.style.backgroundImage = 'none';
+            bgLayer.style.background = 'linear-gradient(135deg, #2d5a27 0%, #1e3a1a 100%)';
+        }
+
+        // BGM
+        if (bgmEnabled && scene.bgm) {
+            playBgm(scene.bgm);
+        }
+
+        // キャラクター（cutIdを渡して表情ガイドから取得）
+        // ※先にrenderCharactersを呼んで動画の有無を判定
+        renderCharacters(cut.id);
+
+        // 音声（動画がある場合はスキップ - 動画内に音声が含まれる）
+        if (voiceEnabled && cut.id && !currentCutHasVideo) {
+            playVoice(cut.id);
+        }
+
+        // セリフ
+        const speaker = cut.speaker;
+        const speakerEl = document.getElementById('speakerName');
+        speakerEl.textContent = speakerNames[speaker] || speaker;
+        speakerEl.className = '';
+        document.getElementById('dialogText').className = '';
+
+        if (speaker === 'narration') {
+            speakerEl.classList.add('narrator');
+        } else if (cut.type === 'thought') {
+            speakerEl.classList.add('thought');
+            document.getElementById('dialogText').classList.add('thought');
+        }
+
+        document.getElementById('dialogText').textContent = cut.text;
+        document.getElementById('sceneHeader').textContent = `Scene ${scene.id}: ${scene.title} (${currentCutIndex + 1}/${scene.cuts.length})`;
+
+        updateProgress();
+        updateNavButtons();
+    }
+
+    // キャラクター描画（表情ガイド対応・動画対応）
+    function renderCharacters(cutId) {
+        document.getElementById('charLeft').innerHTML = '';
+        document.getElementById('charCenter').innerHTML = '';
+        document.getElementById('charRight').innerHTML = '';
+
+        // 動画フラグをリセット
+        currentCutHasVideo = false;
+
+        // 表情ガイドからキャラクター情報を取得
+        const charData = expressionGuide[cutId];
+        if (!charData || charData.length === 0) return;
+
+        // position別に振り分け（動画対応）
+        charData.forEach(charInfo => {
+            const position = charInfo.position || 'center';
+            const mediaHtml = getCharacterMedia(charInfo.id, charInfo.expression, cutId);
+
+            if (position === 'left') {
+                document.getElementById('charLeft').innerHTML = mediaHtml;
+            } else if (position === 'right') {
+                document.getElementById('charRight').innerHTML = mediaHtml;
+            } else {
+                document.getElementById('charCenter').innerHTML = mediaHtml;
+            }
+        });
+    }
+
+    // 動画ファイルのマッピング（cutId_charId: true で動画があることを示す）
+    // SadTalkerで生成した動画をここに登録
+    const videoFiles = {
+        // シーン2（既存）
+        's02_01_doctor': true,
+        's02_03_doctor': true,
+        's02_04_kazuo': true,
+        's02_05_doctor': true,
+        's02_06_kazuo': true,
+        // シーン3
+        's03_01_kazuo': true,
+        's03_02_ichiko': true,
+        's03_03_kazuo': true,
+        's03_04_ichiko': true,
+        's03_05_kazuo': true,
+        's03_06_ichiko': true,
+        // シーン4
+        's04_01_yamada': true,
+        's04_02_kazuo': true,
+        's04_03_yamada': true,
+        's04_04_yamada': true,
+        's04_05_yamada': true,
+        's04_06_kazuo': true,
+        's04_07_yamada': true,
+        // シーン5
+        's05_01_yamada': true,
+        's05_02_ichiko': true,
+        's05_03_yamada': true,
+        's05_04_kazuo': true,
+        's05_05_yamada': true,
+        's05_06_kazuo': true,
+        's05_07_yamada': true,
+        // シーン6
+        's06_01_yamada': true,
+        's06_02_kazuo': true,
+        's06_03_yamada': true,
+        's06_04_yamada': true,
+        's06_05_kazuo': true,
+        's06_06_yamada': true,
+        's06_07_kazuo': true,
+        's06_08_yamada': true,
+        // シーン7
+        's07_01_kazuo': true,
+        's07_02_pharmacist': true,
+        's07_03_kazuo': true,
+        's07_04_pharmacist': true,
+        's07_05_pharmacist': true,
+        's07_06_kazuo': true,
+        // シーン8
+        's08_01_doctor': true,
+        's08_02_kazuo': true,
+        's08_03_doctor': true,
+        's08_04_kazuo': true,
+        's08_05_doctor': true,
+        's08_06_doctor': true,
+        's08_07_kazuo': true,
+        's08_08_doctor': true,
+        // シーン9
+        's09_01_sato': true,
+        's09_02_ichiko': true,
+        's09_03_sato': true,
+        's09_04_kazuo': true,
+        's09_05_sato': true,
+        's09_06_ichiko': true,
+        's09_07_sato': true,
+        // シーン10
+        's10_01_ichiko': true,
+        's10_02_kazuo': true,
+        's10_03_ichiko': true,
+        's10_04_kazuo': true,
+        's10_05_ichiko': true,
+        's10_06_kazuo': true,
+        's10_07_ichiko': true,
+        's10_08_kazuo': true,
+        // シーン11
+        's11_01_ichiko': true,
+        's11_02_kazuo': true,
+        's11_03_yamada': true,
+        's11_04_yamada': true,
+        's11_05_kazuo': true,
+        's11_06_yamada': true,
+        's11_07_kazuo': true,
+        's11_08_yamada': true,
+        's11_09_ichiko': true,
+        // シーン12
+        's12_01_yamada': true,
+        's12_02_kazuo': true,
+        's12_03_yamada': true,
+        's12_04_ichiko': true,
+        's12_05_yamada': true,
+        's12_06_kazuo': true,
+        's12_07_yamada': true,
+        // シーン13
+        's13_04_kazuo': true
+    };
+
+    // 現在のカットで動画を使用しているかのフラグ
+    let currentCutHasVideo = false;
+
+    function getCharacterMedia(charId, expression, cutId) {
+        const char = characters[charId];
+        if (!char) return '';
+
+        // 動画ファイルが存在するかチェック
+        const videoKey = `${cutId}_${charId}`;
+        if (videoFiles[videoKey]) {
+            currentCutHasVideo = true;
+            const videoPath = `videos/${videoKey}.mp4`;
+            return `<video src="${videoPath}" autoplay playsinline onended="onVideoEnded()" onerror="this.outerHTML=getCharacterImgFallback('${charId}', '${expression}')"></video>`;
+        }
+
+        // 動画がない場合は静止画を使用
+        let imgPath;
+        if (expression) {
+            imgPath = `characters/${char.folder}/${expression}.png`;
+        } else {
+            imgPath = charId === 'kazuo'
+                ? `characters/${char.folder}/kazuo_general_05_neutral.png`
+                : `characters/${char.folder}/${charId}_05_neutral.png`;
+        }
+        return `<img src="${imgPath}" alt="${char.name}" onerror="this.style.display='none'">`;
+    }
+
+    // 動画読み込みエラー時のフォールバック
+    function getCharacterImgFallback(charId, expression) {
+        const char = characters[charId];
+        if (!char) return '';
+        let imgPath;
+        if (expression) {
+            imgPath = `characters/${char.folder}/${expression}.png`;
+        } else {
+            imgPath = charId === 'kazuo'
+                ? `characters/${char.folder}/kazuo_general_05_neutral.png`
+                : `characters/${char.folder}/${charId}_05_neutral.png`;
+        }
+        return `<img src="${imgPath}" alt="${char.name}" onerror="this.style.display='none'">`;
+    }
+
+    // 動画終了時のコールバック
+    function onVideoEnded() {
+        // 必要に応じて処理を追加
+        console.log('Video ended');
+    }
+
+    // 後方互換性のため
+    function getCharacterImg(charId, expression) {
+        return getCharacterMedia(charId, expression, '');
+    }
+
+    // BGM
+    function playBgm(bgmId) {
+        if (currentBgm && currentBgm.src.includes(bgmFiles[bgmId])) return;
+        stopBgm();
+        currentBgm = new Audio(bgmFiles[bgmId]);
+        currentBgm.loop = true;
+        currentBgm.volume = 0.15;
+        currentBgm.play().catch(e => console.log('BGM:', e));
+    }
+
+    function stopBgm() {
+        if (currentBgm) { currentBgm.pause(); currentBgm = null; }
+    }
+
+    function toggleBgm() {
+        bgmEnabled = !bgmEnabled;
+        const btn = document.getElementById('bgmToggle');
+        if (bgmEnabled) {
+            btn.textContent = 'BGM ON';
+            btn.classList.remove('off');
+            const scene = scenarioData.scenes[currentSceneIndex];
+            if (scene.bgm) playBgm(scene.bgm);
+        } else {
+            btn.textContent = 'BGM OFF';
+            btn.classList.add('off');
+            stopBgm();
+        }
+    }
+
+    // 音声
+    function playVoice(cutId) {
+        stopVoice();
+        currentVoice = new Audio(`audio/${cutId}.mp3`);
+        currentVoice.volume = 0.8;
+        currentVoice.play().catch(e => console.log('Voice:', e));
+    }
+
+    function stopVoice() {
+        if (currentVoice) { currentVoice.pause(); currentVoice = null; }
+    }
+
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        const btn = document.getElementById('voiceToggle');
+        if (voiceEnabled) {
+            btn.textContent = '音声 ON';
+            btn.classList.remove('off');
+        } else {
+            btn.textContent = '音声 OFF';
+            btn.classList.add('off');
+            stopVoice();
+        }
+    }
+
+    // プログレス
+    function updateProgress() {
+        const scene = scenarioData.scenes[currentSceneIndex];
+        const progress = ((currentCutIndex + 1) / scene.cuts.length) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+    }
+
+    // ナビゲーション
+    function updateNavButtons() {
+        const scene = scenarioData.scenes[currentSceneIndex];
+        document.getElementById('prevBtn').disabled = currentCutIndex === 0 && currentSceneIndex === 0;
+        document.getElementById('nextBtn').textContent = currentCutIndex >= scene.cuts.length - 1 ? 'シーン終了' : '次へ →';
+    }
+
+    function prevCut() {
+        if (currentCutIndex > 0) {
+            stopVoice();
+            stopCurrentVideo();
+            currentCutIndex--;
+            renderScene();
+        }
+    }
+
+    function nextCut() {
+        stopVoice();
+        stopCurrentVideo();
+        const scene = scenarioData.scenes[currentSceneIndex];
+        if (currentCutIndex < scene.cuts.length - 1) {
+            currentCutIndex++;
+            renderScene();
+        } else {
+            endScene();
+        }
+    }
+
+    // 現在再生中の動画を停止
+    function stopCurrentVideo() {
+        const videos = document.querySelectorAll('#characterArea video');
+        videos.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+    }
+
+    // シーン終了
+    function endScene() {
+        const scene = scenarioData.scenes[currentSceneIndex];
+        // シーン完了を記録
+        completedScenes.add(scene.id);
+
+        if (scene.knowledge) {
+            showKnowledge(scene.knowledge);
+        } else if (scene.quiz) {
+            showQuiz(scene.quiz);
+        } else {
+            goToNextScene();
+        }
+    }
+
+    // 最初からやり直す
+    function restartGame() {
+        if (!confirm('最初からやり直しますか？')) return;
+        stopVoice();
+        stopBgm();
+        currentSceneIndex = 0;
+        currentCutIndex = 0;
+        completedScenes.clear();
+        visitedLocations.clear();
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('hospitalMapScreen').style.display = 'none';
+        document.getElementById('homeMapScreen').style.display = 'none';
+        document.getElementById('mapScreen').style.display = 'none';
+        document.getElementById('titleScreen').style.display = 'flex';
+    }
+
+    // シーン選択パネル表示
+    function showSceneSelect() {
+        const sceneList = document.getElementById('sceneList');
+        sceneList.innerHTML = '';
+
+        scenarioData.scenes.forEach((scene, index) => {
+            const div = document.createElement('div');
+            div.className = 'scene-item';
+
+            // 現在のシーン
+            if (index === currentSceneIndex) {
+                div.classList.add('current');
+            }
+            // 完了済みシーン
+            else if (completedScenes.has(scene.id)) {
+                div.classList.add('completed');
+            }
+
+            div.innerHTML = `
+                <div class="scene-number">${scene.id}</div>
+                <div class="scene-title">${scene.title}</div>
+            `;
+
+            // すべてのシーンをクリック可能に
+            div.addEventListener('click', () => goToScene(index));
+
+            sceneList.appendChild(div);
+        });
+
+        document.getElementById('sceneSelectPanel').style.display = 'flex';
+    }
+
+    // シーン選択パネルを閉じる
+    function closeSceneSelect() {
+        document.getElementById('sceneSelectPanel').style.display = 'none';
+    }
+
+    // 指定シーンへジャンプ
+    function goToScene(sceneIndex) {
+        closeSceneSelect();
+        currentSceneIndex = sceneIndex;
+        currentCutIndex = 0;
+
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('mapScreen').style.display = 'none';
+        document.getElementById('hospitalMapScreen').style.display = 'none';
+        document.getElementById('homeMapScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+
+        renderScene();
+    }
+
+    function goToNextScene() {
+        const nextLoc = getNextLocation();
+        if (nextLoc) {
+            showMap();
+        } else if (currentSceneIndex < scenarioData.scenes.length - 1) {
+            currentSceneIndex++;
+            currentCutIndex = 0;
+            renderScene();
+        } else {
+            alert('学習完了！お疲れ様でした。');
+            location.reload();
+        }
+    }
+
+    // 知識解説
+    function showKnowledge(knowledge) {
+        document.getElementById('knowledgeTitle').textContent = knowledge.title;
+        document.getElementById('knowledgeText').textContent = knowledge.text;
+        document.getElementById('knowledgePanel').style.display = 'flex';
+    }
+
+    function closeKnowledge() {
+        document.getElementById('knowledgePanel').style.display = 'none';
+        const scene = scenarioData.scenes[currentSceneIndex];
+        if (scene.quiz) {
+            showQuiz(scene.quiz);
+        } else {
+            goToNextScene();
+        }
+    }
+
+    // クイズ
+    let selectedOptions = new Set();
+    let quizData = null;
+
+    function showQuiz(quiz) {
+        quizData = quiz;
+        selectedOptions.clear();
+        document.getElementById('quizQuestion').textContent = quiz.question;
+
+        const container = document.getElementById('quizOptions');
+        container.innerHTML = '';
+        quiz.options.forEach((opt, i) => {
+            const el = document.createElement('div');
+            el.className = 'quiz-option';
+            el.innerHTML = `<span class="option-marker">${String.fromCharCode(65 + i)}</span><span>${opt.text}</span>`;
+            el.addEventListener('click', () => selectOption(i, el, quiz.multipleAnswer));
+            container.appendChild(el);
+        });
+
+        document.getElementById('quizFeedback').className = 'quiz-feedback';
+        document.getElementById('quizSubmit').style.display = 'block';
+        document.getElementById('quizSubmit').disabled = true;
+        document.getElementById('quizContinue').style.display = 'none';
+        document.getElementById('quizPanel').style.display = 'flex';
+    }
+
+    function selectOption(index, element, multipleAnswer) {
+        if (element.classList.contains('disabled')) return;
+        if (multipleAnswer) {
+            if (selectedOptions.has(index)) {
+                selectedOptions.delete(index);
+                element.classList.remove('selected');
+            } else {
+                selectedOptions.add(index);
+                element.classList.add('selected');
+            }
+        } else {
+            document.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected'));
+            selectedOptions.clear();
+            selectedOptions.add(index);
+            element.classList.add('selected');
+        }
+        document.getElementById('quizSubmit').disabled = selectedOptions.size === 0;
+    }
+
+    function submitQuiz() {
+        const options = document.querySelectorAll('.quiz-option');
+        let allCorrect = true;
+        let correctCount = 0;
+        let selectedCorrectCount = 0;
+
+        quizData.options.forEach((opt, i) => {
+            options[i].classList.add('disabled');
+            if (opt.correct) {
+                correctCount++;
+                options[i].classList.add('correct');
+                if (selectedOptions.has(i)) selectedCorrectCount++;
+            } else if (selectedOptions.has(i)) {
+                options[i].classList.add('incorrect');
+                allCorrect = false;
+            }
+        });
+
+        if (selectedCorrectCount !== correctCount) allCorrect = false;
+
+        const fb = document.getElementById('quizFeedback');
+        fb.className = allCorrect ? 'quiz-feedback show correct' : 'quiz-feedback show incorrect';
+        fb.innerHTML = allCorrect ? '<strong>✅ 正解です！</strong>' : '<strong>❌ 不正解です</strong><br>正解の選択肢を確認してください。';
+
+        document.getElementById('quizSubmit').style.display = 'none';
+        document.getElementById('quizContinue').style.display = 'block';
+    }
+
+    function closeQuiz() {
+        document.getElementById('quizPanel').style.display = 'none';
+        goToNextScene();
+    }
+
+    init();
+    </script>
+</body>
+</html>

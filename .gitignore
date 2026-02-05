@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Firebase
+.firebase/
+
+# Blender backup
+*.blend1
+
+# Backup folders
+backup_2d/

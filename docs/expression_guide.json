@@ -1,0 +1,737 @@
+{
+  "description": "全77カットの表情変化指示書",
+  "note": "各カットで表示するキャラクターと表情を指定",
+  
+  "scenes": [
+    {
+      "sceneId": 1,
+      "title": "イントロ",
+      "cuts": [
+        {"cutId": "s01_01", "characters": []},
+        {"cutId": "s01_02", "characters": []},
+        {"cutId": "s01_03", "characters": []}
+      ]
+    },
+    {
+      "sceneId": 2,
+      "title": "退院前カンファ",
+      "cuts": [
+        {
+          "cutId": "s02_01",
+          "speaker": "doctor",
+          "text": "聖隷さん、入院中の治療で心不全の症状は改善しました。ただ、肺の状態は以前より悪化しています。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"},
+            {"id": "doctor", "position": "right", "expression": "doctor_07_serious"}
+          ]
+        },
+        {
+          "cutId": "s02_02",
+          "speaker": "kazuo",
+          "type": "thought",
+          "text": "（心の声）やっぱり悪くなっているのか...でも家に帰りたい。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_04_thinking"},
+            {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s02_03",
+          "speaker": "doctor",
+          "text": "夜間のNPPV（非侵襲的陽圧換気療法）を自宅でも続けることをお勧めしますが、いかがですか？",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"},
+            {"id": "doctor", "position": "right", "expression": "doctor_04_thinking"}
+          ]
+        },
+        {
+          "cutId": "s02_04",
+          "speaker": "kazuo",
+          "text": "先生、あの機械は眠れないし、つけるのも大変で...酸素だけでなんとかなりませんか？",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"},
+            {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s02_05",
+          "speaker": "doctor",
+          "text": "ご本人の意思を尊重します。ただ、急性増悪のリスクは高いことをご理解ください。何かあったらすぐに連絡してください。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "doctor", "position": "right", "expression": "doctor_07_serious"}
+          ]
+        },
+        {
+          "cutId": "s02_06",
+          "speaker": "kazuo",
+          "text": "わかりました。悪くなるなら、それも寿命かなと思っています。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_07_serious"},
+            {"id": "doctor", "position": "right", "expression": "doctor_02_worried"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 3,
+      "title": "退院・帰宅",
+      "cuts": [
+        {
+          "cutId": "s03_01",
+          "speaker": "kazuo",
+          "text": "やっと家に帰ってこられた。やっぱり自分の家が一番落ち着くな。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_06_relieved"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s03_02",
+          "speaker": "ichiko",
+          "text": "お父さん、おかえりなさい。無理しないでね。ベッドの準備はしてあるから。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s03_03",
+          "speaker": "kazuo",
+          "text": "ありがとう。入院中は夜も眠れなかったから、今日はゆっくり休めそうだ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_09_grateful"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s03_04",
+          "speaker": "ichiko",
+          "text": "酸素の機械も業者さんが設置してくれたわ。使い方は覚えてる？",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_04_thinking"}
+          ]
+        },
+        {
+          "cutId": "s03_05",
+          "speaker": "kazuo",
+          "text": "ああ、3年も使っているから大丈夫だよ。安静時は2リットル、動くときは4リットルに上げればいいんだろう？",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s03_06",
+          "speaker": "ichiko",
+          "text": "明日から訪問看護師さんが来てくれるって。週2回、火曜と木曜に来てくれるそうよ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 4,
+      "title": "訪問看護（初回）",
+      "cuts": [
+        {
+          "cutId": "s04_01",
+          "speaker": "yamada",
+          "text": "聖隷さん、はじめまして。訪問看護ステーションの山田です。今日からよろしくお願いします。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s04_02",
+          "speaker": "kazuo",
+          "text": "よろしくお願いします。こうして家に来てもらえると助かります。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_09_grateful"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s04_03",
+          "speaker": "yamada",
+          "text": "まず、お体の状態を確認させてくださいね。血圧と脈拍、酸素飽和度を測りますね。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s04_04",
+          "speaker": "yamada",
+          "text": "血圧120/75、脈拍78回、SpO2は96%ですね。酸素2リットルで安定しています。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_medical_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s04_05",
+          "speaker": "yamada",
+          "text": "胸の音を聴かせてください...少しヒューヒューという音がしますね。痰は出ますか？",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_medical_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_04_thinking"}
+          ]
+        },
+        {
+          "cutId": "s04_06",
+          "speaker": "kazuo",
+          "text": "ええ、白っぽい痰が出ることはありますが、自分で出せています。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s04_07",
+          "speaker": "yamada",
+          "text": "それは良かったです。痰の色が黄色や緑色に変わったり、熱が出たりしたら、すぐに連絡してくださいね。感染の兆候かもしれませんから。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 5,
+      "title": "入浴介助",
+      "cuts": [
+        {
+          "cutId": "s05_01",
+          "speaker": "yamada",
+          "text": "聖隷さん、今日はお風呂に入りましょうか。奥様が準備してくださっていますね。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s05_02",
+          "speaker": "ichiko",
+          "text": "タオルと着替えは用意してあります。お風呂の温度は39度にしてあるわ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s05_03",
+          "speaker": "yamada",
+          "text": "ありがとうございます。聖隷さん、入浴前に酸素を4リットルに上げておきましょうね。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s05_04",
+          "speaker": "kazuo",
+          "text": "入浴は体力使うからね。苦しくならないか少し心配だな。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s05_05",
+          "speaker": "yamada",
+          "text": "ゆっくり入りましょう。洗髪や体を洗うのは私がお手伝いしますね。腕を上げる動作は息を吐きながら行いましょう。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s05_06",
+          "speaker": "kazuo",
+          "text": "久しぶりのお風呂だ。やっぱり気持ちいいな。一人だとなかなか入れないから、助かるなあ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_06_relieved"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s05_07",
+          "speaker": "yamada",
+          "text": "お湯に浸かるのは5分程度にしておきましょう。長湯は心臓に負担がかかりますからね。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 6,
+      "title": "呼吸リハビリ",
+      "cuts": [
+        {
+          "cutId": "s06_01",
+          "speaker": "yamada",
+          "text": "聖隷さん、今日は呼吸リハビリをしましょう。体力を維持するためにとても大切なんですよ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s06_02",
+          "speaker": "kazuo",
+          "text": "リハビリか...正直、苦しくなるのが怖くてあまりやっていないんだ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s06_03",
+          "speaker": "yamada",
+          "text": "そうですよね。でも、動かないでいると筋力が落ちて、もっと息切れしやすくなってしまうんです。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}
+          ]
+        },
+        {
+          "cutId": "s06_04",
+          "speaker": "yamada",
+          "text": "まず、口すぼめ呼吸を練習しましょう。鼻から吸って、口をすぼめてゆっくり吐きます。吐く時間を吸う時間の2倍くらいにするのがコツです。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s06_05",
+          "speaker": "kazuo",
+          "text": "こうですか？フーッ...",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_medical_03_pursed_lip"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s06_06",
+          "speaker": "yamada",
+          "text": "上手です！この呼吸法は、気道が狭くなるのを防いで、息を吐きやすくしてくれます。苦しくなった時にも使えますよ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s06_07",
+          "speaker": "kazuo",
+          "text": "体力が戻ったら、家族と外食に行きたいと思ってるんだ。温泉旅行も夢だけどね。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s06_08",
+          "speaker": "yamada",
+          "text": "それは素敵な目標ですね！外食に行けるように、一緒に頑張りましょう。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 7,
+      "title": "薬局",
+      "cuts": [
+        {
+          "cutId": "s07_01",
+          "speaker": "kazuo",
+          "text": "処方箋を持ってきました。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "pharmacist", "position": "right", "expression": "pharmacist_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s07_02",
+          "speaker": "pharmacist",
+          "text": "聖隷さん、こんにちは。今回のお薬を確認しますね。吸入薬のスピリーバは、毎日同じ時間に使っていますか？",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "pharmacist", "position": "right", "expression": "pharmacist_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s07_03",
+          "speaker": "kazuo",
+          "text": "朝と夜に使っています。忘れたことはないですよ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"},
+            {"id": "pharmacist", "position": "right", "expression": "pharmacist_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s07_04",
+          "speaker": "pharmacist",
+          "text": "素晴らしいですね。吸入後はうがいを忘れずにしてくださいね。口腔カンジダの予防になります。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "pharmacist", "position": "right", "expression": "pharmacist_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s07_05",
+          "speaker": "pharmacist",
+          "text": "プレドニゾロンは炎症を抑えるお薬ですが、長期使用で骨粗鬆症のリスクがありますので、カルシウムを意識して摂ってくださいね。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "pharmacist", "position": "right", "expression": "pharmacist_07_serious"}
+          ]
+        },
+        {
+          "cutId": "s07_06",
+          "speaker": "kazuo",
+          "text": "わかりました。牛乳を飲むようにします。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "pharmacist", "position": "right", "expression": "pharmacist_01_smile"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 8,
+      "title": "かかりつけ医受診",
+      "cuts": [
+        {
+          "cutId": "s08_01",
+          "speaker": "doctor",
+          "text": "聖隷さん、退院後1ヶ月ですね。調子はいかがですか？",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "doctor", "position": "right", "expression": "doctor_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s08_02",
+          "speaker": "kazuo",
+          "text": "おかげさまで、大きく悪くなることはなく過ごせています。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"},
+            {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s08_03",
+          "speaker": "doctor",
+          "text": "訪問看護の記録を見ると、SpO2も安定していますね。体重が少し減っているのが気になりますが...",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "doctor", "position": "right", "expression": "doctor_02_worried"}
+          ]
+        },
+        {
+          "cutId": "s08_04",
+          "speaker": "kazuo",
+          "text": "食欲はあるんですが、あまり量が食べられなくて。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"},
+            {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s08_05",
+          "speaker": "doctor",
+          "text": "COPDの方は呼吸にエネルギーを使うので、体重が減りやすいんです。少量でも高カロリーなものを摂るようにしてください。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s08_06",
+          "speaker": "doctor",
+          "text": "感染予防も大切です。人混みは避けて、手洗い・うがいを徹底してくださいね。インフルエンザと肺炎球菌のワクチンは接種していますか？",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "doctor", "position": "right", "expression": "doctor_07_serious"}
+          ]
+        },
+        {
+          "cutId": "s08_07",
+          "speaker": "kazuo",
+          "text": "インフルエンザは毎年打っています。肺炎球菌は5年前に打ちました。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s08_08",
+          "speaker": "doctor",
+          "text": "では次回、肺炎球菌ワクチンの再接種も検討しましょう。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "doctor", "position": "right", "expression": "doctor_01_smile"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 9,
+      "title": "ケアマネ訪問",
+      "cuts": [
+        {
+          "cutId": "s09_01",
+          "speaker": "sato",
+          "text": "聖隷さん、奥様、こんにちは。ケアマネジャーの佐藤です。サービスの利用状況を確認させてください。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "sato", "position": "right", "expression": "sato_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s09_02",
+          "speaker": "ichiko",
+          "text": "訪問看護は週2回来てもらっていて、とても助かっています。お風呂も安心して入れるようになりました。",
+          "characters": [
+            {"id": "ichiko", "position": "left", "expression": "ichiko_01_smile"},
+            {"id": "sato", "position": "right", "expression": "sato_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s09_03",
+          "speaker": "sato",
+          "text": "それは良かったです。聖隷さん、他に困っていることはありますか？",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "sato", "position": "right", "expression": "sato_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s09_04",
+          "speaker": "kazuo",
+          "text": "買い物に行けなくなったのが困っているかな。車を運転しなくなったから。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"},
+            {"id": "sato", "position": "right", "expression": "sato_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s09_05",
+          "speaker": "sato",
+          "text": "では、訪問介護で買い物支援を追加することもできますよ。また、配食サービスという選択肢もあります。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "sato", "position": "right", "expression": "sato_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s09_06",
+          "speaker": "ichiko",
+          "text": "娘たちが週末に連れ出してくれているけど、毎回は申し訳なくて...",
+          "characters": [
+            {"id": "ichiko", "position": "left", "expression": "ichiko_02_worried"},
+            {"id": "sato", "position": "right", "expression": "sato_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s09_07",
+          "speaker": "sato",
+          "text": "介護者の負担軽減も大切です。ご家族だけで抱え込まず、使えるサービスは活用してくださいね。",
+          "characters": [
+            {"id": "ichiko", "position": "left", "expression": "ichiko_05_neutral"},
+            {"id": "sato", "position": "right", "expression": "sato_07_serious"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 10,
+      "title": "妻との会話",
+      "cuts": [
+        {
+          "cutId": "s10_01",
+          "speaker": "ichiko",
+          "text": "お父さん、最近少し元気になってきたみたいで嬉しいわ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s10_02",
+          "speaker": "kazuo",
+          "text": "そうかな。まだまだ入院前のようにはいかないけどね。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s10_03",
+          "speaker": "ichiko",
+          "text": "無理しなくていいのよ。苦しそうなのを見ているのが一番辛いから。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_02_worried"}
+          ]
+        },
+        {
+          "cutId": "s10_04",
+          "speaker": "kazuo",
+          "text": "市子には迷惑をかけているな。家事も全部やってもらって...",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s10_05",
+          "speaker": "ichiko",
+          "text": "何言ってるの。50年以上一緒にいるんだから、今さらよ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s10_06",
+          "speaker": "kazuo",
+          "text": "体力が戻ったら、また二人で外食に行きたいな。旅行は難しいかもしれないけど。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s10_07",
+          "speaker": "ichiko",
+          "text": "近場でいいじゃない。孫たちも連れて、みんなで美味しいもの食べに行きましょう。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s10_08",
+          "speaker": "kazuo",
+          "text": "そうだな。それを目標に、リハビリも頑張るよ。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_09_grateful"},
+            {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 11,
+      "title": "急変時の対応",
+      "cuts": [
+        {
+          "cutId": "s11_01",
+          "speaker": "yamada",
+          "text": "聖隷さん、今日は急に具合が悪くなった時の対応について確認しておきましょう。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s11_02",
+          "speaker": "kazuo",
+          "text": "入院中も説明を受けたけど、改めて教えてください。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s11_03",
+          "speaker": "yamada",
+          "text": "まず、いつもより息苦しさが強くなったら、酸素を4リットルに上げて、口すぼめ呼吸をしながら楽な姿勢をとってください。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}
+          ]
+        },
+        {
+          "cutId": "s11_04",
+          "speaker": "yamada",
+          "text": "それでも改善しない場合や、次のような症状があったらすぐに連絡してください。①発熱がある ②痰の色が黄色や緑色に変わった ③胸の痛みがある ④意識がぼんやりする ⑤唇や爪が紫色になる",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}
+          ]
+        },
+        {
+          "cutId": "s11_05",
+          "speaker": "kazuo",
+          "text": "わかりました。緊急連絡先は冷蔵庫に貼ってあります。",
+          "characters": [
+            {"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s11_06",
+          "speaker": "yamada",
+          "text": "奥様も、何か気になることがあれば遠慮なく連絡してくださいね。24時間対応していますから。",
+          "characters": [
+            {"id": "ichiko", "position": "left", "expression": "ichiko_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s11_07",
+          "speaker": "ichiko",
+          "text": "夜中でも大丈夫なんですか？申し訳ない気がして...",
+          "characters": [
+            {"id": "ichiko", "position": "left", "expression": "ichiko_02_worried"},
+            {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}
+          ]
+        },
+        {
+          "cutId": "s11_08",
+          "speaker": "yamada",
+          "text": "遠慮しないでください。早めに連絡していただいた方が、大事に至らずに済むことが多いんですよ。",
+          "characters": [
+            {"id": "ichiko", "position": "left", "expression": "ichiko_05_neutral"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        },
+        {
+          "cutId": "s11_09",
+          "speaker": "ichiko",
+          "text": "わかりました。何かあったらすぐに連絡しますね。",
+          "characters": [
+            {"id": "ichiko", "position": "left", "expression": "ichiko_06_relieved"},
+            {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": 12,
+      "title": "エンディング",
+      "cuts": [
+        {"cutId": "s12_01", "characters": []},
+        {"cutId": "s12_02", "characters": []},
+        {"cutId": "s12_03", "characters": []},
+        {"cutId": "s12_04", "characters": []},
+        {"cutId": "s12_05", "characters": []},
+        {"cutId": "s12_06", "characters": []}
+      ]
+    }
+  ]
+}

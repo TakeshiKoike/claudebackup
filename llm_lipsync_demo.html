@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM患者シミュレーション + リップシンク</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 24px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            margin-bottom: 20px;
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .main-area {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .character-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .character-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.05s ease;
+        }
+
+        .character-img.closed { z-index: 2; }
+        .character-img.open { z-index: 1; }
+
+        .character-name {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        .thinking-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            z-index: 10;
+            display: none;
+        }
+
+        .thinking-indicator.show {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .thinking-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .thinking-dots span {
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .chat-area {
+            flex: 1;
+            min-width: 350px;
+            max-width: 550px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e74c3c;
+        }
+
+        .status-dot.connected { background: #2ecc71; }
+
+        .message-box {
+            flex: 1;
+            min-height: 280px;
+            max-height: 350px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 15px;
+            max-width: 85%;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.patient {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message .speaker {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .input-area button {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .input-area button:hover { transform: translateY(-2px); }
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .controls {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            padding: 15px 20px;
+            border-radius: 15px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .control-row:last-child { margin-bottom: 0; }
+        .control-row label {
+            font-weight: bold;
+            min-width: 80px;
+            font-size: 14px;
+        }
+
+        .control-row select, .control-row input[type="range"] {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: none;
+            background: #fff;
+        }
+
+        .volume-meter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .volume-bar {
+            flex: 1;
+            height: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .volume-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00b894, #fdcb6e, #e17055);
+            width: 0%;
+            transition: width 0.05s ease;
+        }
+
+        .quick-phrases {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quick-phrase {
+            padding: 8px 14px;
+            font-size: 12px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .quick-phrase:hover { background: rgba(255,255,255,0.3); }
+
+        .patient-info {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .patient-info h3 {
+            color: #00cec9;
+            margin-bottom: 10px;
+        }
+
+        .patient-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .patient-info td {
+            padding: 4px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .patient-info td:first-child {
+            font-weight: bold;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>LLM患者シミュレーション</h1>
+    <p class="subtitle">Qwen2.5 + VOICEVOX + リアルタイムリップシンク</p>
+
+    <div class="container">
+        <div class="main-area">
+            <div class="character-container">
+                <img id="imgClosed" class="character-img closed" src="characters/kazuo_expressions/kazuo_general_05_neutral.png" alt="口閉じ">
+                <img id="imgOpen" class="character-img open" src="characters/kazuo_expressions/kazuo_general_03_surprised.png" alt="口開き">
+                <div class="character-name">患者: 田中一男 (72歳)</div>
+                <div id="thinkingIndicator" class="thinking-indicator">
+                    <span>考え中</span>
+                    <div class="thinking-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="status-bar">
+                    <div class="status-item">
+                        <div id="llmStatus" class="status-dot"></div>
+                        <span id="llmStatusText">Ollama</span>
+                    </div>
+                    <div class="status-item">
+                        <div id="voicevoxStatus" class="status-dot"></div>
+                        <span id="voicevoxStatusText">VOICEVOX</span>
+                    </div>
+                </div>
+
+                <div id="messageBox" class="message-box"></div>
+
+                <div class="input-area">
+                    <input type="text" id="userInput" placeholder="看護師として話しかけてください..." disabled>
+                    <button id="sendBtn" disabled>送信</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-row">
+                <label>話者:</label>
+                <select id="speakerSelect">
+                    <option value="13" selected>青山龍星（男性）</option>
+                    <option value="52">雀松朱司（男性）</option>
+                    <option value="3">ずんだもん</option>
+                    <option value="2">四国めたん</option>
+                </select>
+                <label>速度:</label>
+                <select id="speedSelect">
+                    <option value="0.9">ゆっくり</option>
+                    <option value="1.0" selected>普通</option>
+                    <option value="1.1">速め</option>
+                </select>
+                <label>音量:</label>
+                <div class="volume-meter">
+                    <div class="volume-bar">
+                        <div id="volumeFill" class="volume-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-row">
+                <label>質問例:</label>
+                <div class="quick-phrases">
+                    <button class="quick-phrase" data-text="こんにちは、田中さん。今日の調子はいかがですか？">挨拶</button>
+                    <button class="quick-phrase" data-text="息苦しさはありますか？">息苦しさ</button>
+                    <button class="quick-phrase" data-text="お薬はきちんと飲めていますか？">服薬確認</button>
+                    <button class="quick-phrase" data-text="食事は食べられていますか？">食事</button>
+                    <button class="quick-phrase" data-text="夜はよく眠れていますか？">睡眠</button>
+                    <button class="quick-phrase" data-text="何か困っていることはありますか？">困りごと</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="patient-info">
+            <h3>患者情報（LLMに設定済み）</h3>
+            <table>
+                <tr><td>氏名</td><td>田中一男</td></tr>
+                <tr><td>年齢</td><td>72歳 男性</td></tr>
+                <tr><td>疾患</td><td>COPD（慢性閉塞性肺疾患）</td></tr>
+                <tr><td>治療</td><td>在宅酸素療法（HOT）2L/分</td></tr>
+                <tr><td>症状</td><td>労作時の息切れ、痰がらみの咳</td></tr>
+                <tr><td>性格</td><td>穏やか、少し心配性、素直</td></tr>
+                <tr><td>生活</td><td>妻と二人暮らし、元会社員</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 要素
+        const imgClosed = document.getElementById('imgClosed');
+        const imgOpen = document.getElementById('imgOpen');
+        const llmStatus = document.getElementById('llmStatus');
+        const llmStatusText = document.getElementById('llmStatusText');
+        const voicevoxStatus = document.getElementById('voicevoxStatus');
+        const voicevoxStatusText = document.getElementById('voicevoxStatusText');
+        const messageBox = document.getElementById('messageBox');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const speakerSelect = document.getElementById('speakerSelect');
+        const speedSelect = document.getElementById('speedSelect');
+        const volumeFill = document.getElementById('volumeFill');
+        const thinkingIndicator = document.getElementById('thinkingIndicator');
+        const quickPhrases = document.querySelectorAll('.quick-phrase');
+
+        // API URLs
+        const OLLAMA_URL = 'http://localhost:11434';
+        const VOICEVOX_URL = 'http://localhost:50021';
+
+        // Audio
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        let isPlaying = false;
+
+        // 会話履歴
+        let conversationHistory = [];
+
+        // 患者のシステムプロンプト
+        const today = new Date();
+        const dateStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+        const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+        const dayOfWeek = dayNames[today.getDay()];
+
+        const SYSTEM_PROMPT = `あなたは72歳の男性患者「田中一男」です。以下の設定で、訪問看護師との会話をしてください。
+
+【今日の日付】
+${dateStr}（${dayOfWeek}曜日）
+
+【基本情報】
+- 氏名: 田中一男
+- 年齢: 72歳
+- 性別: 男性
+- 職業: 元会社員（定年退職）
+
+【病状】
+- 疾患: COPD（慢性閉塞性肺疾患）
+- 治療: 在宅酸素療法（HOT）、酸素流量2L/分
+- 症状:
+  - 階段や坂道で息切れがする
+  - 朝方に痰がらみの咳が出る
+  - 平地歩行は問題なくできる
+- 服薬: 吸入薬を朝晩使用、きちんと続けている
+
+【生活状況】
+- 同居: 妻（68歳）と二人暮らし
+- 趣味: 将棋、テレビで野球観戦
+- 食事: 妻が作ってくれる、食欲はある
+- 睡眠: 比較的よく眠れる
+
+【性格・話し方】
+- 穏やかで素直な性格
+- 少し心配性なところがある
+- 丁寧だが堅すぎない話し方
+- 「〜ですね」「〜ですよ」などを使う
+- 長すぎない自然な返答（1〜3文程度）
+
+【重要な指示】
+- 看護師の質問に対して、上記の設定に基づいて自然に答えてください
+- 医療的に不正確なことは言わないでください
+- 返答は短く自然に（1〜3文程度）
+- 日本語で返答してください`;
+
+        // 接続確認
+        async function checkConnections() {
+            // Ollama
+            try {
+                const res = await fetch(`${OLLAMA_URL}/api/tags`);
+                if (res.ok) {
+                    llmStatus.classList.add('connected');
+                    llmStatusText.textContent = 'Ollama ✓';
+                }
+            } catch (e) {
+                llmStatusText.textContent = 'Ollama ✗';
+            }
+
+            // VOICEVOX
+            try {
+                const res = await fetch(`${VOICEVOX_URL}/version`);
+                if (res.ok) {
+                    voicevoxStatus.classList.add('connected');
+                    voicevoxStatusText.textContent = 'VOICEVOX ✓';
+                }
+            } catch (e) {
+                voicevoxStatusText.textContent = 'VOICEVOX ✗';
+            }
+
+            // 両方接続されていれば入力有効化
+            if (llmStatus.classList.contains('connected') && voicevoxStatus.classList.contains('connected')) {
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+            }
+        }
+
+        // LLM呼び出し
+        async function callLLM(userMessage) {
+            conversationHistory.push({ role: 'user', content: userMessage });
+
+            const response = await fetch(`${OLLAMA_URL}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'qwen2.5:14b',
+                    messages: [
+                        { role: 'system', content: SYSTEM_PROMPT },
+                        ...conversationHistory
+                    ],
+                    stream: false,
+                    options: {
+                        temperature: 0.7,
+                        top_p: 0.9
+                    }
+                })
+            });
+
+            const data = await response.json();
+            const assistantMessage = data.message.content;
+            conversationHistory.push({ role: 'assistant', content: assistantMessage });
+
+            return assistantMessage;
+        }
+
+        // VOICEVOX音声合成
+        async function synthesize(text, speakerId, speed) {
+            const queryRes = await fetch(
+                `${VOICEVOX_URL}/audio_query?text=${encodeURIComponent(text)}&speaker=${speakerId}`,
+                { method: 'POST' }
+            );
+            const query = await queryRes.json();
+            query.speedScale = parseFloat(speed);
+
+            const synthRes = await fetch(
+                `${VOICEVOX_URL}/synthesis?speaker=${speakerId}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(query)
+                }
+            );
+            return await synthRes.arrayBuffer();
+        }
+
+        // 音声再生 + リップシンク
+        async function playWithLipsync(audioBuffer) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                analyser.smoothingTimeConstant = 0.8;
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+            }
+
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+
+            const decodedAudio = await audioContext.decodeAudioData(audioBuffer);
+            const source = audioContext.createBufferSource();
+            source.buffer = decodedAudio;
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            isPlaying = true;
+            source.start();
+            animate();
+
+            return new Promise(resolve => {
+                source.onended = () => {
+                    isPlaying = false;
+                    imgClosed.style.opacity = 1;
+                    volumeFill.style.width = '0%';
+                    resolve();
+                };
+            });
+        }
+
+        // アニメーション
+        function animate() {
+            if (!isPlaying) return;
+            requestAnimationFrame(animate);
+
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+            const average = sum / dataArray.length;
+
+            const volumePercent = Math.min(100, (average / 128) * 100);
+            volumeFill.style.width = volumePercent + '%';
+
+            const THRESHOLD = 15;
+            if (average > THRESHOLD) {
+                const openAmount = Math.min(1, (average - THRESHOLD) / 50);
+                imgClosed.style.opacity = 1 - openAmount;
+            } else {
+                imgClosed.style.opacity = 1;
+            }
+        }
+
+        // メッセージ追加
+        function addMessage(text, isUser) {
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user' : 'patient'}`;
+            div.innerHTML = `
+                <div class="speaker">${isUser ? '看護師' : '田中一男'}</div>
+                ${text}
+            `;
+            messageBox.appendChild(div);
+            messageBox.scrollTop = messageBox.scrollHeight;
+        }
+
+        // 送信
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+            userInput.value = '';
+
+            addMessage(text, true);
+
+            try {
+                // LLM呼び出し
+                thinkingIndicator.classList.add('show');
+                const response = await callLLM(text);
+                thinkingIndicator.classList.remove('show');
+
+                // 音声合成
+                const audioBuffer = await synthesize(
+                    response,
+                    speakerSelect.value,
+                    speedSelect.value
+                );
+
+                addMessage(response, false);
+                await playWithLipsync(audioBuffer);
+
+            } catch (e) {
+                console.error('エラー:', e);
+                thinkingIndicator.classList.remove('show');
+                addMessage('（エラーが発生しました: ' + e.message + '）', false);
+            }
+
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            userInput.focus();
+        }
+
+        // イベント
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
+        });
+
+        quickPhrases.forEach(btn => {
+            btn.addEventListener('click', () => {
+                userInput.value = btn.dataset.text;
+                sendMessage();
+            });
+        });
+
+        // 初期化
+        checkConnections();
+        setInterval(checkConnections, 5000);
+    </script>
+</body>
+</html>
