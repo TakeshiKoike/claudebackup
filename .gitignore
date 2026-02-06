@@ -1,12 +1,6 @@
 # 全て無視
 *
 
-# CLAUDEファイルのみ追跡
-!CLAUDE.md
-!CLAUDE_UE5.md
-!CLAUDE_Unity.md
+# 追跡対象
 !.gitignore
-
-# 3D LipSyncプロジェクト関連
-!3D_LIPSYNC_PROJECT.md
-!BLENDER_MCP_USAGE.md
+!*.md
