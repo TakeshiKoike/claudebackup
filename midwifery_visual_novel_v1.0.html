@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>妊娠検査薬の経験 ～せいれい花子さんの物語～</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-color: #8B4789;
+            --secondary-color: #B06AB3;
+            --accent-color: #F9A8D4;
+            --bg-dark: #1a1a2e;
+            --bg-light: #f5f5f5;
+            --text-dark: #333;
+            --text-light: #fff;
+        }
+
+        body {
+            font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* タイトル画面 */
+        #titleScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #2d1b3d 0%, #1a1a2e 30%, #3d1b2d 70%, #2d1b3d 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            color: white;
+            text-align: center;
+        }
+
+        #titleScreen::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 50% 50%, rgba(176, 106, 179, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        #titleScreen h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        #titleScreen h2 {
+            font-size: 1.3em;
+            font-weight: normal;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            position: relative;
+        }
+
+        .title-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px 40px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            line-height: 1.8;
+            position: relative;
+            border: 1px solid rgba(249, 168, 212, 0.2);
+        }
+
+        .title-info p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        #startButton {
+            padding: 20px 60px;
+            font-size: 1.4em;
+            background: linear-gradient(135deg, #F9A8D4, #B06AB3);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(176, 106, 179, 0.4);
+            font-weight: bold;
+            position: relative;
+        }
+
+        #startButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(176, 106, 179, 0.6);
+        }
+
+        /* メインゲーム画面 */
+        #gameScreen {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        #backgroundLayer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-color: #2d2d44;
+            transition: background 0.5s ease;
+        }
+
+        #characterLayer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 220px;
+            pointer-events: none;
+        }
+
+        .character-slot {
+            position: absolute;
+            bottom: 220px;
+            max-width: 300px;
+            max-height: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .character-slot.left { left: 5%; }
+        .character-slot.center { left: 50%; transform: translateX(-50%); }
+        .character-slot.right { right: 5%; }
+        .character-slot.right-far { right: 2%; }
+
+        .character-slot img,
+        .character-slot video {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+            border-radius: 10px;
+        }
+
+        .character-slot video {
+            background: transparent;
+        }
+
+        /* キャラクタースロットの暗転（話していないキャラ） */
+        .character-slot.dimmed img {
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3)) brightness(0.6);
+        }
+
+        #dialogBox {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.85));
+            padding: 20px 30px;
+            min-height: 200px;
+        }
+
+        #speakerName {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        #speakerName.narrator { background: #6b7b8d; }
+        #speakerName.thought { background: #4682b4; font-style: italic; }
+
+        #dialogText {
+            color: white;
+            font-size: 1.15em;
+            line-height: 1.8;
+            min-height: 80px;
+        }
+
+        #dialogText.thought {
+            font-style: italic;
+            color: #b0c4de;
+        }
+
+        #navButtons {
+            position: absolute;
+            bottom: 15px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .nav-btn.prev { background: #666; color: white; }
+        .nav-btn.next { background: var(--accent-color); color: var(--text-dark); }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #progressBar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: rgba(255,255,255,0.2);
+            z-index: 10;
+        }
+
+        #progressFill {
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        #sceneHeader {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            z-index: 10;
+        }
+
+        #audioControls {
+            position: fixed;
+            bottom: 220px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1500;
+        }
+
+        .audio-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .audio-btn:hover { background: rgba(0,0,0,0.9); }
+        .audio-btn.off { background: #c62828; }
+
+        /* ナビゲーションコントロール */
+        #navControlPanel {
+            position: fixed;
+            top: 15px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 3500;
+        }
+
+        .nav-control-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-control-btn:hover { background: rgba(0,0,0,0.9); }
+
+        /* シーン選択パネル */
+        #sceneSelectPanel {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 4000;
+        }
+
+        .scene-select-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .scene-select-content h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .scene-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .scene-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scene-item:hover { background: #f0e0f0; }
+        .scene-item.completed { background: #fce4ec; }
+        .scene-item.current { background: #f3e5f5; border: 2px solid var(--secondary-color); }
+
+        .scene-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .scene-item.completed .scene-number { background: #e91e63; }
+
+        .scene-title { flex: 1; font-weight: 500; }
+
+        .scene-close-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        /* 知識解説パネル */
+        #knowledgePanel {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            padding: 20px;
+        }
+
+        .knowledge-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .knowledge-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .knowledge-header h3 { font-size: 1.3em; }
+
+        .knowledge-body {
+            padding: 25px;
+            line-height: 1.8;
+            color: var(--text-dark);
+            white-space: pre-line;
+        }
+
+        .knowledge-close {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .knowledge-close:hover { background: var(--primary-color); }
+
+        /* クイズパネル */
+        #quizPanel {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            padding: 20px;
+        }
+
+        .quiz-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 650px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .quiz-header {
+            background: #e91e63;
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quiz-question {
+            padding: 20px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: var(--text-dark);
+            border-bottom: 1px solid #eee;
+        }
+
+        .quiz-options { padding: 15px; }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover:not(.disabled) {
+            border-color: #e91e63;
+            background: #fce4ec;
+        }
+
+        .quiz-option.selected {
+            border-color: #9c27b0;
+            background: #f3e5f5;
+        }
+
+        .quiz-option.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .quiz-option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .quiz-feedback {
+            display: none;
+            padding: 20px;
+            margin: 15px;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        .quiz-feedback.show { display: block; }
+
+        .quiz-feedback.correct {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        .quiz-feedback.incorrect {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            color: #c62828;
+        }
+
+        .quiz-submit {
+            display: block;
+            width: calc(100% - 30px);
+            margin: 15px;
+            padding: 15px;
+            background: #e91e63;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .quiz-submit:hover:not(:disabled) { background: #c2185b; }
+        .quiz-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+        .quiz-continue {
+            display: none;
+            width: calc(100% - 30px);
+            margin: 15px;
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .quiz-continue:hover { background: var(--secondary-color); }
+
+        /* 全体プログレスバー */
+        #globalProgressBar {
+            position: absolute;
+            top: 5px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            z-index: 10;
+        }
+
+        #globalProgressFill {
+            height: 100%;
+            background: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            #titleScreen h1 { font-size: 1.8em; }
+            #titleScreen h2 { font-size: 1.1em; }
+            .title-info { padding: 15px 20px; }
+            #startButton { padding: 15px 40px; font-size: 1.2em; }
+
+            .character-slot { max-width: 180px; max-height: 250px; }
+            .character-slot img,
+            .character-slot video { max-height: 250px; }
+            .character-slot.left { left: 2%; }
+            .character-slot.right { right: 2%; }
+
+            #dialogBox { padding: 15px 20px; min-height: 180px; }
+            #dialogText { font-size: 1em; }
+            #navButtons { right: 20px; gap: 10px; }
+            .nav-btn { padding: 10px 20px; font-size: 0.9em; }
+
+            #characterLayer { padding-bottom: 190px; }
+            .character-slot { bottom: 190px; }
+            #audioControls { bottom: 190px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- タイトル画面 -->
+    <div id="titleScreen">
+        <h1>妊娠検査薬の経験</h1>
+        <h2>～せいれい花子さんの物語～</h2>
+        <div class="title-info">
+            <p>主人公：せいれい花子さん（28歳・女性）</p>
+            <p>テーマ：妊娠の徴候・検査・受診・出産決断</p>
+            <p>パートナー：大輔さん</p>
+            <p>全12シーン・55カット・4問のクイズ</p>
+        </div>
+        <button id="startButton">学習を開始する</button>
+    </div>
+
+    <!-- メインゲーム画面 -->
+    <div id="gameScreen">
+        <div id="progressBar"><div id="progressFill"></div></div>
+        <div id="globalProgressBar"><div id="globalProgressFill"></div></div>
+        <div id="backgroundLayer"></div>
+        <div id="characterLayer">
+            <div class="character-slot left" id="charLeft"></div>
+            <div class="character-slot center" id="charCenter"></div>
+            <div class="character-slot right" id="charRight"></div>
+        </div>
+        <div id="sceneHeader"></div>
+        <div id="dialogBox">
+            <div id="speakerName"></div>
+            <div id="dialogText"></div>
+            <div id="navButtons">
+                <button class="nav-btn prev" id="prevBtn">&#8592; 戻る</button>
+                <button class="nav-btn next" id="nextBtn">次へ &#8594;</button>
+            </div>
+        </div>
+        <div id="audioControls">
+            <button class="audio-btn" id="voiceToggle">音声 ON</button>
+        </div>
+    </div>
+
+    <!-- 知識解説パネル -->
+    <div id="knowledgePanel">
+        <div class="knowledge-content">
+            <div class="knowledge-header">
+                <span>&#128218;</span>
+                <h3 id="knowledgeTitle"></h3>
+            </div>
+            <div class="knowledge-body" id="knowledgeText"></div>
+            <button class="knowledge-close" id="knowledgeClose">理解しました</button>
+        </div>
+    </div>
+
+    <!-- クイズパネル -->
+    <div id="quizPanel">
+        <div class="quiz-content">
+            <div class="quiz-header">
+                <h3><span>&#10067;</span> 確認クイズ</h3>
+            </div>
+            <div class="quiz-question" id="quizQuestion"></div>
+            <div class="quiz-options" id="quizOptions"></div>
+            <div class="quiz-feedback" id="quizFeedback"></div>
+            <button class="quiz-submit" id="quizSubmit">回答する</button>
+            <button class="quiz-continue" id="quizContinue">次へ進む</button>
+        </div>
+    </div>
+
+    <!-- ナビゲーションコントロール -->
+    <div id="navControlPanel">
+        <button class="nav-control-btn" id="restartBtn">&#128260; 最初から</button>
+        <button class="nav-control-btn" id="sceneSelectBtn">&#128203; シーン選択</button>
+    </div>
+
+    <!-- シーン選択パネル -->
+    <div id="sceneSelectPanel">
+        <div class="scene-select-content">
+            <h3>&#128203; シーン選択</h3>
+            <div class="scene-list" id="sceneList"></div>
+            <button class="scene-close-btn" id="sceneSelectClose">閉じる</button>
+        </div>
+    </div>
+
+    <script>
+    // ========================================================
+    // 音声ファイルマッピング（scene_cut → audio filename）
+    // ========================================================
+    const audioMapping = {
+        "1_0": "01_01", "1_1": "01_02", "1_2": "01_03", "1_3": "01_04",
+        "2_0": "02_01", "2_1": "02_02", "2_2": "02_03",
+        "3_0": "03_01", "3_1": "03_02", "3_2": "03_03", "3_3": "03_04", "3_4": "03_05", "3_5": "03_06",
+        "4_0": "04_01", "4_1": "04_02", "4_2": "04_03", "4_3": "04_04", "4_4": "04_05", "4_5": "04_06", "4_6": "04_07", "4_7": "04_08",
+        "5_0": "05_01", "5_1": "05_02", "5_3": "05_03", "5_4": "05_04", "5_6": "05_05",
+        "6_0": "06_01", "6_1": "06_02", "6_2": "06_03", "6_3": "06_04", "6_4": "06_05",
+        "7_0": "07_01", "7_1": "07_02", "7_2": "07_03", "7_3": "07_04",
+        "8_0": "08_01", "8_1": "08_02", "8_2": "08_03", "8_3": "08_04", "8_4": "08_05", "8_5": "08_06", "8_8": "08_07", "8_9": "08_08",
+        "9_0": "09_01", "9_1": "09_02", "9_2": "09_03", "9_3": "09_04", "9_4": "09_05",
+        "10_0": "10_01", "10_1": "10_02", "10_2": "10_03", "10_3": "10_04", "10_4": "10_05", "10_5": "10_06", "10_6": "10_07",
+        "11_0": "11_01", "11_1": "11_02", "11_3": "11_03", "11_4": "11_04", "11_5": "11_05", "11_6": "11_06", "11_7": "11_07", "11_8": "11_08", "11_9": "11_09", "11_10": "11_10",
+        "12_0": "12_01", "12_1": "12_02", "12_2": "12_03"
+    };
+
+    // ========================================================
+    // 動画ファイルマッピング（cutId_speaker: true）
+    // Videos are named sXX_YY_speaker.mp4
+    // ========================================================
+    const videoFiles = {
+        's03_01_hanako': true, 's03_02_daisuke': true, 's03_03_daisuke': true,
+        's03_04_daisuke': true, 's03_05_hanako': true, 's03_06_daisuke': true,
+        's04_01_friend': true, 's04_02_hanako': true, 's04_03_friend': true,
+        's04_04_hanako': true, 's04_05_friend': true, 's04_06_friend': true,
+        's04_07_hanako': true, 's04_08_friend': true,
+        's05_01_hanako': true, 's05_02_pharmacist': true,
+        's06_03_hanako': true, 's06_05_hanako': true,
+        's07_01_hanako': true, 's07_02_receptionist': true,
+        's07_03_receptionist': true, 's07_04_receptionist': true,
+        's08_01_doctor': true, 's08_02_hanako': true, 's08_03_doctor': true,
+        's08_04_hanako': true, 's08_05_midwife': true, 's08_06_midwife': true,
+        's09_01_hanako': true, 's09_02_daisuke': true, 's09_03_hanako': true,
+        's09_04_daisuke': true, 's09_05_hanako': true,
+        's10_01_midwife': true, 's10_02_hanako': true, 's10_03_midwife': true,
+        's10_04_midwife': true, 's10_05_daisuke': true, 's10_06_midwife': true,
+        's10_07_midwife': true,
+        's11_01_furuta': true, 's11_02_furuta': true
+    };
+
+    // ========================================================
+    // 背景グラデーション（シーンごと）
+    // ========================================================
+    const sceneBackgrounds = {
+        1:  'linear-gradient(135deg, #2d1b3d 0%, #1a1a2e 50%, #3d1b2d 100%)',
+        2:  'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 40%, #e1f5fe 100%)',
+        3:  'linear-gradient(135deg, #fff8e1 0%, #ffe0b2 40%, #fff3e0 100%)',
+        4:  'linear-gradient(135deg, #efebe9 0%, #d7ccc8 40%, #f5f0eb 100%)',
+        5:  'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 40%, #f1f8e9 100%)',
+        6:  'linear-gradient(135deg, #e3f2fd 0%, #b3e5fc 40%, #e8eaf6 100%)',
+        7:  'linear-gradient(135deg, #f5f5f5 0%, #e3f2fd 40%, #fafafa 100%)',
+        8:  'linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 40%, #fafafa 100%)',
+        9:  'linear-gradient(135deg, #fff8e1 0%, #ffecb3 40%, #ffd54f22 100%)',
+        10: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 30%, #fafafa 100%)',
+        11: 'linear-gradient(135deg, #eceff1 0%, #cfd8dc 40%, #f5f5f5 100%)',
+        12: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 30%, #e1f5fe 60%, #fff9c4 100%)'
+    };
+
+    // ========================================================
+    // キャラクター情報
+    // ========================================================
+    const speakerNames = {
+        narrator: "ナレーション",
+        thought: "花子の心の声",
+        hanako: "花子",
+        daisuke: "大輔",
+        friend: "友人",
+        pharmacist: "薬剤師",
+        receptionist: "受付",
+        doctor: "医師",
+        midwife: "クリニック助産師",
+        furuta: "古田助産師"
+    };
+
+    // speaker → character prefix mapping for video lookup
+    const speakerToVideoChar = {
+        hanako: 'hanako',
+        daisuke: 'daisuke',
+        friend: 'friend',
+        pharmacist: 'pharmacist',
+        receptionist: 'receptionist',
+        doctor: 'doctor',
+        midwife: 'midwife',
+        furuta: 'furuta'
+    };
+
+    // ========================================================
+    // シナリオデータ (12 scenes, 55 cuts)
+    // ========================================================
+    const scenarioData = {
+        scenes: [
+            {
+                id: 1,
+                title: "導入",
+                cuts: [
+                    { scene: 1, cut: 0, speaker: "narrator", characters: [], text: "今回の主人公はせいれい花子さん、28歳の女性です。" },
+                    { scene: 1, cut: 1, speaker: "narrator", characters: [], text: "自分が花子さんになったつもりで考えてみましょう。" },
+                    { scene: 1, cut: 2, speaker: "narrator", characters: ["hanako_01_smile_gentle"], text: "花子さんは仕事に意欲的な社会人。パートナーの大輔さんとお付き合いをしています。" },
+                    { scene: 1, cut: 3, speaker: "narrator", characters: ["hanako_01_smile_gentle"], text: "ある日、花子さんは体の変化に気づきます..." }
+                ]
+            },
+            {
+                id: 2,
+                title: "体の変化に気づく",
+                cuts: [
+                    { scene: 2, cut: 0, speaker: "thought", characters: ["hanako_04_worried"], text: "あれ？今月生理がまだ来てないけど、先月はいつだったっけ？" },
+                    { scene: 2, cut: 1, speaker: "thought", characters: ["hanako_12_surprised"], text: "予定よりも1週間も遅れている...。いつも正確に28日周期で来るのに..." },
+                    { scene: 2, cut: 2, speaker: "thought", characters: ["hanako_06_anxious"], text: "そういえば、この間大輔が泊まっていったけど...あの時大丈夫だったかな...？" }
+                ]
+            },
+            {
+                id: 3,
+                title: "夫との会話",
+                cuts: [
+                    { scene: 3, cut: 0, speaker: "hanako", characters: ["hanako_04_worried", "daisuke_05_neutral"], text: "大輔、今月生理が来てなくて、予定よりも1週間も遅れているんだけど、どうしよう？" },
+                    { scene: 3, cut: 1, speaker: "daisuke", characters: ["hanako_04_worried", "daisuke_09_surprised"], text: "えっ？どういうこと？" },
+                    { scene: 3, cut: 2, speaker: "daisuke", characters: ["hanako_06_anxious", "daisuke_04_confused"], text: "えーっ！妊娠したってこと？ちょっと待って！" },
+                    { scene: 3, cut: 3, speaker: "daisuke", characters: ["hanako_06_anxious", "daisuke_03_worried"], text: "妊娠検査薬してみた？" },
+                    { scene: 3, cut: 4, speaker: "hanako", characters: ["hanako_05_neutral", "daisuke_03_worried"], text: "まだ何もしてない" },
+                    { scene: 3, cut: 5, speaker: "daisuke", characters: ["hanako_05_neutral", "daisuke_06_concerned"], text: "病院へ行って診察してもらった方がいいのかな？" }
+                ]
+            },
+            {
+                id: 4,
+                title: "友人との相談",
+                cuts: [
+                    { scene: 4, cut: 0, speaker: "friend", characters: ["hanako_05_neutral", "friend_01_smile_gentle"], text: "珍しいね、花子から呼び出しがあるなんて。何かあった？" },
+                    { scene: 4, cut: 1, speaker: "hanako", characters: ["hanako_04_worried", "friend_05_neutral"], text: "うん...えっと実はね..." },
+                    { scene: 4, cut: 2, speaker: "friend", characters: ["hanako_06_anxious", "friend_09_surprised"], text: "えっ！妊娠したの？" },
+                    { scene: 4, cut: 3, speaker: "hanako", characters: ["hanako_07_confused", "friend_05_neutral"], text: "まだわかんない。そういえば、緊急避妊薬ってあるんでしょ？それ飲んだら大丈夫かな？" },
+                    { scene: 4, cut: 4, speaker: "friend", characters: ["hanako_12_surprised", "friend_03_angry"], text: "何言ってるの！緊急避妊薬は、性交後72時間以内に飲まなきゃ意味ないよ！" },
+                    { scene: 4, cut: 5, speaker: "friend", characters: ["hanako_05_neutral", "friend_04_smile_soft"], text: "まずは妊娠検査薬で見てみようよ" },
+                    { scene: 4, cut: 6, speaker: "hanako", characters: ["hanako_08_thinking", "friend_01_smile_gentle"], text: "妊娠検査薬って、いくら位するんだろう？知ってる？" },
+                    { scene: 4, cut: 7, speaker: "friend", characters: ["hanako_05_neutral", "friend_07_happy"], text: "うちのお姉ちゃんが1,000円～3,000円ぐらいで買えるって言ってたよ" }
+                ],
+                knowledge: {
+                    title: "緊急避妊薬について",
+                    text: "緊急避妊薬（アフターピル）は、避妊に失敗した場合や避妊をしなかった場合に、性交後に緊急的に用いる避妊薬です。\n\n【ポイント】\n・性交後72時間（3日）以内に服用する必要がある\n・早ければ早いほど効果が高い（24時間以内が最も有効）\n・排卵を遅らせたり、受精卵の着床を妨げる作用\n・妊娠が成立した後では効果がない\n・薬局やオンライン処方で入手可能（2024年～）\n・価格は6,000円～15,000円程度\n\n【注意】\n・生理が予定日より1週間以上遅れている場合は、すでに妊娠の可能性があるため、緊急避妊薬ではなく妊娠検査薬を使用すべき"
+                },
+                quiz: {
+                    question: "緊急避妊薬（アフターピル）について正しいのはどれか？",
+                    options: [
+                        { text: "性交後1週間以内に服用すれば効果がある", correct: false },
+                        { text: "性交後72時間以内に服用する必要がある", correct: true },
+                        { text: "すでに妊娠が成立している場合でも効果がある", correct: false },
+                        { text: "月経が遅れている場合にまず試すべき薬である", correct: false }
+                    ]
+                }
+            },
+            {
+                id: 5,
+                title: "薬局",
+                cuts: [
+                    { scene: 5, cut: 0, speaker: "hanako", characters: ["hanako_04_worried", "pharmacist_01_smile"], text: "すみません。妊娠検査薬が欲しいのですが..." },
+                    { scene: 5, cut: 1, speaker: "pharmacist", characters: ["hanako_05_neutral", "pharmacist_01_smile"], text: "はい、こちらになります。ご使用方法はわかりますか？" }
+                ],
+                knowledge: {
+                    title: "妊娠検査薬の使い方",
+                    text: "妊娠検査薬は、尿中のhCG（ヒト絨毛性ゴナドトロピン）を検出して妊娠の有無を判定します。\n\n【使用のタイミング】\n・生理予定日の約1週間後から使用可能\n・朝一番の尿が最も正確\n\n【使い方】\n1. 検査薬の先端に尿をかける（または尿を容器に取って浸す）\n2. 平らな場所に置いて1～3分待つ\n3. 判定窓を確認する\n\n【結果の見方】\n・陽性（2本線）：妊娠の可能性が高い\n・陰性（1本線）：妊娠の可能性は低い\n・無効（線なし）：検査失敗、やり直し\n\n【価格】\n・1,000円～3,000円程度（薬局で購入可能）\n\n【注意点】\n・陽性でも異所性妊娠（子宮外妊娠）の可能性がある\n・必ず産婦人科を受診すること"
+                }
+            },
+            {
+                id: 6,
+                title: "妊娠検査",
+                cuts: [
+                    { scene: 6, cut: 0, speaker: "thought", characters: ["hanako_08_thinking"], text: "妊娠したらどんな風になるのかな？調べてみよう" },
+                    { scene: 6, cut: 1, speaker: "narrator", characters: ["hanako_05_neutral"], text: "【妊娠の徴候】無月経、つわり、胸の張り、だるさ、おりものの変化、微熱、下腹痛..." },
+                    { scene: 6, cut: 2, speaker: "hanako", characters: ["hanako_12_surprised"], text: "そうなんだ。こんなにいろいろな症状があるんだ" },
+                    { scene: 6, cut: 3, speaker: "narrator", characters: ["hanako_08_thinking"], text: "妊娠週数は、最終月経の初日を0日として、280日を分娩予定日とします" },
+                    { scene: 6, cut: 4, speaker: "hanako", characters: ["hanako_05_neutral"], text: "もし私が妊娠しているとしたら、妊娠5週目の終わりか妊娠6週目の初め頃ってことなのね" }
+                ],
+                knowledge: {
+                    title: "妊娠の徴候と妊娠週数の数え方",
+                    text: "【妊娠の主な徴候】\n・無月経（最も重要なサイン）\n・つわり（悪心・嘔吐）：妊娠5～6週頃から\n・乳房の張り・痛み\n・全身倦怠感、眠気\n・基礎体温の高温期が続く\n・おりものの変化\n・微熱、下腹部痛\n\n【妊娠週数の数え方】\n・最終月経の初日を妊娠0週0日とする\n・妊娠は約280日（40週）\n・ネーゲレの概算法：最終月経月 -3（or +9）、日 +7\n\n例：最終月経が4月1日の場合\n→ 分娩予定日：1月8日\n\n【妊娠初期の区分】\n・妊娠4週：着床完了、hCG上昇\n・妊娠5～6週：胎嚢確認可能\n・妊娠6～7週：心拍確認可能"
+                },
+                quiz: {
+                    question: "妊娠週数の数え方について正しいのはどれか？",
+                    options: [
+                        { text: "受精した日を0日として数える", correct: false },
+                        { text: "最終月経の初日を0日として数える", correct: true },
+                        { text: "妊娠検査薬が陽性になった日から数える", correct: false },
+                        { text: "つわりが始まった日から数える", correct: false }
+                    ]
+                }
+            },
+            {
+                id: 7,
+                title: "クリニック受付",
+                cuts: [
+                    { scene: 7, cut: 0, speaker: "hanako", characters: ["hanako_04_worried", "receptionist_01_smile"], text: "生理が1週間遅れているので、診察していただきたくて来ました" },
+                    { scene: 7, cut: 1, speaker: "receptionist", characters: ["hanako_05_neutral", "receptionist_05_neutral"], text: "市販の妊娠検査薬でチェックされていても、再度こちらで調べますがよろしいですか？" },
+                    { scene: 7, cut: 2, speaker: "receptionist", characters: ["hanako_05_neutral", "receptionist_05_neutral"], text: "今回初診になりますので、尿検査、血圧測定、体重測定、問診内診、経腟超音波検査があります" },
+                    { scene: 7, cut: 3, speaker: "receptionist", characters: ["hanako_05_neutral", "receptionist_01_smile"], text: "妊娠・出産は健康保険適用外で自費診療となります。妊婦健診扱いで初診6,000円、陰性の場合は4,700円です" }
+                ],
+                knowledge: {
+                    title: "初診の流れと費用",
+                    text: "【産婦人科初診の検査内容】\n・尿検査（hCG検査）\n・血圧測定\n・体重測定\n・問診（最終月経日、既往歴など）\n・内診\n・経腟超音波検査（エコー）\n\n【費用について】\n・妊娠・出産は健康保険が適用されない（自費診療）\n・初診料：約5,000円～10,000円\n・超音波検査：約2,000円～5,000円\n・合計：約6,000円～15,000円\n\n【持っていくもの】\n・健康保険証\n・基礎体温表（あれば）\n・最終月経の日付のメモ\n・お薬手帳\n\n【妊婦健診の公費助成】\n・母子健康手帳を受け取ると、14回分の妊婦健診受診票が交付される\n・自治体により助成内容が異なる"
+                }
+            },
+            {
+                id: 8,
+                title: "診察・助産師面談",
+                cuts: [
+                    { scene: 8, cut: 0, speaker: "doctor", characters: ["hanako_04_worried", "doctor_01_smile"], text: "こんにちは。今日はどうされましたか" },
+                    { scene: 8, cut: 1, speaker: "hanako", characters: ["hanako_05_neutral", "doctor_05_neutral"], text: "生理が1週間遅れているので診察していただきたくて来ました。市販の妊娠検査薬でチェックしてみたら陽性でした" },
+                    { scene: 8, cut: 2, speaker: "doctor", characters: ["hanako_06_anxious", "doctor_05_neutral"], text: "そうなんですね。こちらでももう一度検査してみますね。ところでこのことは、パートナーの方はご存じですか？" },
+                    { scene: 8, cut: 3, speaker: "hanako", characters: ["hanako_09_concerned", "doctor_05_neutral"], text: "はい、知っています。まだ結婚していませんし、仕事ではある企画を任されていて、おもしろくなってきたところなんです" },
+                    { scene: 8, cut: 4, speaker: "midwife", characters: ["hanako_04_worried", "midwife_clinic_01_smile"], text: "そうなんですね。まだ妊娠を継続するのか諦めるのか、決められない状況なんですね" },
+                    { scene: 8, cut: 5, speaker: "midwife", characters: ["hanako_05_neutral", "midwife_clinic_05_neutral"], text: "パートナーの方やご両親とも十分にお話しなさってください。もしも今回の妊娠を諦めるということであれば、妊娠22週未満でなければなりません" }
+                ],
+                quiz: {
+                    question: "妊娠の確定診断に最も重要な検査はどれか？",
+                    options: [
+                        { text: "市販の妊娠検査薬", correct: false },
+                        { text: "血液検査によるhCG測定", correct: false },
+                        { text: "経腟超音波検査による胎嚢確認", correct: true },
+                        { text: "基礎体温の測定", correct: false }
+                    ]
+                }
+            },
+            {
+                id: 9,
+                title: "妊娠報告",
+                cuts: [
+                    { scene: 9, cut: 0, speaker: "hanako", characters: ["hanako_05_neutral", "daisuke_05_neutral"], text: "大輔、昨日病院に行って検査してもらってきたよ。やっぱり妊娠してた" },
+                    { scene: 9, cut: 1, speaker: "daisuke", characters: ["hanako_12_surprised", "daisuke_07_happy"], text: "やったー！よかったよ。あれからずっと考えてたんだけど、お互い付き合いも長いし、これでキミとお腹の子と一緒に生きていけるんだね" },
+                    { scene: 9, cut: 2, speaker: "hanako", characters: ["hanako_11_laugh", "daisuke_08_laugh"], text: "妊娠したかもって思ったときは、仕事のこととか、やりたいことはいろいろあるけれど...本当にどうしたらいいのか不安だったけど" },
+                    { scene: 9, cut: 3, speaker: "daisuke", characters: ["hanako_10_happy", "daisuke_01_smile"], text: "結婚して子どもを二人で育てていこうよ" },
+                    { scene: 9, cut: 4, speaker: "hanako", characters: ["hanako_10_happy", "daisuke_07_happy"], text: "助産師さんに出産しますって伝えなくっちゃ" }
+                ]
+            },
+            {
+                id: 10,
+                title: "助産師指導",
+                cuts: [
+                    { scene: 10, cut: 0, speaker: "midwife", characters: ["hanako_10_happy", "daisuke_01_smile", "midwife_clinic_07_happy"], text: "良かったですね。妊娠を継続することになったんですね。赤ちゃんは順調に育っているようですよ" },
+                    { scene: 10, cut: 1, speaker: "hanako", characters: ["hanako_04_worried", "midwife_clinic_05_neutral"], text: "はい、ありがとうございます。なんだか胃がむかむかするようになってきました" },
+                    { scene: 10, cut: 2, speaker: "midwife", characters: ["hanako_05_neutral", "midwife_clinic_01_smile"], text: "つわりの症状が出てきましたかね。吐いても心配はありません。水分を取るようにして、食べられそうなものを少しずつ食べましょう" },
+                    { scene: 10, cut: 3, speaker: "midwife", characters: ["daisuke_05_neutral", "midwife_clinic_05_neutral"], text: "こちらがお相手の方ですか。出産をご希望ということですので、早めに籍を入れて、母子健康手帳をもらってきてください" },
+                    { scene: 10, cut: 4, speaker: "daisuke", characters: ["hanako_10_happy", "daisuke_01_smile"], text: "はい、わかりました。花子のご両親にもあいさつに行かないといけないね" },
+                    { scene: 10, cut: 5, speaker: "midwife", characters: ["hanako_05_neutral", "midwife_clinic_05_neutral"], text: "こちらが妊娠届出書です。お住いの区の子育て世代包括支援センターへ行くと、母子健康手帳がもらえます" },
+                    { scene: 10, cut: 6, speaker: "midwife", characters: ["hanako_05_neutral", "midwife_clinic_05_neutral"], text: "母子健康手帳の中には乳児健診受診票が入っており、別冊で妊婦健診等受診票綴り（14回分）がついています" }
+                ],
+                knowledge: {
+                    title: "母子健康手帳について",
+                    text: "母子健康手帳は、妊娠期から乳幼児期までの健康に関する重要な情報を記録するものです。\n\n【交付場所】\n・お住まいの市区町村の窓口\n・子育て世代包括支援センター\n\n【必要書類】\n・妊娠届出書（医療機関で記入）\n・本人確認書類\n\n【手帳の内容】\n・妊婦の健康状態の記録\n・妊婦健診の記録\n・出産の記録\n・乳幼児の発育・発達の記録\n・予防接種の記録\n\n【同時に交付されるもの】\n・妊婦健診等受診票（14回分）\n  → 健診費用の公費助成に使用\n・乳児健診受診票\n・各種相談窓口の案内\n\n【つわりへの対処】\n・少量頻回食\n・水分をこまめに摂取\n・食べられるものを食べる\n・症状がひどい場合は医療機関に相談"
+                },
+                quiz: {
+                    question: "母子健康手帳について正しいのはどれか？",
+                    options: [
+                        { text: "産婦人科の病院で交付される", correct: false },
+                        { text: "妊娠届出書をもとに市区町村が交付する", correct: true },
+                        { text: "出産後に申請して交付される", correct: false },
+                        { text: "健康保険証があれば不要である", correct: false }
+                    ]
+                }
+            },
+            {
+                id: 11,
+                title: "母子手帳交付",
+                cuts: [
+                    { scene: 11, cut: 0, speaker: "furuta", characters: ["hanako_10_happy", "daisuke_01_smile", "midwife_furuta_01_smile"], text: "こんにちは。助産師の古田です。この度はおめでとうございます" },
+                    { scene: 11, cut: 1, speaker: "furuta", characters: ["hanako_10_happy", "midwife_furuta_01_smile"], text: "妊娠届出書を確認させていただきましたので、母子健康手帳をお渡しさせていただきます" }
+                ]
+            },
+            {
+                id: 12,
+                title: "エンディング",
+                cuts: [
+                    { scene: 12, cut: 0, speaker: "narrator", characters: ["hanako_10_happy"], text: "こうして、せいれい花子さんは妊娠が確定し、出産する決心をしました" },
+                    { scene: 12, cut: 1, speaker: "narrator", characters: ["hanako_11_laugh"], text: "これから、花子さんのマタニティライフが始まります" },
+                    { scene: 12, cut: 2, speaker: "narrator", characters: [], text: "その後の花子さんの様子を、順次クリニックのカルテで確認していきましょう" }
+                ]
+            }
+        ]
+    };
+
+    // ========================================================
+    // ゲーム状態
+    // ========================================================
+    let currentSceneIndex = 0;
+    let currentCutIndex = 0;
+    let voiceEnabled = true;
+    let currentVoice = null;
+    let currentCutHasVideo = false;
+    let completedScenes = new Set();
+
+    // ========================================================
+    // 初期化
+    // ========================================================
+    function init() {
+        document.getElementById('startButton').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', restartGame);
+        document.getElementById('sceneSelectBtn').addEventListener('click', showSceneSelect);
+        document.getElementById('sceneSelectClose').addEventListener('click', closeSceneSelect);
+        document.getElementById('voiceToggle').addEventListener('click', toggleVoice);
+        document.getElementById('knowledgeClose').addEventListener('click', closeKnowledge);
+        document.getElementById('quizSubmit').addEventListener('click', submitQuiz);
+        document.getElementById('quizContinue').addEventListener('click', closeQuiz);
+        document.getElementById('prevBtn').addEventListener('click', prevCut);
+        document.getElementById('nextBtn').addEventListener('click', nextCut);
+
+        // キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('gameScreen').style.display !== 'block') return;
+            if (document.getElementById('knowledgePanel').style.display === 'flex') return;
+            if (document.getElementById('quizPanel').style.display === 'flex') return;
+            if (document.getElementById('sceneSelectPanel').style.display === 'flex') return;
+
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                nextCut();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevCut();
+            }
+        });
+    }
+
+    // ========================================================
+    // ゲーム開始
+    // ========================================================
+    function startGame() {
+        document.getElementById('titleScreen').style.display = 'none';
+        currentSceneIndex = 0;
+        currentCutIndex = 0;
+        document.getElementById('gameScreen').style.display = 'block';
+        renderScene();
+    }
+
+    // ========================================================
+    // シーン描画
+    // ========================================================
+    function renderScene() {
+        const scene = scenarioData.scenes[currentSceneIndex];
+        const cut = scene.cuts[currentCutIndex];
+
+        // 背景設定
+        const bgLayer = document.getElementById('backgroundLayer');
+        bgLayer.style.backgroundImage = 'none';
+        bgLayer.style.background = sceneBackgrounds[scene.id] || sceneBackgrounds[1];
+
+        // キャラクター描画
+        renderCharacters(cut);
+
+        // 音声再生（動画がある場合はスキップ - 動画内に音声含まれる）
+        if (voiceEnabled && !currentCutHasVideo) {
+            const sceneCutKey = `${cut.scene}_${cut.cut}`;
+            const audioId = audioMapping[sceneCutKey];
+            if (audioId) {
+                playVoice(audioId);
+            }
+        }
+
+        // セリフ
+        const speaker = cut.speaker;
+        const speakerEl = document.getElementById('speakerName');
+        speakerEl.textContent = speakerNames[speaker] || speaker;
+        speakerEl.className = '';
+        document.getElementById('dialogText').className = '';
+
+        if (speaker === 'narrator') {
+            speakerEl.classList.add('narrator');
+        } else if (speaker === 'thought') {
+            speakerEl.classList.add('thought');
+            document.getElementById('dialogText').classList.add('thought');
+        }
+
+        document.getElementById('dialogText').textContent = cut.text;
+        document.getElementById('sceneHeader').textContent = `Scene ${scene.id}: ${scene.title} (${currentCutIndex + 1}/${scene.cuts.length})`;
+
+        updateProgress();
+        updateGlobalProgress();
+        updateNavButtons();
+    }
+
+    // ========================================================
+    // キャラクター描画
+    // ========================================================
+    function renderCharacters(cut) {
+        const charLeft = document.getElementById('charLeft');
+        const charCenter = document.getElementById('charCenter');
+        const charRight = document.getElementById('charRight');
+        charLeft.innerHTML = '';
+        charCenter.innerHTML = '';
+        charRight.innerHTML = '';
+        charLeft.className = 'character-slot left';
+        charCenter.className = 'character-slot center';
+        charRight.className = 'character-slot right';
+
+        currentCutHasVideo = false;
+
+        const chars = cut.characters;
+        if (!chars || chars.length === 0) return;
+
+        const speaker = cut.speaker;
+        const sceneId = cut.scene;
+        const cutIdx = cut.cut;
+
+        // Build the cutId for video lookup: sXX_YY format
+        const scenePad = String(sceneId).padStart(2, '0');
+        // We need the audio mapping to get the correct cut number for video
+        const sceneCutKey = `${sceneId}_${cutIdx}`;
+        const audioId = audioMapping[sceneCutKey];
+        let cutIdForVideo = null;
+        if (audioId) {
+            cutIdForVideo = 's' + audioId.replace('_', '_');
+        }
+
+        if (chars.length === 1) {
+            // Single character - center position
+            const charName = chars[0];
+            const charBase = getCharBase(charName);
+            const videoKey = cutIdForVideo ? `${cutIdForVideo}_${speakerToVideoChar[speaker] || speaker}` : null;
+            const hasVideo = videoKey && videoFiles[videoKey];
+
+            if (hasVideo && speaker !== 'narrator' && speaker !== 'thought') {
+                currentCutHasVideo = true;
+                charCenter.innerHTML = `<video src="videos/${videoKey}.mp4" autoplay playsinline onended="onVideoEnded()" onerror="this.outerHTML='<img src=\\'characters/${charName}.png\\' alt=\\'${charBase}\\' onerror=\\'this.style.display=&quot;none&quot;\\'>'"></video>`;
+            } else {
+                charCenter.innerHTML = `<img src="characters/${charName}.png" alt="${charBase}" onerror="this.style.display='none'">`;
+            }
+        } else if (chars.length === 2) {
+            // Two characters - left and right
+            const leftCharName = chars[0];
+            const rightCharName = chars[1];
+            const leftBase = getCharBase(leftCharName);
+            const rightBase = getCharBase(rightCharName);
+
+            // Determine which character is speaking for video
+            const speakerCharKey = speakerToVideoChar[speaker] || speaker;
+            const videoKey = cutIdForVideo ? `${cutIdForVideo}_${speakerCharKey}` : null;
+            const hasVideo = videoKey && videoFiles[videoKey] && speaker !== 'narrator' && speaker !== 'thought';
+
+            // Left character
+            if (hasVideo && isCharMatchingSpeaker(leftCharName, speaker)) {
+                currentCutHasVideo = true;
+                charLeft.innerHTML = `<video src="videos/${videoKey}.mp4" autoplay playsinline onended="onVideoEnded()" onerror="this.outerHTML='<img src=\\'characters/${leftCharName}.png\\' alt=\\'${leftBase}\\' onerror=\\'this.style.display=&quot;none&quot;\\'>'"></video>`;
+            } else {
+                charLeft.innerHTML = `<img src="characters/${leftCharName}.png" alt="${leftBase}" onerror="this.style.display='none'">`;
+                if (hasVideo && speaker !== 'narrator' && speaker !== 'thought') {
+                    charLeft.classList.add('dimmed');
+                }
+            }
+
+            // Right character
+            if (hasVideo && isCharMatchingSpeaker(rightCharName, speaker)) {
+                currentCutHasVideo = true;
+                charRight.innerHTML = `<video src="videos/${videoKey}.mp4" autoplay playsinline onended="onVideoEnded()" onerror="this.outerHTML='<img src=\\'characters/${rightCharName}.png\\' alt=\\'${rightBase}\\' onerror=\\'this.style.display=&quot;none&quot;\\'>'"></video>`;
+            } else {
+                charRight.innerHTML = `<img src="characters/${rightCharName}.png" alt="${rightBase}" onerror="this.style.display='none'">`;
+                if (hasVideo && speaker !== 'narrator' && speaker !== 'thought') {
+                    charRight.classList.add('dimmed');
+                }
+            }
+        } else if (chars.length >= 3) {
+            // Three characters - left, center, right
+            const leftCharName = chars[0];
+            const centerCharName = chars[1];
+            const rightCharName = chars[2];
+            const leftBase = getCharBase(leftCharName);
+            const centerBase = getCharBase(centerCharName);
+            const rightBase = getCharBase(rightCharName);
+
+            const speakerCharKey = speakerToVideoChar[speaker] || speaker;
+            const videoKey = cutIdForVideo ? `${cutIdForVideo}_${speakerCharKey}` : null;
+            const hasVideo = videoKey && videoFiles[videoKey] && speaker !== 'narrator' && speaker !== 'thought';
+
+            // Left
+            if (hasVideo && isCharMatchingSpeaker(leftCharName, speaker)) {
+                currentCutHasVideo = true;
+                charLeft.innerHTML = `<video src="videos/${videoKey}.mp4" autoplay playsinline onended="onVideoEnded()" onerror="this.outerHTML='<img src=\\'characters/${leftCharName}.png\\' alt=\\'${leftBase}\\' onerror=\\'this.style.display=&quot;none&quot;\\'>'"></video>`;
+            } else {
+                charLeft.innerHTML = `<img src="characters/${leftCharName}.png" alt="${leftBase}" onerror="this.style.display='none'">`;
+                if (hasVideo) charLeft.classList.add('dimmed');
+            }
+
+            // Center
+            if (hasVideo && isCharMatchingSpeaker(centerCharName, speaker)) {
+                currentCutHasVideo = true;
+                charCenter.innerHTML = `<video src="videos/${videoKey}.mp4" autoplay playsinline onended="onVideoEnded()" onerror="this.outerHTML='<img src=\\'characters/${centerCharName}.png\\' alt=\\'${centerBase}\\' onerror=\\'this.style.display=&quot;none&quot;\\'>'"></video>`;
+            } else {
+                charCenter.innerHTML = `<img src="characters/${centerCharName}.png" alt="${centerBase}" onerror="this.style.display='none'">`;
+                if (hasVideo) charCenter.classList.add('dimmed');
+            }
+
+            // Right
+            if (hasVideo && isCharMatchingSpeaker(rightCharName, speaker)) {
+                currentCutHasVideo = true;
+                charRight.innerHTML = `<video src="videos/${videoKey}.mp4" autoplay playsinline onended="onVideoEnded()" onerror="this.outerHTML='<img src=\\'characters/${rightCharName}.png\\' alt=\\'${rightBase}\\' onerror=\\'this.style.display=&quot;none&quot;\\'>'"></video>`;
+            } else {
+                charRight.innerHTML = `<img src="characters/${rightCharName}.png" alt="${rightBase}" onerror="this.style.display='none'">`;
+                if (hasVideo) charRight.classList.add('dimmed');
+            }
+        }
+    }
+
+    // キャラクター画像名からベース名を取得
+    function getCharBase(charImageName) {
+        // e.g., "hanako_04_worried" -> "hanako"
+        // e.g., "midwife_clinic_01_smile" -> "midwife_clinic"
+        // e.g., "midwife_furuta_01_smile" -> "midwife_furuta"
+        const parts = charImageName.split('_');
+        // Check known prefixes
+        if (charImageName.startsWith('midwife_clinic_')) return 'midwife_clinic';
+        if (charImageName.startsWith('midwife_furuta_')) return 'midwife_furuta';
+        return parts[0];
+    }
+
+    // キャラクター画像名がspeakerに一致するか判定
+    function isCharMatchingSpeaker(charImageName, speaker) {
+        const charBase = getCharBase(charImageName);
+        // speaker → image prefix mapping
+        const speakerCharMap = {
+            hanako: 'hanako',
+            daisuke: 'daisuke',
+            friend: 'friend',
+            pharmacist: 'pharmacist',
+            receptionist: 'receptionist',
+            doctor: 'doctor',
+            midwife: 'midwife_clinic',
+            furuta: 'midwife_furuta'
+        };
+        return charBase === (speakerCharMap[speaker] || speaker);
+    }
+
+    // 動画終了コールバック
+    function onVideoEnded() {
+        console.log('Video ended');
+    }
+
+    // ========================================================
+    // 音声
+    // ========================================================
+    function playVoice(audioId) {
+        stopVoice();
+        const audioFile = `audio/scene_${audioId}.mp3`;
+        currentVoice = new Audio(audioFile);
+        currentVoice.volume = 0.8;
+        currentVoice.play().catch(e => console.log('Voice:', e));
+    }
+
+    function stopVoice() {
+        if (currentVoice) {
+            currentVoice.pause();
+            currentVoice.currentTime = 0;
+            currentVoice = null;
+        }
+    }
+
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        const btn = document.getElementById('voiceToggle');
+        if (voiceEnabled) {
+            btn.textContent = '音声 ON';
+            btn.classList.remove('off');
+        } else {
+            btn.textContent = '音声 OFF';
+            btn.classList.add('off');
+            stopVoice();
+        }
+    }
+
+    // ========================================================
+    // プログレス
+    // ========================================================
+    function updateProgress() {
+        const scene = scenarioData.scenes[currentSceneIndex];
+        const progress = ((currentCutIndex + 1) / scene.cuts.length) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+    }
+
+    function updateGlobalProgress() {
+        let totalCuts = 0;
+        let completedCuts = 0;
+        scenarioData.scenes.forEach((scene, index) => {
+            totalCuts += scene.cuts.length;
+            if (index < currentSceneIndex) {
+                completedCuts += scene.cuts.length;
+            } else if (index === currentSceneIndex) {
+                completedCuts += currentCutIndex + 1;
+            }
+        });
+        const globalProgress = (completedCuts / totalCuts) * 100;
+        document.getElementById('globalProgressFill').style.width = globalProgress + '%';
+    }
+
+    // ========================================================
+    // ナビゲーション
+    // ========================================================
+    function updateNavButtons() {
+        const scene = scenarioData.scenes[currentSceneIndex];
+        document.getElementById('prevBtn').disabled = currentCutIndex === 0 && currentSceneIndex === 0;
+
+        if (currentCutIndex >= scene.cuts.length - 1) {
+            if (currentSceneIndex >= scenarioData.scenes.length - 1) {
+                document.getElementById('nextBtn').textContent = '学習完了';
+            } else {
+                document.getElementById('nextBtn').textContent = 'シーン終了';
+            }
+        } else {
+            document.getElementById('nextBtn').textContent = '次へ \u2192';
+        }
+    }
+
+    function prevCut() {
+        stopVoice();
+        stopCurrentVideo();
+        if (currentCutIndex > 0) {
+            currentCutIndex--;
+            renderScene();
+        } else if (currentSceneIndex > 0) {
+            currentSceneIndex--;
+            const prevScene = scenarioData.scenes[currentSceneIndex];
+            currentCutIndex = prevScene.cuts.length - 1;
+            renderScene();
+        }
+    }
+
+    function nextCut() {
+        stopVoice();
+        stopCurrentVideo();
+        const scene = scenarioData.scenes[currentSceneIndex];
+        if (currentCutIndex < scene.cuts.length - 1) {
+            currentCutIndex++;
+            renderScene();
+        } else {
+            endScene();
+        }
+    }
+
+    function stopCurrentVideo() {
+        const videos = document.querySelectorAll('#characterLayer video');
+        videos.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+    }
+
+    // ========================================================
+    // シーン終了
+    // ========================================================
+    function endScene() {
+        const scene = scenarioData.scenes[currentSceneIndex];
+        completedScenes.add(scene.id);
+
+        if (scene.knowledge) {
+            showKnowledge(scene.knowledge);
+        } else if (scene.quiz) {
+            showQuiz(scene.quiz);
+        } else {
+            goToNextScene();
+        }
+    }
+
+    function goToNextScene() {
+        if (currentSceneIndex < scenarioData.scenes.length - 1) {
+            currentSceneIndex++;
+            currentCutIndex = 0;
+            renderScene();
+        } else {
+            showEndScreen();
+        }
+    }
+
+    // ========================================================
+    // エンド画面
+    // ========================================================
+    function showEndScreen() {
+        const bgLayer = document.getElementById('backgroundLayer');
+        bgLayer.style.background = 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 30%, #e1f5fe 60%, #fff9c4 100%)';
+
+        document.getElementById('charLeft').innerHTML = '';
+        document.getElementById('charCenter').innerHTML = '';
+        document.getElementById('charRight').innerHTML = '';
+
+        const speakerEl = document.getElementById('speakerName');
+        speakerEl.textContent = '学習完了';
+        speakerEl.className = '';
+        speakerEl.style.background = 'linear-gradient(135deg, #e91e63, #9c27b0)';
+
+        document.getElementById('dialogText').innerHTML =
+            'お疲れ様でした！<br><br>' +
+            'せいれい花子さんの妊娠の経験を通して、妊娠の徴候・妊娠検査薬の使い方・産婦人科の初診・母子健康手帳の交付について学びました。<br><br>' +
+            '<strong>もう一度学習する場合は「最初から」ボタンを押してください。</strong>';
+        document.getElementById('dialogText').className = '';
+
+        document.getElementById('sceneHeader').textContent = '学習完了 - 全12シーン';
+        document.getElementById('progressFill').style.width = '100%';
+        document.getElementById('globalProgressFill').style.width = '100%';
+
+        document.getElementById('nextBtn').style.display = 'none';
+        document.getElementById('prevBtn').disabled = true;
+    }
+
+    // ========================================================
+    // 最初からやり直す
+    // ========================================================
+    function restartGame() {
+        if (!confirm('最初からやり直しますか？')) return;
+        stopVoice();
+        currentSceneIndex = 0;
+        currentCutIndex = 0;
+        completedScenes.clear();
+
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('titleScreen').style.display = 'flex';
+        document.getElementById('nextBtn').style.display = '';
+        document.getElementById('prevBtn').disabled = false;
+
+        // Reset end screen styling
+        const speakerEl = document.getElementById('speakerName');
+        speakerEl.style.background = '';
+        document.getElementById('dialogText').innerHTML = '';
+    }
+
+    // ========================================================
+    // シーン選択パネル
+    // ========================================================
+    function showSceneSelect() {
+        const sceneList = document.getElementById('sceneList');
+        sceneList.innerHTML = '';
+
+        scenarioData.scenes.forEach((scene, index) => {
+            const div = document.createElement('div');
+            div.className = 'scene-item';
+
+            if (index === currentSceneIndex) {
+                div.classList.add('current');
+            } else if (completedScenes.has(scene.id)) {
+                div.classList.add('completed');
+            }
+
+            div.innerHTML = `
+                <div class="scene-number">${scene.id}</div>
+                <div class="scene-title">${scene.title}</div>
+            `;
+
+            div.addEventListener('click', () => goToScene(index));
+            sceneList.appendChild(div);
+        });
+
+        document.getElementById('sceneSelectPanel').style.display = 'flex';
+    }
+
+    function closeSceneSelect() {
+        document.getElementById('sceneSelectPanel').style.display = 'none';
+    }
+
+    function goToScene(sceneIndex) {
+        closeSceneSelect();
+        currentSceneIndex = sceneIndex;
+        currentCutIndex = 0;
+
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+        document.getElementById('nextBtn').style.display = '';
+        document.getElementById('prevBtn').disabled = false;
+
+        // Reset end screen styling
+        const speakerEl = document.getElementById('speakerName');
+        speakerEl.style.background = '';
+
+        renderScene();
+    }
+
+    // ========================================================
+    // 知識解説
+    // ========================================================
+    function showKnowledge(knowledge) {
+        document.getElementById('knowledgeTitle').textContent = knowledge.title;
+        document.getElementById('knowledgeText').textContent = knowledge.text;
+        document.getElementById('knowledgePanel').style.display = 'flex';
+    }
+
+    function closeKnowledge() {
+        document.getElementById('knowledgePanel').style.display = 'none';
+        const scene = scenarioData.scenes[currentSceneIndex];
+        if (scene.quiz) {
+            showQuiz(scene.quiz);
+        } else {
+            goToNextScene();
+        }
+    }
+
+    // ========================================================
+    // クイズ
+    // ========================================================
+    let selectedOptions = new Set();
+    let quizData = null;
+
+    function showQuiz(quiz) {
+        quizData = quiz;
+        selectedOptions.clear();
+        document.getElementById('quizQuestion').textContent = quiz.question;
+
+        const container = document.getElementById('quizOptions');
+        container.innerHTML = '';
+        quiz.options.forEach((opt, i) => {
+            const el = document.createElement('div');
+            el.className = 'quiz-option';
+            el.innerHTML = `<span class="option-marker">${String.fromCharCode(65 + i)}</span><span>${opt.text}</span>`;
+            el.addEventListener('click', () => selectOption(i, el, quiz.multipleAnswer));
+            container.appendChild(el);
+        });
+
+        document.getElementById('quizFeedback').className = 'quiz-feedback';
+        document.getElementById('quizSubmit').style.display = 'block';
+        document.getElementById('quizSubmit').disabled = true;
+        document.getElementById('quizContinue').style.display = 'none';
+        document.getElementById('quizPanel').style.display = 'flex';
+    }
+
+    function selectOption(index, element, multipleAnswer) {
+        if (element.classList.contains('disabled')) return;
+        if (multipleAnswer) {
+            if (selectedOptions.has(index)) {
+                selectedOptions.delete(index);
+                element.classList.remove('selected');
+            } else {
+                selectedOptions.add(index);
+                element.classList.add('selected');
+            }
+        } else {
+            document.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected'));
+            selectedOptions.clear();
+            selectedOptions.add(index);
+            element.classList.add('selected');
+        }
+        document.getElementById('quizSubmit').disabled = selectedOptions.size === 0;
+    }
+
+    function submitQuiz() {
+        const options = document.querySelectorAll('.quiz-option');
+        let allCorrect = true;
+        let correctCount = 0;
+        let selectedCorrectCount = 0;
+
+        quizData.options.forEach((opt, i) => {
+            options[i].classList.add('disabled');
+            if (opt.correct) {
+                correctCount++;
+                options[i].classList.add('correct');
+                if (selectedOptions.has(i)) selectedCorrectCount++;
+            } else if (selectedOptions.has(i)) {
+                options[i].classList.add('incorrect');
+                allCorrect = false;
+            }
+        });
+
+        if (selectedCorrectCount !== correctCount) allCorrect = false;
+
+        const fb = document.getElementById('quizFeedback');
+        fb.className = allCorrect ? 'quiz-feedback show correct' : 'quiz-feedback show incorrect';
+
+        if (allCorrect) {
+            fb.innerHTML = '<strong>正解です！</strong>';
+        } else {
+            fb.innerHTML = '<strong>不正解です</strong><br>正解の選択肢を確認してください。';
+        }
+
+        document.getElementById('quizSubmit').style.display = 'none';
+        document.getElementById('quizContinue').style.display = 'block';
+    }
+
+    function closeQuiz() {
+        document.getElementById('quizPanel').style.display = 'none';
+        goToNextScene();
+    }
+
+    // ========================================================
+    // 初期化実行
+    // ========================================================
+    init();
+    </script>
+</body>
+</html>

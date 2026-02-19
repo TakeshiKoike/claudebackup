@@ -14,12 +14,13 @@
 ### UE5.6 プロジェクト ★現在使用
 | 項目 | 値 |
 |------|-----|
-| パス | `C:\UE_Projects\PatientSim56` |
+| パス | `C:\UE_Projects\PatientSim56_v2` |
+| ベース保管 | `C:\UE_Projects\PatientSim56`（変更禁止） |
 | エンジン | UE 5.6.1 |
-| MCP | runreal/unreal-mcp |
+| MCP | runreal/unreal-mcp（要MCP経由操作） |
 | 有効プラグイン | PythonScriptPlugin, LiveLink, LiveLinkControlRig, **NV_ACE_Reference v2.5.0** |
 | 現在のマップ | Lvl_ThirdPerson |
-| MetaHuman | Keiji（Patient_Keiji として配置済み） |
+| MetaHuman | BP_takeshi77（設定済み）、BP_Keiji（設定途中） |
 
 ---
 
@@ -568,6 +569,11 @@ Start-Process -FilePath 'C:\Users\kokek\AppData\Local\Programs\VOICEVOX\vv-engin
 
 ## 作成済みスクリプト
 
+### ドキュメント
+| ファイル | 説明 |
+|---------|------|
+| `C:\Users\kokek\MetaHuman_LipSync_Manual.md` | **MetaHumanリップシンク完全マニュアル** ★ |
+
 ### メインツール（推奨）
 | スクリプト | 説明 |
 |-----------|------|
@@ -1057,11 +1063,13 @@ Event Tick
 - [ ] 患者設定カスタマイズ（GUI内）
 - [ ] 音声入力（STT）
 
-### Phase 1.5: 演出強化 ← **次回以降**
-- [ ] MetaHuman交換（別の患者キャラクターへの切り替え）
+### Phase 1.5: 演出強化 ← **作業中**
+- [x] MetaHuman交換テンプレート化 ✅ 完了（2026-02-04）
+- [x] **BP_keiji ACE設定追加** ✅ 完了（2026-02-04）
+- [x] **WBP_PatientChat BP_keiji対応** ✅ 完了（2026-02-04）
 - [ ] 場面設定（病室背景、ベッド、医療機器など）
 - [ ] アイドリングアニメーション（待機中の自然な動き：呼吸、まばたき等）
-- [ ] MetaHuman競演（患者 + 看護師の2体同時表示・会話）
+- [ ] **MetaHuman競演（患者 + 看護師の2体同時表示・リップシンク）** ← 次の拡張候補
 
 ### Phase 2: Pixel Streaming対応
 - [ ] Pixel Streaming設定
@@ -1075,8 +1083,186 @@ Event Tick
 
 ---
 
+## MetaHuman交換テンプレート化（2026-02-04）
+
+### 目的
+複数のMetaHuman（3〜4体）を同じACEリップシンク設定で使えるようにする。
+
+### 作成・更新ファイル
+
+| ファイル | 説明 |
+|---------|------|
+| `C:\UE_Projects\PatientSim56_v2\Config\PatientTemplate.json` | v2.0に拡張（active_patient、metahumans追加） |
+| `C:\Users\kokek\patient_config.py` | **新規作成** 共通設定読み込みモジュール |
+| `C:\Users\kokek\patient_gui.py` | config読み込み対応 |
+| `C:\Users\kokek\patient_ue5_monitor.py` | config読み込み対応 |
+| `C:\Users\kokek\patient_conversation.py` | config読み込み対応 |
+| `C:\Users\kokek\setup_metahuman_patient.py` | 機能強化（list/check/add/switch） |
+
+### PatientTemplate.json v2.0 構造
+
+```json
+{
+  "template_version": "2.0",
+  "active_patient": "keiji",  // ← これを変更で切替
+  "metahumans": {
+    "keiji": {
+      "blueprint_name": "BP_Keiji",
+      "display_name": "啓二（男性60歳・高齢者）",
+      "profile_id": "keiji_default"
+    },
+    "takeshi": {
+      "blueprint_name": "BP_takeshi77",
+      "display_name": "タケシ（男性）",
+      "profile_id": "takeshi_default"
+    }
+  },
+  "patient_profiles": [...],
+  "system_config": {...}
+}
+```
+
+### 患者切り替え方法
+
+```bash
+python setup_metahuman_patient.py switch keiji
+python setup_metahuman_patient.py switch takeshi
+```
+
+### BP_Keiji 設定状況（2026-02-04 22:00 更新）
+
+| 項目 | 状態 |
+|------|------|
+| Quixel Bridgeからインポート | ✅ 完了 |
+| レベルに配置 | ✅ 完了 |
+| 見た目（高齢者） | ✅ 正常表示 |
+| ACEAudioCurveSourceComponent | ✅ **MCP経由で追加完了** |
+| PendingWavPath変数 | ✅ **MCP経由で追加完了** |
+| IsReady変数 | ✅ **MCP経由で追加完了（default=True）** |
+| PendingMessage変数 | ✅ **MCP経由で追加完了** |
+| CurrentSubtitle変数 | ✅ **MCP経由で追加完了** |
+| Event Graph | ✅ **BP_takeshi77からコピペ完了** |
+
+### 完了したタスク（2026-02-04 23:30更新）
+
+| タスク | 状態 | 備考 |
+|--------|------|------|
+| ACEAudioCurveSourceComponent追加 | ✅ 完了 | 手動で再作成（MCP版は不完全だった） |
+| 変数4つ追加 | ✅ 完了 | Instance Editable=ON必須 |
+| Event Graphコピペ | ✅ 完了 | BP_takeshi77からコピー |
+| On Animation Ended再紐づけ | ✅ 完了 | 手動で新ACEコンポーネントに紐づけ |
+| PatientTemplate.json更新 | ✅ 完了 | blueprint_name="BP_keiji"（小文字注意） |
+| リップシンク動作確認 | ✅ 完了 | patient_conversation.pyで確認 |
+
+### 残りのタスク
+
+| タスク | 状態 | 方法 |
+|--------|------|------|
+| WBP_PatientChat修正 | ✅ **完了** | BP_keiji用に修正済み（2026-02-04） |
+| PixelStreaming無効化 | ❌ 未完了 | 手動でPlugins設定変更 |
+
+### WBP_PatientChat 修正内容（2026-02-04 23:56）
+
+| 修正項目 | 内容 |
+|---------|------|
+| Get All Actors Of Class | BP_keiji に変更（2箇所） |
+| Set Pending Message ノード | **GET → SET に変更**（重要！） |
+| 実行ピン接続 | Get All Actors Of Class → Set Pending Message → SetText |
+
+**問題だった点**: 「Set Pending Message」ではなく「Get Pending Message」ノードが使われていた（実行ピンがないため動作しなかった）
+
+### 教訓
+
+**MCP Python APIの限界**:
+- ACEコンポーネント追加 → 不完全（TRASH_状態になった）
+- auto_activate設定 → 反映されなかった
+- Instance Editable設定 → Python APIでは不可
+
+**推奨**: Blueprint設定は**全て手動**で行う。詳細は `MetaHuman_LipSync_Manual.md` 参照。
+
+---
+
+## 将来の拡張: 2体同時リップシンク（患者 + 看護師）
+
+### 構想
+| MetaHuman | 役割 | リップシンク |
+|-----------|------|-------------|
+| BP_keiji | 患者 | LLM応答を音声化してリップシンク |
+| BP_takeshi77 | 看護師 | 学生の入力テキストを音声化してリップシンク |
+
+### 必要な変更
+
+#### patient_ue5_monitor.py
+```python
+# 看護師: BP_takeshi77 にリップシンク
+set_pending_wav_path(remote, NURSE_WAV_PATH, "BP_takeshi77")
+
+# 患者: BP_keiji にリップシンク
+set_pending_wav_path(remote, WAV_PATH, "BP_keiji")
+```
+
+#### レベル配置
+- BP_keiji と BP_takeshi77 を同時に配置
+- カメラで両方が見える位置に調整
+
+### 現状
+- 患者（BP_keiji）のみリップシンク
+- 看護師音声はWindows再生（リップシンクなし）
+
+---
+
+## 次回以降の予定（2026-02-05〜）
+
+| 項目 | 内容 | 優先度 |
+|------|------|--------|
+| 背景の工夫 | 病室背景、ベッド、医療機器などの配置 | 高 |
+| UIの工夫 | チャットUIの見た目改善、使いやすさ向上 | 高 |
+| 2人同時リップシンク | 患者(BP_keiji) + 看護師(BP_takeshi77) 同時動作 | 高 |
+
+---
+
+### 問題と教訓
+
+#### 試行1: BP_takeshi77を複製してMesh差し替え
+- **結果**: 失敗
+- **原因**: takeshi77（m_med_nrw）とKeiji（m_srt_nrw）でSkeletonが異なる
+- **症状**: 体のパーツが崩れる
+
+#### 試行2: Quixel BridgeからBP_Keijiインポート
+- **結果**: 見た目は正常
+- **問題**: ACEコンポーネント・変数・Event Graphがない
+- **Python API制限**: Blueprintへの変数追加は不可能
+
+### 解決策（次回）
+
+**MCP経由でBlueprint編集を行う**
+
+1. UE5でプラグイン有効化:
+   - Python Editor Script Plugin
+   - Remote Control API
+
+2. Edit → Project Settings → Python → "Enable Remote Execution" 有効化
+
+3. UE5再起動
+
+4. Claude Code再起動（`/quit` → 再起動）
+
+5. MCP経由でBP_Keijiに設定追加:
+   - ACEAudioCurveSourceComponent
+   - 変数4つ
+   - Event Graph
+
+### 重要な注意事項
+
+- **MCP以外でUE5を操作しない**（Python Remote Executionではなく、MCPを使用すること）
+- Blueprint編集はMCPのadd_component_to_blueprint等を使用
+- PatientSim56はベース保管用、変更はPatientSim56_v2で行う
+
+---
+
 ## 参考リンク
 - [runreal/unreal-mcp](https://github.com/runreal/unreal-mcp)
+- [unreal-mcp Blueprint Tools](https://github.com/chongdashu/unreal-mcp/blob/main/Docs/Tools/blueprint_tools.md)
 - [NVIDIA ACE](https://developer.nvidia.com/ace)
 - [Audio2Face-3D SDK](https://github.com/NVIDIA/Audio2Face-3D-SDK)
 - [ACE Agent Docs](https://docs.nvidia.com/ace/ace-agent/latest/)

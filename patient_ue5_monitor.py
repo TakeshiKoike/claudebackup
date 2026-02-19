@@ -19,23 +19,37 @@ import subprocess
 import remote_execution as re
 from concurrent.futures import ThreadPoolExecutor
 
-# Configuration
-VOICEVOX_URL = "http://localhost:50021"
-OLLAMA_URL = "http://localhost:11434"
+# 共通設定モジュール
+from patient_config import (
+    get_metahuman_config,
+    get_patient_profile,
+    get_system_config,
+    get_blueprint_name
+)
+
+# 設定読み込み
+_sys_config = get_system_config()
+_profile = get_patient_profile()
+_mh_config = get_metahuman_config()
+
+VOICEVOX_URL = _sys_config.get("voicevox_url", "http://localhost:50021")
+OLLAMA_URL = _sys_config.get("ollama_url", "http://localhost:11434")
 
 # Voice settings
-PATIENT_SPEAKER_ID = 11   # 玄野武宏（男性・患者）
+PATIENT_SPEAKER_ID = _profile.get("voice_speaker_id", 11)
 NURSE_SPEAKER_ID = 8      # 春日部つむぎ（女性・看護師）
 PATIENT_VOLUME = 2.0      # 患者音量（1.0が標準、2.0で2倍）
 NURSE_VOLUME = 1.0        # 看護師音量
 
 # File paths
-WAV_PATH = "C:/UE_Projects/PatientSim56/Saved/patient_response.wav"
-NURSE_WAV_PATH = "C:/UE_Projects/PatientSim56/Saved/nurse_voice.wav"
-LLM_MODEL = "hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest"
+WAV_PATH = _sys_config.get("wav_output_path", "C:/UE_Projects/PatientSim56/Saved/patient_response.wav")
+NURSE_WAV_PATH = _sys_config.get("nurse_wav_path", "C:/UE_Projects/PatientSim56/Saved/nurse_voice.wav")
+LLM_MODEL = _sys_config.get("llm_model", "hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest")
+PATIENT_NAME = _profile.get("name", "啓二")
+BLUEPRINT_NAME = get_blueprint_name()
 
 # Patient system prompt
-PATIENT_PROMPT = """あなたは入院中の60歳男性患者です。
+PATIENT_PROMPT = _profile.get("llm_prompt", """あなたは入院中の60歳男性患者です。
 名前: 啓二
 年齢: 60歳
 症状: 軽い腰痛で3日前から入院中
@@ -45,7 +59,7 @@ PATIENT_PROMPT = """あなたは入院中の60歳男性患者です。
 - 具体的なエピソードや感情を交えて話す
 - 2〜3文程度で答える
 - 必要に応じて質問を返したり、世間話をしたりする
-- 名前や役割は言わず、会話の返答だけを出力する"""
+- 名前や役割は言わず、会話の返答だけを出力する""")
 
 
 def connect_ue5():
@@ -73,14 +87,14 @@ unreal.ACEBlueprintLibrary.override_a2f3d_realtime_initial_chunk_size(0.2)
 
 
 def get_pending_message(remote):
-    """BP_takeshi77のPendingMessageを取得"""
-    result = remote.run_command('''
+    """MetaHumanのPendingMessageを取得"""
+    result = remote.run_command(f'''
 import unreal
 editor_subsystem = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 game_world = editor_subsystem.get_game_world()
 if game_world:
     for a in unreal.GameplayStatics.get_all_actors_of_class(game_world, unreal.Actor):
-        if "BP_takeshi77" in a.get_name():
+        if "{BLUEPRINT_NAME}" in a.get_name():
             # Try multiple property name formats
             for prop_name in ["PendingMessage", "Pending Message", "pending_message"]:
                 try:
@@ -103,13 +117,13 @@ if game_world:
 
 def clear_pending_message(remote):
     """PendingMessageをクリア"""
-    remote.run_command('''
+    remote.run_command(f'''
 import unreal
 editor_subsystem = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 game_world = editor_subsystem.get_game_world()
 if game_world:
     for a in unreal.GameplayStatics.get_all_actors_of_class(game_world, unreal.Actor):
-        if "BP_takeshi77" in a.get_name():
+        if "{BLUEPRINT_NAME}" in a.get_name():
             for prop_name in ["PendingMessage", "Pending Message", "pending_message"]:
                 try:
                     a.set_editor_property(prop_name, "")
@@ -128,7 +142,7 @@ editor_subsystem = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 game_world = editor_subsystem.get_game_world()
 if game_world:
     for a in unreal.GameplayStatics.get_all_actors_of_class(game_world, unreal.Actor):
-        if "BP_takeshi77" in a.get_name():
+        if "{BLUEPRINT_NAME}" in a.get_name():
             a.set_editor_property("PendingWavPath", "{wav_path}")
             break
 ''', unattended=True)
@@ -144,7 +158,7 @@ editor_subsystem = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
 game_world = editor_subsystem.get_game_world()
 if game_world:
     for a in unreal.GameplayStatics.get_all_actors_of_class(game_world, unreal.Actor):
-        if "BP_takeshi77" in a.get_name():
+        if "{BLUEPRINT_NAME}" in a.get_name():
             a.set_editor_property("CurrentSubtitle", "{subtitle}")
             break
 ''', unattended=True)
@@ -167,7 +181,7 @@ def generate_llm_response(user_input):
 
         # 後処理
         text = text.split('\n')[0].strip()
-        text = regex.sub(r'^(患者|啓二|返答)[\(（]?[^）\)]*[\)）]?[:：]?\s*', '', text)
+        text = regex.sub(r'^(患者|' + PATIENT_NAME + r'|返答)[\(（]?[^）\)]*[\)）]?[:：]?\s*', '', text)
         text = regex.sub(r'\s*\|.*$', '', text)
         if len(text) > 200:
             text = text[:200]
@@ -220,8 +234,9 @@ def main():
     print("  (看護師音声でLLM待機時間をマスク)")
     print("=" * 50)
     print("")
+    print(f"患者: {PATIENT_NAME} (Blueprint: {BLUEPRINT_NAME})")
     print(f"看護師ボイス: Speaker {NURSE_SPEAKER_ID} (春日部つむぎ) 音量:{NURSE_VOLUME}")
-    print(f"患者ボイス: Speaker {PATIENT_SPEAKER_ID} (玄野武宏) 音量:{PATIENT_VOLUME}")
+    print(f"患者ボイス: Speaker {PATIENT_SPEAKER_ID} 音量:{PATIENT_VOLUME}")
     print("")
     print("UE5に接続中...")
 
@@ -272,7 +287,7 @@ def main():
                     # LLM応答を待つ
                     response_text = llm_future.result()
 
-                print(f"啓二: {response_text}")
+                print(f"{PATIENT_NAME}: {response_text}")
 
                 # 患者音声生成
                 print("[TTS] 患者音声生成中...")
@@ -280,7 +295,7 @@ def main():
 
                 if wav_path:
                     # 患者字幕を表示
-                    set_subtitle(remote, "啓二", response_text)
+                    set_subtitle(remote, PATIENT_NAME, response_text)
                     # リップシンクをトリガー
                     print("[LIPSYNC] リップシンク実行中...")
                     set_pending_wav_path(remote, wav_path)
