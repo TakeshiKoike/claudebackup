@@ -114,7 +114,17 @@ MacBook Pro の Claude Code で:
 
 ## 現在の進捗
 
-- [x] MacBook Pro（36セッション）
-- [ ] RTX 4090
-- [ ] ThinkPad
-- [ ] MacBook Air
+- [x] MacBook Pro（40セッション、1,327ユーザーメッセージ）
+- [x] RTX 4090（68セッション、2,073メッセージ）
+- [x] ThinkPad（38起動、3 facets）
+- [x] MacBook Air（17セッション、1,158メッセージ）
+
+## 統合レポート（完了）
+
+- **完成日**: 2026年2月12日
+- **統合ドキュメント**: `Claude総合.docx`（OneDrive\デスクトップ）
+- **内容**: 全11章、4PC + Web/Desktop(conversations.json 328MB)統合分析
+- **総メッセージ数**: 15,439（Web/Desktop 11,317 + Claude Code 4,122）
+- **総使用時間**: 約611時間（Web/Desktop 433h + Claude Code 178h）
+- **対象期間**: 2024年11月〜2026年2月（約15ヶ月）
+- **生成ツール**: Claude Code (claude-opus-4-6)
