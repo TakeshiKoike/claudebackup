@@ -1,0 +1,547 @@
+{
+  "meta": {
+    "title": "在宅療養を支える訪問看護",
+    "subtitle": "COPD事例 〜聖隷一男さんの物語〜",
+    "version": "2.32",
+    "titleBackground": "maps/map_town.png",
+    "titleInfo": [
+      "患者：聖隷一男さん（78歳）",
+      "疾患：COPD（慢性閉塞性肺疾患）",
+      "治療：在宅酸素療法",
+      "全14シーン・77カット・10問のクイズ"
+    ]
+  },
+  "characters": {
+    "kazuo": { "name": "聖隷一男", "folder": "kazuo_expressions", "defaultExpression": "kazuo_general_05_neutral" },
+    "ichiko": { "name": "聖隷市子", "folder": "ichiko_expressions", "defaultExpression": "ichiko_05_neutral" },
+    "yamada": { "name": "山田看護師", "folder": "yamada_expressions", "defaultExpression": "yamada_05_neutral" },
+    "doctor": { "name": "主治医", "folder": "doctor_expressions", "defaultExpression": "doctor_05_neutral" },
+    "pharmacist": { "name": "薬剤師", "folder": "pharmacist_expressions", "defaultExpression": "pharmacist_05_neutral" },
+    "sato": { "name": "佐藤ケアマネ", "folder": "sato_expressions", "defaultExpression": "sato_05_neutral" }
+  },
+  "speakerNames": {
+    "narration": "ナレーション",
+    "kazuo": "聖隷一男",
+    "ichiko": "市子",
+    "yamada": "山田看護師",
+    "doctor": "主治医",
+    "pharmacist": "薬剤師",
+    "sato": "佐藤ケアマネ"
+  },
+  "backgrounds": {
+    "hospital_room": "backgrounds/bg_hospital_room.png",
+    "home_living": "backgrounds/bg_home_living.png",
+    "home_bedroom": "backgrounds/bg_home_bedroom.png",
+    "pharmacy": "backgrounds/bg_pharmacy.png",
+    "clinic": "backgrounds/bg_clinic.png",
+    "map_town": "maps/map_town.png",
+    "map_hospital": "maps/map_hospital.png",
+    "map_home": "maps/map_home.png"
+  },
+  "bgm": {
+    "main_theme": "bgm/bgm_main_theme.mp3",
+    "daily": "bgm/bgm_daily.mp3",
+    "medical": "bgm/bgm_medical.mp3",
+    "heartwarming": "bgm/bgm_heartwarming.mp3"
+  },
+  "maps": {
+    "town": {
+      "image": "maps/map_town.png",
+      "markers": [
+        { "id": "hospital", "label": "総合病院", "icon": "🏥", "colorClass": "hospital", "position": { "left": "15%", "top": "72%" } },
+        { "id": "home", "label": "聖隷さん宅", "icon": "🏠", "colorClass": "home", "position": { "left": "55%", "top": "55%" } },
+        { "id": "pharmacy", "label": "薬局", "icon": "💊", "colorClass": "pharmacy", "position": { "left": "38%", "top": "48%" } },
+        { "id": "nursing", "label": "訪問看護ステーション", "icon": "👩‍⚕️", "colorClass": "nursing", "position": { "left": "52%", "top": "25%" } },
+        { "id": "clinic", "label": "クリニック", "icon": "🩺", "colorClass": "clinic", "position": { "left": "70%", "top": "75%" } }
+      ]
+    },
+    "subMaps": {
+      "hospital": {
+        "image": "maps/map_hospital.png",
+        "title": "病院内MAP",
+        "markers": [
+          { "id": "hospital_room", "label": "病室", "icon": "🛏️", "colorClass": "hospital", "position": { "left": "75%", "top": "35%" } },
+          { "id": "waiting_room", "label": "待合室", "icon": "🪑", "colorClass": "hospital", "position": { "left": "30%", "top": "65%" } },
+          { "id": "nurse_station", "label": "ナースステーション", "icon": "👩‍⚕️", "colorClass": "hospital", "position": { "left": "45%", "top": "40%" } }
+        ]
+      },
+      "home": {
+        "image": "maps/map_home.png",
+        "title": "自宅内MAP",
+        "markers": [
+          { "id": "home_living", "label": "リビング", "icon": "🛋️", "colorClass": "home", "position": { "left": "40%", "top": "45%" } },
+          { "id": "home_bedroom", "label": "寝室", "icon": "🛏️", "colorClass": "home", "position": { "left": "60%", "top": "80%" } },
+          { "id": "home_bathroom", "label": "浴室", "icon": "🛁", "colorClass": "home", "position": { "left": "82%", "top": "35%" } }
+        ]
+      }
+    }
+  },
+  "sceneFlow": [
+    { "sceneId": 1, "nextLocation": "hospital" },
+    { "sceneId": 2, "nextLocation": "home" },
+    { "sceneId": 3, "nextLocation": "home" },
+    { "sceneId": 4, "nextLocation": "home" },
+    { "sceneId": 5, "nextLocation": "home" },
+    { "sceneId": 6, "nextLocation": "pharmacy" },
+    { "sceneId": 7, "nextLocation": "clinic" },
+    { "sceneId": 8, "nextLocation": "home" },
+    { "sceneId": 9, "nextLocation": "home" },
+    { "sceneId": 10, "nextLocation": "home" },
+    { "sceneId": 11, "nextLocation": "clinic" },
+    { "sceneId": 12, "nextLocation": "home" },
+    { "sceneId": 13, "nextLocation": null },
+    { "sceneId": 14, "nextLocation": null }
+  ],
+  "sceneLocationMap": {
+    "1": null,
+    "2": "hospital",
+    "3": "home",
+    "4": "home",
+    "5": "home",
+    "6": "home",
+    "7": "pharmacy",
+    "8": "clinic",
+    "9": "home",
+    "10": "home",
+    "11": "home",
+    "12": "clinic",
+    "13": "home",
+    "14": null
+  },
+  "sceneRoomMap": {
+    "2": "hospital_room",
+    "3": "home_living",
+    "4": "home_bedroom",
+    "5": "home_bathroom",
+    "6": "home_bedroom",
+    "9": "home_living",
+    "10": "home_living",
+    "11": "home_bedroom",
+    "13": "home_bedroom"
+  },
+  "videoFiles": {
+    "s02_01_doctor": true,
+    "s02_03_doctor": true,
+    "s02_04_kazuo": true,
+    "s02_05_doctor": true,
+    "s02_06_kazuo": true,
+    "s03_01_kazuo": true,
+    "s03_02_ichiko": true,
+    "s03_03_kazuo": true,
+    "s03_04_ichiko": true,
+    "s03_05_kazuo": true,
+    "s03_06_ichiko": true,
+    "s04_01_yamada": true,
+    "s04_02_kazuo": true,
+    "s04_03_yamada": true,
+    "s04_04_yamada": true,
+    "s04_05_yamada": true,
+    "s04_06_kazuo": true,
+    "s04_07_yamada": true,
+    "s05_01_yamada": true,
+    "s05_02_ichiko": true,
+    "s05_03_yamada": true,
+    "s05_04_kazuo": true,
+    "s05_05_yamada": true,
+    "s05_06_kazuo": true,
+    "s05_07_yamada": true,
+    "s06_01_yamada": true,
+    "s06_02_kazuo": true,
+    "s06_03_yamada": true,
+    "s06_04_yamada": true,
+    "s06_05_kazuo": true,
+    "s06_06_yamada": true,
+    "s06_07_kazuo": true,
+    "s06_08_yamada": true,
+    "s07_01_kazuo": true,
+    "s07_02_pharmacist": true,
+    "s07_03_kazuo": true,
+    "s07_04_pharmacist": true,
+    "s07_05_pharmacist": true,
+    "s07_06_kazuo": true,
+    "s08_01_doctor": true,
+    "s08_02_kazuo": true,
+    "s08_03_doctor": true,
+    "s08_04_kazuo": true,
+    "s08_05_doctor": true,
+    "s08_06_doctor": true,
+    "s08_07_kazuo": true,
+    "s08_08_doctor": true,
+    "s09_01_sato": true,
+    "s09_02_ichiko": true,
+    "s09_03_sato": true,
+    "s09_04_kazuo": true,
+    "s09_05_sato": true,
+    "s09_06_ichiko": true,
+    "s09_07_sato": true,
+    "s10_01_ichiko": true,
+    "s10_02_kazuo": true,
+    "s10_03_ichiko": true,
+    "s10_04_kazuo": true,
+    "s10_05_ichiko": true,
+    "s10_06_kazuo": true,
+    "s10_07_ichiko": true,
+    "s10_08_kazuo": true,
+    "s11_01_ichiko": true,
+    "s11_02_kazuo": true,
+    "s11_03_yamada": true,
+    "s11_04_yamada": true,
+    "s11_05_kazuo": true,
+    "s11_06_yamada": true,
+    "s11_07_kazuo": true,
+    "s11_08_yamada": true,
+    "s11_09_ichiko": true,
+    "s12_01_yamada": true,
+    "s12_02_kazuo": true,
+    "s12_03_yamada": true,
+    "s12_04_ichiko": true,
+    "s12_05_yamada": true,
+    "s12_06_kazuo": true,
+    "s12_07_yamada": true,
+    "s13_04_kazuo": true
+  },
+  "scenes": [
+    {
+      "id": 1,
+      "title": "イントロ",
+      "background": "map_town",
+      "bgm": "main_theme",
+      "cuts": [
+        { "id": "s01_01", "speaker": "narration", "text": "今回の主人公は聖隷一男さん、78歳の男性です。元公務員で、定年後は妻の市子さんとゴルフや旅行を楽しんでいました。", "expressions": [] },
+        { "id": "s01_02", "speaker": "narration", "text": "3年前にCOPD、慢性閉塞性肺疾患と診断され、在宅酸素療法を開始。先月、コロナ感染から急性増悪を起こし入院しましたが、退院して自宅療養を始めたところです。", "expressions": [] },
+        { "id": "s01_03", "speaker": "narration", "text": "一男さんの視点で、訪問看護や地域の多職種連携を体験してみましょう。", "expressions": [] }
+      ],
+      "knowledge": {
+        "title": "COPDとは",
+        "text": "COPD（Chronic Obstructive Pulmonary Disease）は、タバコ煙などの有害物質を長期に吸入することで生じる肺の炎症性疾患です。\n\n・肺胞の破壊（肺気腫）と気道の炎症により気流制限が生じる\n・日本では約530万人以上の患者がいると推定\n・主な症状：息切れ、慢性的な咳・痰\n・喫煙が最大の危険因子"
+      }
+    },
+    {
+      "id": 2,
+      "title": "退院前カンファ",
+      "background": "hospital_room",
+      "bgm": "medical",
+      "cuts": [
+        { "id": "s02_01", "speaker": "doctor", "text": "聖隷さん、入院中の治療で心不全の症状は改善しました。ただ、肺の状態は以前より悪化しています。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "doctor", "position": "right", "expression": "doctor_07_serious"}] },
+        { "id": "s02_02", "speaker": "kazuo", "type": "thought", "text": "やっぱり悪くなっているのか。でも家に帰りたい。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_04_thinking"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}] },
+        { "id": "s02_03", "speaker": "doctor", "text": "夜間のNPPV、非侵襲的陽圧換気療法を自宅でも続けることをお勧めしますが、いかがですか？", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "doctor", "position": "right", "expression": "doctor_04_thinking"}] },
+        { "id": "s02_04", "speaker": "kazuo", "text": "先生、あの機械は眠れないし、つけるのも大変で。酸素だけでなんとかなりませんか？", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}] },
+        { "id": "s02_05", "speaker": "doctor", "text": "ご本人の意思を尊重します。ただ、急性増悪のリスクは高いことをご理解ください。何かあったらすぐに連絡してください。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_07_serious"}] },
+        { "id": "s02_06", "speaker": "kazuo", "text": "わかりました。悪くなるなら、それも寿命かなと思っています。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_07_serious"}, {"id": "doctor", "position": "right", "expression": "doctor_02_worried"}] }
+      ],
+      "knowledge": {
+        "title": "NPPVとは",
+        "text": "NPPV（非侵襲的陽圧換気療法）は、マスクを介して陽圧をかけ呼吸を補助する治療法です。\n\n・気管挿管が不要なため「非侵襲的」\n・COPD急性増悪時の第一選択治療\n・マスクの不快感から継続が難しい患者も\n・患者の意思決定を尊重することが重要"
+      },
+      "quiz": {
+        "question": "COPD急性増悪時の人工呼吸管理として、最初に選択されることが多いのはどれか？",
+        "options": [
+          { "text": "気管挿管による人工呼吸", "correct": false },
+          { "text": "NPPV（非侵襲的陽圧換気療法）", "correct": true },
+          { "text": "高流量鼻カニュラ酸素療法", "correct": false },
+          { "text": "ネブライザー吸入", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "退院・帰宅",
+      "background": "home_living",
+      "bgm": "daily",
+      "cuts": [
+        { "id": "s03_01", "speaker": "kazuo", "text": "やっと家に帰ってこられた。やっぱり自分の家が一番落ち着くな。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_06_relieved"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}] },
+        { "id": "s03_02", "speaker": "ichiko", "text": "お父さん、おかえりなさい。無理しないでね。ベッドの準備はしてあるから。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}] },
+        { "id": "s03_03", "speaker": "kazuo", "text": "ありがとう。入院中は夜も眠れなかったから、今日はゆっくり休めそうだ。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_09_grateful"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}] },
+        { "id": "s03_04", "speaker": "ichiko", "text": "酸素の機械も業者さんが設置してくれたわ。使い方は覚えてる？", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_04_thinking"}] },
+        { "id": "s03_05", "speaker": "kazuo", "text": "ああ、3年も使っているから大丈夫だよ。安静時は2リットル、動くときは4リットルに上げればいいんだろう？", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}] },
+        { "id": "s03_06", "speaker": "ichiko", "text": "明日から訪問看護師さんが来てくれるって。週2回、火曜と木曜に来てくれるそうよ。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}] }
+      ],
+      "knowledge": {
+        "title": "在宅酸素療法（HOT）とは",
+        "text": "Home Oxygen Therapyの略で、自宅で酸素吸入を行う治療法です。\n\n【機器の種類】\n・酸素濃縮器（主に自宅用）\n・液体酸素\n・携帯用ボンベ（外出用）\n\n【重要な注意点】\n・火気厳禁（2m以内）\n・酸素流量は医師の指示を守る\n・月1回の外来受診が必要"
+      },
+      "quiz": {
+        "question": "在宅酸素療法について正しいのはどれか？",
+        "options": [
+          { "text": "酸素流量は自己判断で変更してよい", "correct": false },
+          { "text": "酸素吸入中の喫煙は問題ない", "correct": false },
+          { "text": "月1回以上の外来受診が必要である", "correct": true },
+          { "text": "入浴中は酸素吸入を中止する", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "訪問看護（初回）",
+      "background": "home_bedroom",
+      "bgm": "heartwarming",
+      "cuts": [
+        { "id": "s04_01", "speaker": "yamada", "text": "聖隷さん、はじめまして。訪問看護ステーションの山田です。今日からよろしくお願いします。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s04_02", "speaker": "kazuo", "text": "よろしくお願いします。こうして家に来てもらえると助かります。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_09_grateful"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s04_03", "speaker": "yamada", "text": "まず、お体の状態を確認させてくださいね。血圧と脈拍、酸素飽和度を測りますね。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s04_04", "speaker": "yamada", "text": "血圧120の75、脈拍78回、SpO2は96%ですね。酸素2リットルで安定しています。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s04_05", "speaker": "yamada", "text": "胸の音を聴かせてください。少しヒューヒューという音がしますね。痰は出ますか？", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_04_thinking"}] },
+        { "id": "s04_06", "speaker": "kazuo", "text": "ええ、白っぽい痰が出ることはありますが、自分で出せています。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s04_07", "speaker": "yamada", "text": "それは良かったです。痰の色が黄色や緑色に変わったり、熱が出たりしたら、すぐに連絡してくださいね。感染の兆候かもしれませんから。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}] }
+      ],
+      "knowledge": {
+        "title": "COPDの呼吸音と観察ポイント",
+        "text": "【聴診で聞こえる音】\n・笛声音（wheeze）：ヒューヒュー。気道狭窄\n・類鼾音（rhonchi）：グーグー。痰の貯留\n\n【急性増悪の徴候】\n・痰の量の増加、色の変化（膿性）\n・呼吸困難の悪化\n・発熱\n・全身倦怠感の増強"
+      },
+      "quiz": {
+        "question": "COPD患者の酸素療法で正しいのはどれか？",
+        "options": [
+          { "text": "高濃度酸素を投与する", "correct": false },
+          { "text": "CO2ナルコーシスに注意する", "correct": true },
+          { "text": "SpO2 100%を目標とする", "correct": false },
+          { "text": "酸素流量は患者の判断で調整する", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "title": "入浴介助",
+      "background": "home_bedroom",
+      "bgm": "heartwarming",
+      "cuts": [
+        { "id": "s05_01", "speaker": "yamada", "text": "聖隷さん、今日はお風呂に入りましょうか。奥様が準備してくださっていますね。", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s05_02", "speaker": "ichiko", "text": "タオルと着替えは用意してあります。お風呂の温度は39度にしてあるわ。", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}] },
+        { "id": "s05_03", "speaker": "yamada", "text": "ありがとうございます。聖隷さん、入浴前に酸素を4リットルに上げておきましょうね。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s05_04", "speaker": "kazuo", "text": "入浴は体力使うからね。苦しくならないか少し心配だな。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s05_05", "speaker": "yamada", "text": "ゆっくり入りましょう。洗髪や体を洗うのは私がお手伝いしますね。腕を上げる動作は息を吐きながら行いましょう。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s05_06", "speaker": "kazuo", "text": "久しぶりのお風呂だ。やっぱり気持ちいいな。一人だとなかなか入れないから、助かるなあ。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_06_relieved"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s05_07", "speaker": "yamada", "text": "お湯に浸かるのは5分程度にしておきましょう。長湯は心臓に負担がかかりますからね。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] }
+      ],
+      "knowledge": {
+        "title": "COPD患者の入浴介助のポイント",
+        "text": "【入浴介助の6つのポイント】\n①入浴前後で酸素流量を上げる\n②湯温は38-40度のぬるめに\n③長湯を避ける（5-10分程度）\n④洗髪時は前かがみを避ける\n⑤脱衣所と浴室の温度差に注意\n⑥入浴後は十分な休息を取る"
+      },
+      "quiz": {
+        "question": "COPD患者の入浴介助で正しいのはどれか？",
+        "options": [
+          { "text": "42度以上の熱い湯に入れる", "correct": false },
+          { "text": "入浴中は酸素吸入を中止する", "correct": false },
+          { "text": "洗髪時は長時間前かがみの姿勢をとらせる", "correct": false },
+          { "text": "労作時は酸素流量を増やす", "correct": true }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "title": "呼吸リハビリ",
+      "background": "home_bedroom",
+      "bgm": "heartwarming",
+      "cuts": [
+        { "id": "s06_01", "speaker": "yamada", "text": "聖隷さん、今日は呼吸リハビリをしましょう。体力を維持するためにとても大切なんですよ。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s06_02", "speaker": "kazuo", "text": "リハビリか。正直、苦しくなるのが怖くてあまりやっていないんだ。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s06_03", "speaker": "yamada", "text": "そうですよね。でも、動かないでいると筋力が落ちて、もっと息切れしやすくなってしまうんです。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}] },
+        { "id": "s06_04", "speaker": "yamada", "text": "まず、口すぼめ呼吸を練習しましょう。鼻から吸って、口をすぼめてゆっくり吐きます。吐く時間を吸う時間の2倍くらいにするのがコツです。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s06_05", "speaker": "kazuo", "text": "こうですか？フーッ。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_03_pursed_lip"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s06_06", "speaker": "yamada", "text": "上手です！この呼吸法は、気道が狭くなるのを防いで、息を吐きやすくしてくれます。苦しくなった時にも使えますよ。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s06_07", "speaker": "kazuo", "text": "体力が戻ったら、家族と外食に行きたいと思ってるんだ。温泉旅行も夢だけどね。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s06_08", "speaker": "yamada", "text": "それは素敵な目標ですね！外食に行けるように、一緒に頑張りましょう。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] }
+      ],
+      "knowledge": {
+        "title": "口すぼめ呼吸の効果",
+        "text": "【口すぼめ呼吸のメカニズム】\n①呼気時の気道内圧を高め、気道の虚脱を防ぐ\n②呼気時間を延長し、肺内の空気を効率よく排出\n③呼吸数を減らし、呼吸仕事量を軽減\n④日常生活動作中の息切れを軽減"
+      },
+      "quiz": {
+        "question": "COPD患者の呼吸困難時に有効な呼吸法はどれか？",
+        "options": [
+          { "text": "胸式呼吸", "correct": false },
+          { "text": "口すぼめ呼吸", "correct": true },
+          { "text": "努力呼吸", "correct": false },
+          { "text": "過換気", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "title": "薬局",
+      "background": "pharmacy",
+      "bgm": "heartwarming",
+      "cuts": [
+        { "id": "s07_01", "speaker": "kazuo", "text": "処方箋を持ってきました。", "characters": ["kazuo", "pharmacist"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_05_neutral"}] },
+        { "id": "s07_02", "speaker": "pharmacist", "text": "聖隷さん、こんにちは。今回のお薬を確認しますね。吸入薬のスピリーバは、毎日同じ時間に使っていますか？", "characters": ["kazuo", "pharmacist"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_01_smile"}] },
+        { "id": "s07_03", "speaker": "kazuo", "text": "朝と夜に使っています。忘れたことはないですよ。", "characters": ["kazuo", "pharmacist"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_05_neutral"}] },
+        { "id": "s07_04", "speaker": "pharmacist", "text": "素晴らしいですね。吸入後はうがいを忘れずにしてくださいね。口腔カンジダの予防になります。", "characters": ["kazuo", "pharmacist"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_01_smile"}] },
+        { "id": "s07_05", "speaker": "pharmacist", "text": "プレドニゾロンは炎症を抑えるお薬ですが、長期使用で骨粗鬆症のリスクがありますので、カルシウムを意識して摂ってくださいね。", "characters": ["kazuo", "pharmacist"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_07_serious"}] },
+        { "id": "s07_06", "speaker": "kazuo", "text": "わかりました。牛乳を飲むようにします。", "characters": ["kazuo", "pharmacist"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "pharmacist", "position": "right", "expression": "pharmacist_01_smile"}] }
+      ],
+      "knowledge": {
+        "title": "COPD治療薬の種類",
+        "text": "【気管支拡張薬】\n・LAMA（長時間作用性抗コリン薬）\n・LABA（長時間作用性β2刺激薬）\n・SABA（短時間作用性β2刺激薬）\n\n【抗炎症薬】\n・ICS（吸入ステロイド）\n・経口ステロイド"
+      },
+      "quiz": {
+        "question": "吸入ステロイド薬使用後にうがいをする目的はどれか？",
+        "options": [
+          { "text": "味覚障害の予防", "correct": false },
+          { "text": "口腔カンジダ症の予防", "correct": true },
+          { "text": "歯周病の予防", "correct": false },
+          { "text": "口臭の予防", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "title": "かかりつけ医受診",
+      "background": "clinic",
+      "bgm": "medical",
+      "cuts": [
+        { "id": "s08_01", "speaker": "doctor", "text": "聖隷さん、退院後1ヶ月ですね。調子はいかがですか？", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_01_smile"}] },
+        { "id": "s08_02", "speaker": "kazuo", "text": "おかげさまで、大きく悪くなることはなく過ごせています。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}] },
+        { "id": "s08_03", "speaker": "doctor", "text": "訪問看護の記録を見ると、SpO2も安定していますね。体重が少し減っているのが気になりますが。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_02_worried"}] },
+        { "id": "s08_04", "speaker": "kazuo", "text": "食欲はあるんですが、あまり量が食べられなくて。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}] },
+        { "id": "s08_05", "speaker": "doctor", "text": "COPDの方は呼吸にエネルギーを使うので、体重が減りやすいんです。少量でも高カロリーなものを摂るようにしてください。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}] },
+        { "id": "s08_06", "speaker": "doctor", "text": "感染予防も大切です。人混みは避けて、手洗いうがいを徹底してくださいね。インフルエンザと肺炎球菌のワクチンは接種していますか？", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_07_serious"}] },
+        { "id": "s08_07", "speaker": "kazuo", "text": "インフルエンザは毎年打っています。肺炎球菌は5年前に打ちました。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_05_neutral"}] },
+        { "id": "s08_08", "speaker": "doctor", "text": "では次回、肺炎球菌ワクチンの再接種も検討しましょう。", "characters": ["kazuo", "doctor"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "doctor", "position": "right", "expression": "doctor_01_smile"}] }
+      ],
+      "knowledge": {
+        "title": "COPD患者の栄養管理",
+        "text": "【なぜ体重が減るのか】\nCOPD患者は呼吸筋の仕事量増加により、安静時でも健常者の1.2-1.5倍のエネルギーを消費します。\n\n【栄養指導のポイント】\n・高カロリー・高タンパク食\n・少量頻回食（1日5-6回）\n・炭水化物過剰摂取は避ける"
+      },
+      "quiz": {
+        "question": "COPD患者の栄養指導として適切なのはどれか？",
+        "options": [
+          { "text": "低カロリー食を勧める", "correct": false },
+          { "text": "水分制限を指導する", "correct": false },
+          { "text": "高タンパク食を勧める", "correct": true },
+          { "text": "炭水化物中心の食事を勧める", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "title": "ケアマネ訪問",
+      "background": "home_living",
+      "bgm": "heartwarming",
+      "cuts": [
+        { "id": "s09_01", "speaker": "sato", "text": "聖隷さん、奥様、こんにちは。ケアマネジャーの佐藤です。サービスの利用状況を確認させてください。", "characters": ["kazuo", "ichiko", "sato"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "sato", "position": "right", "expression": "sato_01_smile"}] },
+        { "id": "s09_02", "speaker": "ichiko", "text": "訪問看護のおかげで、私も少し楽になりました。", "characters": ["kazuo", "ichiko", "sato"], "expressions": [{"id": "ichiko", "position": "left", "expression": "ichiko_01_smile"}, {"id": "sato", "position": "right", "expression": "sato_05_neutral"}] },
+        { "id": "s09_03", "speaker": "sato", "text": "それは良かったです。介護する奥様の健康も大切ですからね。", "characters": ["kazuo", "ichiko", "sato"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "sato", "position": "right", "expression": "sato_01_smile"}] },
+        { "id": "s09_04", "speaker": "sato", "text": "訪問入浴や、レスパイト入院といったサービスもあります。必要なときは遠慮なく相談してくださいね。", "characters": ["kazuo", "ichiko", "sato"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "sato", "position": "right", "expression": "sato_05_neutral"}] },
+        { "id": "s09_05", "speaker": "kazuo", "text": "そういうサービスがあるのは心強いです。", "characters": ["kazuo", "ichiko", "sato"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "sato", "position": "right", "expression": "sato_01_smile"}] },
+        { "id": "s09_06", "speaker": "sato", "text": "緊急時の連絡先はお渡ししましたね。24時間対応の訪問看護ステーションの番号です。", "characters": ["kazuo", "ichiko", "sato"], "expressions": [{"id": "ichiko", "position": "left", "expression": "ichiko_02_worried"}, {"id": "sato", "position": "right", "expression": "sato_05_neutral"}] },
+        { "id": "s09_07", "speaker": "sato", "text": "介護者の負担軽減も大切です。ご家族だけで抱え込まず、使えるサービスは活用してくださいね。", "characters": ["kazuo", "ichiko", "sato"], "expressions": [{"id": "ichiko", "position": "left", "expression": "ichiko_05_neutral"}, {"id": "sato", "position": "right", "expression": "sato_07_serious"}] }
+      ],
+      "knowledge": {
+        "title": "要介護2で利用できるサービス例",
+        "text": "【居宅サービス】\n・訪問介護（ホームヘルプ）\n・訪問看護\n・訪問リハビリテーション\n・通所介護（デイサービス）\n・短期入所（ショートステイ）\n\n区分支給限度額：約197,050円/月"
+      },
+      "quiz": {
+        "question": "介護保険の保険者はどれか？",
+        "options": [
+          { "text": "都道府県", "correct": false },
+          { "text": "市町村", "correct": true },
+          { "text": "介護保険審査会", "correct": false },
+          { "text": "地域包括支援センター", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "title": "妻との会話",
+      "background": "home_living",
+      "bgm": "daily",
+      "cuts": [
+        { "id": "s10_01", "speaker": "ichiko", "text": "お父さん、最近少し顔色が良くなったんじゃない？", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}] },
+        { "id": "s10_02", "speaker": "kazuo", "text": "そうか？山田さんが来てくれるようになって、お風呂にも入れるし、リハビリもできるからかな。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}] },
+        { "id": "s10_03", "speaker": "ichiko", "text": "私も安心できるわ。一人で見ていた時は、夜中に何かあったらどうしようって心配で。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_02_worried"}] },
+        { "id": "s10_04", "speaker": "kazuo", "text": "母さんには苦労をかけるな。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_02_worried"}, {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}] },
+        { "id": "s10_05", "speaker": "ichiko", "text": "何言ってるの。一緒にいられる時間を大切にしましょうよ。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_05_neutral"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}] },
+        { "id": "s10_06", "speaker": "kazuo", "text": "ああ、そうだな。来月、孫が遊びに来るって言ってたな。その日を楽しみにしているよ。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "ichiko", "position": "right", "expression": "ichiko_05_neutral"}] },
+        { "id": "s10_07", "speaker": "ichiko", "text": "近場でいいじゃない。孫たちも連れて、みんなで美味しいもの食べに行きましょう。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}] },
+        { "id": "s10_08", "speaker": "kazuo", "text": "そうだな。それを目標に、リハビリも頑張るよ。", "characters": ["kazuo", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_09_grateful"}, {"id": "ichiko", "position": "right", "expression": "ichiko_01_smile"}] }
+      ],
+      "knowledge": {
+        "title": "介護者ケアの重要性",
+        "text": "在宅療養では、介護者である家族の心身の健康も重要です。\n\n【介護者のアセスメント項目】\n・身体的健康状態\n・精神的健康状態\n・介護負担感\n・睡眠状況\n\n【具体的な支援】\n・傾聴、共感的理解\n・レスパイトケア"
+      }
+    },
+    {
+      "id": 11,
+      "title": "急変時の対応",
+      "background": "home_bedroom",
+      "bgm": "medical",
+      "cuts": [
+        { "id": "s11_01", "speaker": "ichiko", "text": "お父さん、大丈夫？息が荒いわよ。", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "ichiko", "position": "right", "expression": "ichiko_02_worried"}] },
+        { "id": "s11_02", "speaker": "kazuo", "text": "昨日から少し調子が悪くて。痰が出にくいんだ。", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "ichiko", "position": "right", "expression": "ichiko_02_worried"}] },
+        { "id": "s11_03", "speaker": "yamada", "text": "聖隷さん、訪問看護の山田です。朝、奥様から連絡をいただいて来ました。", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}] },
+        { "id": "s11_04", "speaker": "yamada", "text": "SpO2は90%、少し下がっていますね。酸素を4リットルに上げましょう。熱はありますか？", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}] },
+        { "id": "s11_05", "speaker": "kazuo", "text": "37度5分くらいあります。", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s11_06", "speaker": "yamada", "text": "痰の色は黄色くなっていませんか？", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_04_thinking"}] },
+        { "id": "s11_07", "speaker": "kazuo", "text": "言われてみれば、少し黄色っぽいかも。", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_04_cyanosis"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s11_08", "speaker": "yamada", "text": "感染の兆候かもしれません。主治医に連絡して、早めに受診しましょう。奥様、かかりつけ医の診察券を用意していただけますか？", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "ichiko", "position": "left", "expression": "ichiko_02_worried"}, {"id": "yamada", "position": "right", "expression": "yamada_07_serious"}] },
+        { "id": "s11_09", "speaker": "ichiko", "text": "わかりました。すぐ用意します。", "characters": ["kazuo", "yamada", "ichiko"], "expressions": [{"id": "ichiko", "position": "left", "expression": "ichiko_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] }
+      ],
+      "knowledge": {
+        "title": "COPD急性増悪の徴候",
+        "text": "【主要症状】\n・呼吸困難の悪化\n・痰の量の増加、色の変化（膿性）\n・発熱\n\n【その他の症状】\n・全身倦怠感の増強\n・チアノーゼ（唇・爪が紫色）\n・意識レベルの低下"
+      },
+      "quiz": {
+        "question": "COPD急性増悪の徴候として正しいのはどれか？（2つ選べ）",
+        "multipleAnswer": true,
+        "options": [
+          { "text": "膿性痰の増加", "correct": true },
+          { "text": "呼吸困難の軽減", "correct": false },
+          { "text": "食欲の増進", "correct": false },
+          { "text": "発熱", "correct": true }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "title": "クリニック受診",
+      "background": "clinic",
+      "bgm": "medical",
+      "cuts": [
+        { "id": "s11b_01", "speaker": "narration", "text": "山田看護師の判断で、一男さんはその日のうちにかかりつけ医を受診しました。", "expressions": [] },
+        { "id": "s11b_02", "speaker": "narration", "text": "診察の結果、COPD急性増悪と診断。細菌感染による気道炎症が原因でした。", "expressions": [] },
+        { "id": "s11b_03", "speaker": "narration", "text": "抗生剤と去痰薬が処方され、自宅での療養を続けることになりました。", "expressions": [] },
+        { "id": "s11b_04", "speaker": "narration", "text": "数日後、一男さんの症状は徐々に改善していきました。", "expressions": [] }
+      ],
+      "knowledge": {
+        "title": "COPD急性増悪の治療",
+        "text": "【外来治療の基本】\n・抗菌薬（細菌感染時）\n・気管支拡張薬の増量\n・全身性ステロイド（短期間）\n・酸素療法の調整\n\n【入院適応の判断】\n・重度の呼吸困難\n・意識障害\n・在宅酸素でも改善しない低酸素血症"
+      }
+    },
+    {
+      "id": 13,
+      "title": "回復確認訪問",
+      "background": "home_bedroom",
+      "bgm": "heartwarming",
+      "cuts": [
+        { "id": "s12_01", "speaker": "yamada", "text": "聖隷さん、こんにちは。先週の受診後、調子はいかがですか？", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_09_recovering"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s12_02", "speaker": "kazuo", "text": "おかげさまで、だいぶ楽になりました。抗生剤が効いたみたいで、痰も出やすくなったよ。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_06_relieved"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s12_03", "speaker": "yamada", "text": "良かったです。SpO2を測りますね。96%、酸素2リットルで安定していますね。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_medical_05_neutral"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s12_04", "speaker": "ichiko", "text": "山田さんがすぐ来てくれて、本当に助かりました。一人だったらどうなっていたか。", "characters": ["ichiko", "yamada"], "expressions": [{"id": "ichiko", "position": "left", "expression": "ichiko_09_grateful"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s12_05", "speaker": "yamada", "text": "奥様がすぐに連絡してくださったおかげです。早めに対応できて、入院せずに済みましたね。", "characters": ["ichiko", "yamada"], "expressions": [{"id": "ichiko", "position": "left", "expression": "ichiko_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] },
+        { "id": "s12_06", "speaker": "kazuo", "text": "来週、孫が来るんだ。それまでにもっと元気になっておきたいな。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_05_neutral"}] },
+        { "id": "s12_07", "speaker": "yamada", "text": "いい目標ですね。無理のない範囲で、リハビリも続けていきましょう。", "characters": ["kazuo", "yamada"], "expressions": [{"id": "kazuo", "position": "left", "expression": "kazuo_general_01_smile"}, {"id": "yamada", "position": "right", "expression": "yamada_01_smile"}] }
+      ],
+      "knowledge": {
+        "title": "早期対応の重要性",
+        "text": "【COPD患者の急変時対応のポイント】\n・症状の変化を早期に察知\n・24時間対応の連絡体制\n・家族への教育と連携\n・かかりつけ医との情報共有"
+      }
+    },
+    {
+      "id": 14,
+      "title": "エンディング",
+      "background": "map_town",
+      "bgm": "main_theme",
+      "cuts": [
+        { "id": "s13_01", "speaker": "narration", "text": "早めの対応で、一男さんは入院せずに外来治療で回復しました。", "expressions": [] },
+        { "id": "s13_02", "speaker": "narration", "text": "在宅療養を支えるのは、訪問看護師だけではありません。", "expressions": [] },
+        { "id": "s13_03", "speaker": "narration", "text": "主治医、薬剤師、ケアマネジャー、そして何より家族。多くの人がチームとなって支えています。", "expressions": [] },
+        { "id": "s13_04", "speaker": "kazuo", "text": "家にいられるのは、みなさんのおかげだな。ありがとう。", "characters": ["kazuo"], "expressions": [{"id": "kazuo", "position": "center", "expression": "kazuo_general_09_grateful"}] },
+        { "id": "s13_05", "speaker": "narration", "text": "患者さんの「家にいたい」という思いに寄り添いながら、その人らしい生活を支援する。それが在宅療養を支える訪問看護の役割です。", "expressions": [] },
+        { "id": "s13_06", "speaker": "narration", "text": "皆さんも、地域の多職種連携について学び、チームの一員として活躍してください。", "expressions": [] }
+      ],
+      "knowledge": {
+        "title": "在宅療養を支える多職種連携",
+        "text": "【主な専門職と役割】\n・医師：診断・治療方針の決定\n・訪問看護師：状態観察・医療処置\n・ケアマネジャー：ケアプラン作成\n・薬剤師：服薬管理・指導\n・理学療法士：リハビリテーション\n・介護福祉士：生活援助"
+      }
+    }
+  ]
+}

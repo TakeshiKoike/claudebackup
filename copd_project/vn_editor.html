@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビジュアルノベル エディタ</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --sidebar-width: 260px;
+            --header-height: 50px;
+            --primary: #2d5a27;
+            --primary-light: #4a7c43;
+            --accent: #8bc34a;
+            --bg: #f5f5f5;
+            --bg-dark: #1a1a2e;
+            --border: #ddd;
+            --text: #333;
+            --text-light: #666;
+        }
+
+        body {
+            font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* ヘッダー */
+        .editor-header {
+            height: var(--header-height);
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .editor-header h1 {
+            font-size: 1.1em;
+            margin-right: auto;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .header-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .header-btn.primary {
+            background: var(--accent);
+            color: var(--text);
+            border-color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* メインレイアウト */
+        .editor-body {
+            display: flex;
+            height: calc(100vh - var(--header-height));
+        }
+
+        /* サイドバー */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-section h3 {
+            padding: 10px 15px;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            color: var(--text-light);
+            letter-spacing: 1px;
+            background: #fafafa;
+        }
+
+        .sidebar-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-item:hover { background: #f0f0f0; }
+        .sidebar-item.active { background: #e8f5e9; color: var(--primary); font-weight: bold; }
+
+        .sidebar-item .badge {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.75em;
+        }
+
+        .scene-tree-item {
+            padding: 8px 15px 8px 20px;
+            cursor: pointer;
+            font-size: 0.88em;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .scene-tree-item:hover { background: #f0f0f0; }
+        .scene-tree-item.active { background: #e8f5e9; font-weight: bold; }
+
+        .cut-tree-item {
+            padding: 5px 15px 5px 40px;
+            cursor: pointer;
+            font-size: 0.8em;
+            color: var(--text-light);
+            transition: background 0.15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cut-tree-item:hover { background: #f5f5f5; }
+        .cut-tree-item.active { background: #e8f5e9; color: var(--primary); font-weight: bold; }
+
+        .sidebar-add-btn {
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.85em;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+
+        .sidebar-add-btn:hover { background: #e8f5e9; }
+
+        /* メインパネル */
+        .main-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+        }
+
+        .panel-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(45,90,39,0.15);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row > .form-group {
+            flex: 1;
+        }
+
+        /* テーブル */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        .data-table th {
+            background: #fafafa;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+
+        .data-table input, .data-table select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: opacity 0.2s;
+        }
+
+        .btn-sm:hover { opacity: 0.8; }
+        .btn-sm.add { background: var(--accent); color: var(--text); }
+        .btn-sm.delete { background: #f44336; color: white; }
+        .btn-sm.move { background: #2196f3; color: white; }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        /* カード */
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-header h4 {
+            font-size: 1em;
+            color: var(--primary);
+        }
+
+        /* 表情選択のグリッド */
+        .expression-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .expression-tag {
+            padding: 4px 10px;
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            border-radius: 12px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        .expression-tag.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* プレビュー領域 */
+        .preview-bar {
+            position: fixed;
+            bottom: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 45px;
+            background: var(--bg-dark);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 10px;
+            z-index: 50;
+        }
+
+        .preview-bar button {
+            padding: 6px 14px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .preview-bar button:hover { background: rgba(255,255,255,0.25); }
+
+        .preview-bar .preview-info {
+            margin-left: auto;
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
+
+        /* ドラッグハンドル */
+        .drag-handle {
+            cursor: grab;
+            color: #bbb;
+            margin-right: 5px;
+        }
+
+        .drag-handle:active { cursor: grabbing; }
+
+        /* 通知 */
+        .toast {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #323232;
+            color: white;
+            border-radius: 8px;
+            font-size: 0.9em;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <div class="editor-header">
+        <h1>VN Editor</h1>
+        <button class="header-btn" id="btnNew">新規</button>
+        <button class="header-btn" id="btnOpen">開く</button>
+        <button class="header-btn primary" id="btnSave">保存</button>
+        <button class="header-btn" id="btnPreview">プレビュー</button>
+        <input type="file" id="fileOpen" accept=".json" style="display:none">
+    </div>
+
+    <div class="editor-body">
+        <!-- サイドバー -->
+        <div class="sidebar" id="sidebar">
+            <!-- 設定セクション -->
+            <div class="sidebar-section">
+                <h3>設定</h3>
+                <div class="sidebar-item" data-panel="meta">&#x1F4DD; 基本情報</div>
+                <div class="sidebar-item" data-panel="characters">&#x1F464; キャラクター</div>
+                <div class="sidebar-item" data-panel="backgrounds">&#x1F5BC; 背景</div>
+                <div class="sidebar-item" data-panel="bgm">&#x1F3B5; BGM</div>
+                <div class="sidebar-item" data-panel="maps">&#x1F5FA; MAP設定</div>
+                <div class="sidebar-item" data-panel="flow">&#x27A1; シーン進行</div>
+            </div>
+            <!-- シーンツリー -->
+            <div class="sidebar-section">
+                <h3>シーン</h3>
+                <div id="sceneTree"></div>
+                <div class="sidebar-add-btn" id="addSceneBtn">+ シーンを追加</div>
+            </div>
+        </div>
+
+        <!-- メインパネル -->
+        <div class="main-panel" id="mainPanel">
+            <div style="text-align:center; padding: 60px 20px; color: var(--text-light);">
+                <p style="font-size: 1.2em; margin-bottom: 10px;">JSONファイルを開くか、新規作成してください</p>
+                <p style="font-size: 0.9em;">サイドバーの項目をクリックして編集</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- プレビューバー -->
+    <div class="preview-bar">
+        <button id="previewPrev">&larr;</button>
+        <button id="previewPlay">&#x25B6; 再生</button>
+        <button id="previewNext">&rarr;</button>
+        <span class="preview-info" id="previewInfo">シーンを選択してプレビュー</span>
+    </div>
+
+    <!-- 通知 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+    // ========== エディタ状態 ==========
+    let scenario = createEmpty();
+    let activePanel = null;
+    let activeSceneIndex = -1;
+    let activeCutIndex = -1;
+
+    function createEmpty() {
+        return {
+            meta: { title: '', subtitle: '', version: '1.0', titleBackground: '', titleInfo: [] },
+            characters: {},
+            speakerNames: {},
+            backgrounds: {},
+            bgm: {},
+            maps: { town: { image: '', markers: [] }, subMaps: {} },
+            sceneFlow: [],
+            sceneLocationMap: {},
+            sceneRoomMap: {},
+            videoFiles: {},
+            scenes: []
+        };
+    }
+
+    // ========== ファイル I/O ==========
+    document.getElementById('btnNew').addEventListener('click', () => {
+        if (!confirm('現在の内容を破棄して新規作成しますか？')) return;
+        scenario = createEmpty();
+        activePanel = null;
+        activeSceneIndex = -1;
+        activeCutIndex = -1;
+        refreshSidebar();
+        showWelcome();
+        toast('新規シナリオを作成しました');
+    });
+
+    document.getElementById('btnOpen').addEventListener('click', () => {
+        document.getElementById('fileOpen').click();
+    });
+
+    document.getElementById('fileOpen').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                scenario = JSON.parse(ev.target.result);
+                refreshSidebar();
+                showWelcome();
+                toast(file.name + ' を読み込みました');
+            } catch(err) {
+                alert('JSON読み込みエラー: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    document.getElementById('btnSave').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(scenario, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = (scenario.meta.title || 'scenario').replace(/[^a-zA-Z0-9\u3000-\u9FFF]/g, '_') + '.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast('保存しました: ' + a.download);
+    });
+
+    document.getElementById('btnPreview').addEventListener('click', () => {
+        // vn_viewer.htmlを同じフォルダから開き、scenarioを渡す
+        const blob = new Blob([JSON.stringify(scenario)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        // BlobURLをscenarioパラメータとして渡す
+        window.open('vn_viewer.html?scenario=' + encodeURIComponent(url), '_blank');
+    });
+
+    // ========== サイドバー ==========
+    function refreshSidebar() {
+        const tree = document.getElementById('sceneTree');
+        tree.innerHTML = '';
+
+        (scenario.scenes || []).forEach((scene, si) => {
+            const sceneDiv = document.createElement('div');
+
+            const sceneItem = document.createElement('div');
+            sceneItem.className = 'scene-tree-item' + (activeSceneIndex === si && activeCutIndex === -1 ? ' active' : '');
+            sceneItem.textContent = `Scene ${scene.id}: ${scene.title || '(無題)'}`;
+            sceneItem.addEventListener('click', () => {
+                activeSceneIndex = si;
+                activeCutIndex = -1;
+                showScenePanel(si);
+                refreshSidebar();
+            });
+            sceneDiv.appendChild(sceneItem);
+
+            // カット一覧
+            (scene.cuts || []).forEach((cut, ci) => {
+                const cutItem = document.createElement('div');
+                cutItem.className = 'cut-tree-item' + (activeSceneIndex === si && activeCutIndex === ci ? ' active' : '');
+                const speakerLabel = scenario.speakerNames[cut.speaker] || cut.speaker || '?';
+                cutItem.textContent = `${cut.id}: ${speakerLabel} - ${(cut.text || '').substring(0, 20)}...`;
+                cutItem.addEventListener('click', () => {
+                    activeSceneIndex = si;
+                    activeCutIndex = ci;
+                    showCutPanel(si, ci);
+                    refreshSidebar();
+                });
+                sceneDiv.appendChild(cutItem);
+            });
+
+            tree.appendChild(sceneDiv);
+        });
+
+        // 設定パネルアクティブ状態
+        document.querySelectorAll('.sidebar-item[data-panel]').forEach(item => {
+            item.classList.toggle('active', item.dataset.panel === activePanel);
+        });
+    }
+
+    // サイドバー設定クリック
+    document.querySelectorAll('.sidebar-item[data-panel]').forEach(item => {
+        item.addEventListener('click', () => {
+            activePanel = item.dataset.panel;
+            activeSceneIndex = -1;
+            activeCutIndex = -1;
+            showPanel(item.dataset.panel);
+            refreshSidebar();
+        });
+    });
+
+    // シーン追加
+    document.getElementById('addSceneBtn').addEventListener('click', () => {
+        const maxId = scenario.scenes.reduce((max, s) => Math.max(max, s.id || 0), 0);
+        scenario.scenes.push({
+            id: maxId + 1,
+            title: '',
+            background: '',
+            bgm: '',
+            cuts: []
+        });
+        // sceneFlowにも追加
+        scenario.sceneFlow.push({ sceneId: maxId + 1, nextLocation: null });
+        activeSceneIndex = scenario.scenes.length - 1;
+        activeCutIndex = -1;
+        showScenePanel(activeSceneIndex);
+        refreshSidebar();
+        toast('シーンを追加しました');
+    });
+
+    // ========== パネル描画 ==========
+    const mp = document.getElementById('mainPanel');
+
+    function showWelcome() {
+        mp.innerHTML = `<div style="text-align:center; padding: 60px 20px; color: var(--text-light);">
+            <p style="font-size: 1.2em; margin-bottom: 10px;">${scenario.meta.title || 'シナリオ'} を編集中</p>
+            <p style="font-size: 0.9em;">サイドバーの項目をクリックして編集</p>
+            <p style="font-size: 0.85em; margin-top: 10px;">シーン数: ${scenario.scenes.length} / キャラクター数: ${Object.keys(scenario.characters || {}).length}</p>
+        </div>`;
+    }
+
+    function showPanel(panel) {
+        switch(panel) {
+            case 'meta': showMetaPanel(); break;
+            case 'characters': showCharactersPanel(); break;
+            case 'backgrounds': showBackgroundsPanel(); break;
+            case 'bgm': showBgmPanel(); break;
+            case 'maps': showMapsPanel(); break;
+            case 'flow': showFlowPanel(); break;
+        }
+    }
+
+    // ---------- 基本情報 ----------
+    function showMetaPanel() {
+        const m = scenario.meta || {};
+        mp.innerHTML = `
+            <div class="panel-title">&#x1F4DD; 基本情報</div>
+            <div class="card">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>タイトル</label>
+                        <input type="text" id="metaTitle" value="${esc(m.title)}">
+                    </div>
+                    <div class="form-group">
+                        <label>バージョン</label>
+                        <input type="text" id="metaVersion" value="${esc(m.version)}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>サブタイトル</label>
+                    <input type="text" id="metaSubtitle" value="${esc(m.subtitle)}">
+                </div>
+                <div class="form-group">
+                    <label>タイトル背景画像パス</label>
+                    <input type="text" id="metaTitleBg" value="${esc(m.titleBackground)}">
+                </div>
+                <div class="form-group">
+                    <label>タイトル情報テキスト（1行ごと）</label>
+                    <textarea id="metaTitleInfo">${(m.titleInfo || []).join('\n')}</textarea>
+                </div>
+            </div>`;
+
+        // 自動保存
+        ['metaTitle', 'metaVersion', 'metaSubtitle', 'metaTitleBg', 'metaTitleInfo'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                scenario.meta.title = document.getElementById('metaTitle').value;
+                scenario.meta.version = document.getElementById('metaVersion').value;
+                scenario.meta.subtitle = document.getElementById('metaSubtitle').value;
+                scenario.meta.titleBackground = document.getElementById('metaTitleBg').value;
+                scenario.meta.titleInfo = document.getElementById('metaTitleInfo').value.split('\n').filter(l => l.trim());
+            });
+        });
+    }
+
+    // ---------- キャラクター ----------
+    function showCharactersPanel() {
+        const chars = scenario.characters || {};
+        const speakers = scenario.speakerNames || {};
+        let rows = '';
+        Object.entries(chars).forEach(([key, val]) => {
+            rows += `<tr>
+                <td><input value="${esc(key)}" data-old="${esc(key)}" class="char-key"></td>
+                <td><input value="${esc(val.name)}" class="char-name"></td>
+                <td><input value="${esc(val.folder)}" class="char-folder"></td>
+                <td><input value="${esc(val.defaultExpression || '')}" class="char-default"></td>
+                <td><input value="${esc(speakers[key] || '')}" class="char-speaker"></td>
+                <td><button class="btn-sm delete char-del">&#x2716;</button></td>
+            </tr>`;
+        });
+
+        mp.innerHTML = `
+            <div class="panel-title">&#x1F464; キャラクター</div>
+            <div class="card">
+                <table class="data-table" id="charTable">
+                    <thead><tr><th>ID</th><th>名前</th><th>画像フォルダ</th><th>デフォルト表情</th><th>話者表示名</th><th></th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div class="btn-row">
+                    <button class="btn-sm add" id="addChar">+ キャラクター追加</button>
+                </div>
+            </div>`;
+
+        bindCharTable();
+    }
+
+    function bindCharTable() {
+        document.getElementById('addChar').addEventListener('click', () => {
+            const key = 'char_' + Date.now();
+            scenario.characters[key] = { name: '', folder: '', defaultExpression: '' };
+            scenario.speakerNames[key] = '';
+            showCharactersPanel();
+        });
+
+        document.querySelectorAll('#charTable tbody tr').forEach(row => {
+            const inputs = row.querySelectorAll('input');
+            const oldKey = inputs[0].dataset.old;
+
+            const save = () => {
+                const newKey = inputs[0].value.trim();
+                if (newKey !== oldKey) {
+                    scenario.characters[newKey] = scenario.characters[oldKey];
+                    delete scenario.characters[oldKey];
+                    scenario.speakerNames[newKey] = scenario.speakerNames[oldKey];
+                    delete scenario.speakerNames[oldKey];
+                }
+                scenario.characters[newKey || oldKey] = {
+                    name: inputs[1].value,
+                    folder: inputs[2].value,
+                    defaultExpression: inputs[3].value
+                };
+                scenario.speakerNames[newKey || oldKey] = inputs[4].value;
+            };
+
+            inputs.forEach(input => input.addEventListener('change', save));
+
+            row.querySelector('.char-del').addEventListener('click', () => {
+                delete scenario.characters[oldKey];
+                delete scenario.speakerNames[oldKey];
+                showCharactersPanel();
+            });
+        });
+    }
+
+    // ---------- 背景 ----------
+    function showBackgroundsPanel() {
+        const bgs = scenario.backgrounds || {};
+        let rows = '';
+        Object.entries(bgs).forEach(([key, val]) => {
+            rows += `<tr>
+                <td><input value="${esc(key)}" data-old="${esc(key)}" class="bg-key"></td>
+                <td><input value="${esc(val)}" class="bg-path"></td>
+                <td><button class="btn-sm delete bg-del">&#x2716;</button></td>
+            </tr>`;
+        });
+
+        mp.innerHTML = `
+            <div class="panel-title">&#x1F5BC; 背景</div>
+            <div class="card">
+                <table class="data-table" id="bgTable">
+                    <thead><tr><th>ID</th><th>ファイルパス</th><th></th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div class="btn-row">
+                    <button class="btn-sm add" id="addBg">+ 背景追加</button>
+                </div>
+            </div>`;
+
+        document.getElementById('addBg').addEventListener('click', () => {
+            scenario.backgrounds['bg_' + Date.now()] = '';
+            showBackgroundsPanel();
+        });
+
+        document.querySelectorAll('#bgTable tbody tr').forEach(row => {
+            const inputs = row.querySelectorAll('input');
+            const oldKey = inputs[0].dataset.old;
+
+            const save = () => {
+                const newKey = inputs[0].value.trim();
+                if (newKey !== oldKey) {
+                    scenario.backgrounds[newKey] = scenario.backgrounds[oldKey];
+                    delete scenario.backgrounds[oldKey];
+                }
+                scenario.backgrounds[newKey || oldKey] = inputs[1].value;
+            };
+            inputs.forEach(input => input.addEventListener('change', save));
+
+            row.querySelector('.bg-del').addEventListener('click', () => {
+                delete scenario.backgrounds[oldKey];
+                showBackgroundsPanel();
+            });
+        });
+    }
+
+    // ---------- BGM ----------
+    function showBgmPanel() {
+        const bgms = scenario.bgm || {};
+        let rows = '';
+        Object.entries(bgms).forEach(([key, val]) => {
+            rows += `<tr>
+                <td><input value="${esc(key)}" data-old="${esc(key)}" class="bgm-key"></td>
+                <td><input value="${esc(val)}" class="bgm-path"></td>
+                <td><button class="btn-sm delete bgm-del">&#x2716;</button></td>
+            </tr>`;
+        });
+
+        mp.innerHTML = `
+            <div class="panel-title">&#x1F3B5; BGM</div>
+            <div class="card">
+                <table class="data-table" id="bgmTable">
+                    <thead><tr><th>ID</th><th>ファイルパス</th><th></th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div class="btn-row">
+                    <button class="btn-sm add" id="addBgm">+ BGM追加</button>
+                </div>
+            </div>`;
+
+        document.getElementById('addBgm').addEventListener('click', () => {
+            scenario.bgm['bgm_' + Date.now()] = '';
+            showBgmPanel();
+        });
+
+        document.querySelectorAll('#bgmTable tbody tr').forEach(row => {
+            const inputs = row.querySelectorAll('input');
+            const oldKey = inputs[0].dataset.old;
+
+            const save = () => {
+                const newKey = inputs[0].value.trim();
+                if (newKey !== oldKey) {
+                    scenario.bgm[newKey] = scenario.bgm[oldKey];
+                    delete scenario.bgm[oldKey];
+                }
+                scenario.bgm[newKey || oldKey] = inputs[1].value;
+            };
+            inputs.forEach(input => input.addEventListener('change', save));
+
+            row.querySelector('.bgm-del').addEventListener('click', () => {
+                delete scenario.bgm[oldKey];
+                showBgmPanel();
+            });
+        });
+    }
+
+    // ---------- MAP設定 ----------
+    function showMapsPanel() {
+        const maps = scenario.maps || {};
+        const town = maps.town || { image: '', markers: [] };
+        const subs = maps.subMaps || {};
+
+        let townMarkersHtml = '';
+        (town.markers || []).forEach((m, i) => {
+            townMarkersHtml += `<tr>
+                <td><input value="${esc(m.id)}" class="tm-id" data-i="${i}"></td>
+                <td><input value="${esc(m.label)}" class="tm-label" data-i="${i}"></td>
+                <td><input value="${esc(m.icon)}" class="tm-icon" data-i="${i}" style="width:50px"></td>
+                <td><input value="${esc(m.colorClass)}" class="tm-color" data-i="${i}"></td>
+                <td><input value="${esc(m.position.left)}" class="tm-left" data-i="${i}" style="width:60px"></td>
+                <td><input value="${esc(m.position.top)}" class="tm-top" data-i="${i}" style="width:60px"></td>
+                <td><button class="btn-sm delete tm-del" data-i="${i}">&#x2716;</button></td>
+            </tr>`;
+        });
+
+        let subMapsHtml = '';
+        Object.entries(subs).forEach(([key, sub]) => {
+            subMapsHtml += `<div class="card">
+                <div class="card-header"><h4>サブMAP: ${key}</h4></div>
+                <div class="form-group"><label>画像</label><input type="text" value="${esc(sub.image)}" class="submap-img" data-key="${key}"></div>
+                <div class="form-group"><label>タイトル</label><input type="text" value="${esc(sub.title || '')}" class="submap-title" data-key="${key}"></div>
+                <p style="font-size:0.85em; color:var(--text-light); margin-bottom:5px;">マーカー: ${(sub.markers || []).length}個（JSON直接編集）</p>
+            </div>`;
+        });
+
+        mp.innerHTML = `
+            <div class="panel-title">&#x1F5FA; MAP設定</div>
+            <div class="card">
+                <div class="card-header"><h4>街並みMAP</h4></div>
+                <div class="form-group">
+                    <label>MAP画像パス</label>
+                    <input type="text" id="townMapImg" value="${esc(town.image)}">
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>ID</th><th>ラベル</th><th>アイコン</th><th>色クラス</th><th>Left</th><th>Top</th><th></th></tr></thead>
+                    <tbody id="townMarkerBody">${townMarkersHtml}</tbody>
+                </table>
+                <div class="btn-row">
+                    <button class="btn-sm add" id="addTownMarker">+ マーカー追加</button>
+                </div>
+            </div>
+            ${subMapsHtml}`;
+
+        // 街並みMAP画像
+        document.getElementById('townMapImg').addEventListener('change', e => {
+            if (!scenario.maps) scenario.maps = {};
+            if (!scenario.maps.town) scenario.maps.town = { image: '', markers: [] };
+            scenario.maps.town.image = e.target.value;
+        });
+
+        // マーカー編集
+        document.querySelectorAll('#townMarkerBody input').forEach(input => {
+            input.addEventListener('change', () => {
+                const i = parseInt(input.dataset.i);
+                const m = scenario.maps.town.markers[i];
+                if (input.classList.contains('tm-id')) m.id = input.value;
+                if (input.classList.contains('tm-label')) m.label = input.value;
+                if (input.classList.contains('tm-icon')) m.icon = input.value;
+                if (input.classList.contains('tm-color')) m.colorClass = input.value;
+                if (input.classList.contains('tm-left')) m.position.left = input.value;
+                if (input.classList.contains('tm-top')) m.position.top = input.value;
+            });
+        });
+
+        document.querySelectorAll('.tm-del').forEach(btn => {
+            btn.addEventListener('click', () => {
+                scenario.maps.town.markers.splice(parseInt(btn.dataset.i), 1);
+                showMapsPanel();
+            });
+        });
+
+        document.getElementById('addTownMarker').addEventListener('click', () => {
+            scenario.maps.town.markers.push({ id: '', label: '', icon: '', colorClass: '', position: { left: '50%', top: '50%' } });
+            showMapsPanel();
+        });
+
+        // サブMAP
+        document.querySelectorAll('.submap-img').forEach(input => {
+            input.addEventListener('change', () => {
+                scenario.maps.subMaps[input.dataset.key].image = input.value;
+            });
+        });
+        document.querySelectorAll('.submap-title').forEach(input => {
+            input.addEventListener('change', () => {
+                scenario.maps.subMaps[input.dataset.key].title = input.value;
+            });
+        });
+    }
+
+    // ---------- シーン進行 ----------
+    function showFlowPanel() {
+        let rows = '';
+        (scenario.sceneFlow || []).forEach((f, i) => {
+            rows += `<tr>
+                <td>${f.sceneId}</td>
+                <td>${(scenario.scenes.find(s => s.id === f.sceneId) || {}).title || ''}</td>
+                <td><input value="${f.nextLocation || ''}" class="flow-next" data-i="${i}"></td>
+            </tr>`;
+        });
+
+        let locRows = '';
+        Object.entries(scenario.sceneLocationMap || {}).forEach(([k, v]) => {
+            locRows += `<tr><td>${k}</td><td><input value="${v || ''}" class="locmap-val" data-key="${k}"></td></tr>`;
+        });
+
+        let roomRows = '';
+        Object.entries(scenario.sceneRoomMap || {}).forEach(([k, v]) => {
+            roomRows += `<tr><td>${k}</td><td><input value="${v || ''}" class="roommap-val" data-key="${k}"></td></tr>`;
+        });
+
+        mp.innerHTML = `
+            <div class="panel-title">&#x27A1; シーン進行</div>
+            <div class="card">
+                <div class="card-header"><h4>シーンフロー</h4></div>
+                <table class="data-table">
+                    <thead><tr><th>シーンID</th><th>タイトル</th><th>次の場所</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+            <div class="card">
+                <div class="card-header"><h4>シーン→場所マッピング</h4></div>
+                <table class="data-table">
+                    <thead><tr><th>シーンID</th><th>場所</th></tr></thead>
+                    <tbody>${locRows}</tbody>
+                </table>
+            </div>
+            <div class="card">
+                <div class="card-header"><h4>シーン→部屋マッピング</h4></div>
+                <table class="data-table">
+                    <thead><tr><th>シーンID</th><th>部屋</th></tr></thead>
+                    <tbody>${roomRows}</tbody>
+                </table>
+            </div>`;
+
+        document.querySelectorAll('.flow-next').forEach(input => {
+            input.addEventListener('change', () => {
+                scenario.sceneFlow[parseInt(input.dataset.i)].nextLocation = input.value || null;
+            });
+        });
+
+        document.querySelectorAll('.locmap-val').forEach(input => {
+            input.addEventListener('change', () => {
+                scenario.sceneLocationMap[input.dataset.key] = input.value || null;
+            });
+        });
+
+        document.querySelectorAll('.roommap-val').forEach(input => {
+            input.addEventListener('change', () => {
+                if (input.value) {
+                    scenario.sceneRoomMap[input.dataset.key] = input.value;
+                } else {
+                    delete scenario.sceneRoomMap[input.dataset.key];
+                }
+            });
+        });
+    }
+
+    // ---------- シーン編集 ----------
+    function showScenePanel(si) {
+        activePanel = null;
+        const scene = scenario.scenes[si];
+        if (!scene) return;
+
+        const bgOptions = Object.keys(scenario.backgrounds || {}).map(k =>
+            `<option value="${esc(k)}" ${scene.background === k ? 'selected' : ''}>${k}</option>`
+        ).join('');
+
+        const bgmOptions = Object.keys(scenario.bgm || {}).map(k =>
+            `<option value="${esc(k)}" ${scene.bgm === k ? 'selected' : ''}>${k}</option>`
+        ).join('');
+
+        mp.innerHTML = `
+            <div class="panel-title">Scene ${scene.id}: ${scene.title || '(無題)'}</div>
+            <div class="card">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>シーンID</label>
+                        <input type="text" id="sceneId" value="${scene.id}">
+                    </div>
+                    <div class="form-group">
+                        <label>タイトル</label>
+                        <input type="text" id="sceneTitle" value="${esc(scene.title)}">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>背景</label>
+                        <select id="sceneBg"><option value="">なし</option>${bgOptions}</select>
+                    </div>
+                    <div class="form-group">
+                        <label>BGM</label>
+                        <select id="sceneBgm"><option value="">なし</option>${bgmOptions}</select>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h4>知識解説</h4>
+                </div>
+                <div class="form-group">
+                    <label>タイトル</label>
+                    <input type="text" id="knowledgeTitle" value="${esc((scene.knowledge || {}).title || '')}">
+                </div>
+                <div class="form-group">
+                    <label>テキスト</label>
+                    <textarea id="knowledgeText" style="min-height:100px">${esc((scene.knowledge || {}).text || '')}</textarea>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h4>クイズ</h4>
+                </div>
+                <div class="form-group">
+                    <label>問題文</label>
+                    <input type="text" id="quizQuestion" value="${esc((scene.quiz || {}).question || '')}">
+                </div>
+                <div class="form-group">
+                    <label><input type="checkbox" id="quizMultiple" ${(scene.quiz || {}).multipleAnswer ? 'checked' : ''}> 複数回答</label>
+                </div>
+                <div id="quizOptionsContainer"></div>
+                <div class="btn-row">
+                    <button class="btn-sm add" id="addQuizOption">+ 選択肢追加</button>
+                    <button class="btn-sm delete" id="clearQuiz">クイズ削除</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h4>カット一覧 (${(scene.cuts || []).length})</h4>
+                    <button class="btn-sm add" id="addCutBtn">+ カット追加</button>
+                </div>
+                <div id="cutsList"></div>
+            </div>
+            <div class="btn-row">
+                <button class="btn-sm delete" id="deleteSceneBtn">このシーンを削除</button>
+            </div>`;
+
+        // シーン基本情報の保存
+        ['sceneId', 'sceneTitle', 'sceneBg', 'sceneBgm'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => {
+                scene.id = parseInt(document.getElementById('sceneId').value) || scene.id;
+                scene.title = document.getElementById('sceneTitle').value;
+                scene.background = document.getElementById('sceneBg').value || '';
+                scene.bgm = document.getElementById('sceneBgm').value || '';
+                refreshSidebar();
+            });
+        });
+
+        // 知識
+        ['knowledgeTitle', 'knowledgeText'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                const title = document.getElementById('knowledgeTitle').value;
+                const text = document.getElementById('knowledgeText').value;
+                if (title || text) {
+                    scene.knowledge = { title, text };
+                } else {
+                    delete scene.knowledge;
+                }
+            });
+        });
+
+        // クイズ
+        renderQuizOptions(scene);
+
+        document.getElementById('quizQuestion').addEventListener('input', () => {
+            if (!scene.quiz) scene.quiz = { question: '', options: [] };
+            scene.quiz.question = document.getElementById('quizQuestion').value;
+        });
+
+        document.getElementById('quizMultiple').addEventListener('change', () => {
+            if (!scene.quiz) scene.quiz = { question: '', options: [] };
+            if (document.getElementById('quizMultiple').checked) {
+                scene.quiz.multipleAnswer = true;
+            } else {
+                delete scene.quiz.multipleAnswer;
+            }
+        });
+
+        document.getElementById('addQuizOption').addEventListener('click', () => {
+            if (!scene.quiz) scene.quiz = { question: '', options: [] };
+            scene.quiz.options.push({ text: '', correct: false });
+            renderQuizOptions(scene);
+        });
+
+        document.getElementById('clearQuiz').addEventListener('click', () => {
+            delete scene.quiz;
+            document.getElementById('quizQuestion').value = '';
+            document.getElementById('quizMultiple').checked = false;
+            renderQuizOptions(scene);
+        });
+
+        // カット一覧
+        renderCutsList(scene);
+
+        document.getElementById('addCutBtn').addEventListener('click', () => {
+            const lastCut = scene.cuts[scene.cuts.length - 1];
+            const prefix = 's' + String(scene.id).padStart(2, '0') + '_';
+            const newNum = scene.cuts.length + 1;
+            scene.cuts.push({
+                id: prefix + String(newNum).padStart(2, '0'),
+                speaker: '',
+                text: '',
+                expressions: []
+            });
+            renderCutsList(scene);
+            refreshSidebar();
+        });
+
+        document.getElementById('deleteSceneBtn').addEventListener('click', () => {
+            if (!confirm(`Scene ${scene.id} を削除しますか？`)) return;
+            scenario.scenes.splice(si, 1);
+            activeSceneIndex = -1;
+            refreshSidebar();
+            showWelcome();
+            toast('シーンを削除しました');
+        });
+    }
+
+    function renderQuizOptions(scene) {
+        const container = document.getElementById('quizOptionsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!scene.quiz || !scene.quiz.options) return;
+
+        scene.quiz.options.forEach((opt, i) => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex; gap:8px; margin-bottom:8px; align-items:center;';
+            row.innerHTML = `
+                <span style="font-weight:bold; min-width:20px">${String.fromCharCode(65 + i)}</span>
+                <input type="text" value="${esc(opt.text)}" style="flex:1; padding:6px; border:1px solid var(--border); border-radius:4px;" class="quiz-opt-text" data-i="${i}">
+                <label style="white-space:nowrap; font-size:0.85em;"><input type="checkbox" class="quiz-opt-correct" data-i="${i}" ${opt.correct ? 'checked' : ''}> 正解</label>
+                <button class="btn-sm delete quiz-opt-del" data-i="${i}">&#x2716;</button>
+            `;
+            container.appendChild(row);
+        });
+
+        container.querySelectorAll('.quiz-opt-text').forEach(input => {
+            input.addEventListener('input', () => {
+                scene.quiz.options[parseInt(input.dataset.i)].text = input.value;
+            });
+        });
+
+        container.querySelectorAll('.quiz-opt-correct').forEach(cb => {
+            cb.addEventListener('change', () => {
+                scene.quiz.options[parseInt(cb.dataset.i)].correct = cb.checked;
+            });
+        });
+
+        container.querySelectorAll('.quiz-opt-del').forEach(btn => {
+            btn.addEventListener('click', () => {
+                scene.quiz.options.splice(parseInt(btn.dataset.i), 1);
+                renderQuizOptions(scene);
+            });
+        });
+    }
+
+    function renderCutsList(scene) {
+        const container = document.getElementById('cutsList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        (scene.cuts || []).forEach((cut, ci) => {
+            const speakerLabel = scenario.speakerNames[cut.speaker] || cut.speaker || '?';
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex; gap:8px; padding:8px 0; border-bottom:1px solid #eee; align-items:center; cursor:pointer;';
+            row.innerHTML = `
+                <span style="font-size:0.8em; color:var(--text-light); min-width:55px;">${cut.id}</span>
+                <span style="font-size:0.85em; font-weight:bold; min-width:80px;">${speakerLabel}</span>
+                <span style="font-size:0.85em; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(cut.text || '')}</span>
+                <button class="btn-sm move cut-up" data-i="${ci}" title="上へ">&#x2191;</button>
+                <button class="btn-sm move cut-down" data-i="${ci}" title="下へ">&#x2193;</button>
+                <button class="btn-sm delete cut-del" data-i="${ci}">&#x2716;</button>
+            `;
+
+            row.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') return;
+                activeSceneIndex = scenario.scenes.indexOf(scene);
+                activeCutIndex = ci;
+                showCutPanel(activeSceneIndex, ci);
+                refreshSidebar();
+            });
+
+            container.appendChild(row);
+        });
+
+        container.querySelectorAll('.cut-up').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const i = parseInt(btn.dataset.i);
+                if (i > 0) {
+                    [scene.cuts[i - 1], scene.cuts[i]] = [scene.cuts[i], scene.cuts[i - 1]];
+                    renderCutsList(scene);
+                    refreshSidebar();
+                }
+            });
+        });
+
+        container.querySelectorAll('.cut-down').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const i = parseInt(btn.dataset.i);
+                if (i < scene.cuts.length - 1) {
+                    [scene.cuts[i], scene.cuts[i + 1]] = [scene.cuts[i + 1], scene.cuts[i]];
+                    renderCutsList(scene);
+                    refreshSidebar();
+                }
+            });
+        });
+
+        container.querySelectorAll('.cut-del').forEach(btn => {
+            btn.addEventListener('click', () => {
+                scene.cuts.splice(parseInt(btn.dataset.i), 1);
+                renderCutsList(scene);
+                refreshSidebar();
+            });
+        });
+    }
+
+    // ---------- カット編集 ----------
+    function showCutPanel(si, ci) {
+        activePanel = null;
+        const scene = scenario.scenes[si];
+        const cut = scene.cuts[ci];
+        if (!cut) return;
+
+        const speakerOptions = Object.entries(scenario.speakerNames || {}).map(([k, v]) =>
+            `<option value="${esc(k)}" ${cut.speaker === k ? 'selected' : ''}>${v} (${k})</option>`
+        ).join('');
+
+        // 表情編集
+        let exprHtml = '';
+        (cut.expressions || []).forEach((expr, ei) => {
+            const charOptions = Object.entries(scenario.characters || {}).map(([k, v]) =>
+                `<option value="${esc(k)}" ${expr.id === k ? 'selected' : ''}>${v.name} (${k})</option>`
+            ).join('');
+
+            exprHtml += `<div class="card" style="padding:12px; margin-bottom:10px;">
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <div class="form-group" style="margin-bottom:0; flex:1; min-width:120px;">
+                        <label>キャラ</label>
+                        <select class="expr-char" data-i="${ei}"><option value="">--</option>${charOptions}</select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0; min-width:100px;">
+                        <label>位置</label>
+                        <select class="expr-pos" data-i="${ei}">
+                            <option value="left" ${expr.position === 'left' ? 'selected' : ''}>左</option>
+                            <option value="center" ${expr.position === 'center' ? 'selected' : ''}>中央</option>
+                            <option value="right" ${expr.position === 'right' ? 'selected' : ''}>右</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0; flex:2; min-width:200px;">
+                        <label>表情ファイル名</label>
+                        <input type="text" value="${esc(expr.expression || '')}" class="expr-file" data-i="${ei}">
+                    </div>
+                    <button class="btn-sm delete expr-del" data-i="${ei}" style="align-self:flex-end;">&#x2716;</button>
+                </div>
+            </div>`;
+        });
+
+        mp.innerHTML = `
+            <div class="panel-title">&#x2702; カット編集: ${cut.id}</div>
+            <div class="card">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>カットID</label>
+                        <input type="text" id="cutId" value="${esc(cut.id)}">
+                    </div>
+                    <div class="form-group">
+                        <label>話者</label>
+                        <select id="cutSpeaker"><option value="">--</option><option value="narration" ${cut.speaker === 'narration' ? 'selected' : ''}>ナレーション</option>${speakerOptions}</select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>タイプ</label>
+                    <select id="cutType">
+                        <option value="" ${!cut.type ? 'selected' : ''}>通常</option>
+                        <option value="thought" ${cut.type === 'thought' ? 'selected' : ''}>心の声</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>テキスト</label>
+                    <textarea id="cutText" style="min-height:80px">${esc(cut.text || '')}</textarea>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h4>キャラクター表情</h4>
+                    <button class="btn-sm add" id="addExpr">+ 表情追加</button>
+                </div>
+                <div id="exprContainer">${exprHtml}</div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn-sm move" id="cutPrevBtn">&larr; 前のカット</button>
+                <button class="btn-sm move" id="cutNextBtn">次のカット &rarr;</button>
+                <button class="btn-sm" style="background:#eee; margin-left:auto;" id="backToSceneBtn">シーンに戻る</button>
+            </div>`;
+
+        // 基本フィールド保存
+        ['cutId', 'cutSpeaker', 'cutType', 'cutText'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                cut.id = document.getElementById('cutId').value;
+                cut.speaker = document.getElementById('cutSpeaker').value;
+                const typeVal = document.getElementById('cutType').value;
+                if (typeVal) cut.type = typeVal; else delete cut.type;
+                cut.text = document.getElementById('cutText').value;
+                refreshSidebar();
+            });
+        });
+
+        // 表情フィールド
+        document.querySelectorAll('.expr-char, .expr-pos, .expr-file').forEach(el => {
+            el.addEventListener('change', () => {
+                const i = parseInt(el.dataset.i);
+                if (el.classList.contains('expr-char')) cut.expressions[i].id = el.value;
+                if (el.classList.contains('expr-pos')) cut.expressions[i].position = el.value;
+                if (el.classList.contains('expr-file')) cut.expressions[i].expression = el.value;
+            });
+        });
+
+        document.querySelectorAll('.expr-del').forEach(btn => {
+            btn.addEventListener('click', () => {
+                cut.expressions.splice(parseInt(btn.dataset.i), 1);
+                showCutPanel(si, ci);
+            });
+        });
+
+        document.getElementById('addExpr').addEventListener('click', () => {
+            if (!cut.expressions) cut.expressions = [];
+            cut.expressions.push({ id: '', position: 'left', expression: '' });
+            showCutPanel(si, ci);
+        });
+
+        // ナビゲーション
+        document.getElementById('cutPrevBtn').addEventListener('click', () => {
+            if (ci > 0) {
+                activeCutIndex = ci - 1;
+                showCutPanel(si, ci - 1);
+                refreshSidebar();
+            }
+        });
+
+        document.getElementById('cutNextBtn').addEventListener('click', () => {
+            if (ci < scene.cuts.length - 1) {
+                activeCutIndex = ci + 1;
+                showCutPanel(si, ci + 1);
+                refreshSidebar();
+            }
+        });
+
+        document.getElementById('backToSceneBtn').addEventListener('click', () => {
+            activeCutIndex = -1;
+            showScenePanel(si);
+            refreshSidebar();
+        });
+
+        // プレビュー情報
+        document.getElementById('previewInfo').textContent =
+            `Scene ${scene.id}: ${scene.title} / Cut ${ci + 1}/${scene.cuts.length} - ${cut.id}`;
+    }
+
+    // ========== プレビューバー ==========
+    document.getElementById('previewPrev').addEventListener('click', () => {
+        if (activeSceneIndex >= 0 && activeCutIndex > 0) {
+            activeCutIndex--;
+            showCutPanel(activeSceneIndex, activeCutIndex);
+            refreshSidebar();
+        }
+    });
+
+    document.getElementById('previewNext').addEventListener('click', () => {
+        if (activeSceneIndex >= 0) {
+            const scene = scenario.scenes[activeSceneIndex];
+            if (activeCutIndex < scene.cuts.length - 1) {
+                activeCutIndex++;
+                showCutPanel(activeSceneIndex, activeCutIndex);
+                refreshSidebar();
+            }
+        }
+    });
+
+    // ========== ユーティリティ ==========
+    function esc(str) {
+        if (str === null || str === undefined) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function toast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    // 初期化
+    refreshSidebar();
+    </script>
+</body>
+</html>

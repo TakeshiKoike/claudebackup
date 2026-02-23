@@ -10,3 +10,10 @@
 !patient_http_server.py
 !patient_gui.py
 !patient_conversation.py
+
+# COPDビジュアルノベル テンプレート化プロジェクト
+!copd_project/
+copd_project/*
+!copd_project/scenario_copd.json
+!copd_project/vn_viewer.html
+!copd_project/vn_editor.html
