@@ -11,6 +11,11 @@
 !patient_gui.py
 !patient_conversation.py
 
+# KES2025プレゼン翻訳スクリプト
+!translate_pptx.py
+!translate_pptx_v2.py
+!translate_pptx_v3.py
+
 # COPDビジュアルノベル テンプレート化プロジェクト
 !copd_project/
 copd_project/*
