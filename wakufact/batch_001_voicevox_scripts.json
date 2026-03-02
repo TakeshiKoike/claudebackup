@@ -1,0 +1,3216 @@
+{
+  "batch_id": "wakufact_batch_001_voicevox",
+  "generated_date": "2026-03-02",
+  "total_episodes": 50,
+  "available_speakers": {
+    "ずんだもん（ノーマル）": 3,
+    "四国めたん（ノーマル）": 2,
+    "春日部つむぎ": 8,
+    "波音リツ": 9,
+    "玄野武宏（ノーマル）": 11,
+    "白上虎太郎（ノーマル）": 12
+  },
+  "default_speaker_id": 3,
+  "episodes": [
+    {
+      "ep": 1,
+      "title_jp": "バナナはベリー、イチゴはベリーじゃない",
+      "category": "食べ物",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたが知ってるフルーツの分類、全部ウソかも。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "実は植物学的に、バナナはベリーなんです。でもイチゴはベリーじゃない。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "ベリーの定義は「1つの花の子房から発達した、種が果肉に埋まった果実」。バナナはこの条件を完璧に満たします。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "一方イチゴは、表面のツブツブが本当の果実で、赤い部分は花托という茎の一部。つまりイチゴは「偽果」なんです。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "ちなみにアボカドもスイカもベリー。ラズベリーはベリーじゃない。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "植物学者のネーミングセンス、ちょっとおかしいですよね。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "フルーツの真実、もっと知りたい？フォローして次の雑学を待て！"
+    },
+    {
+      "ep": 2,
+      "title_jp": "あなたの脳は小さな電球1個分の電力で動いている",
+      "category": "人体",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "世界最高のコンピュータ、たった20ワットで動いてます。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "それはあなたの脳。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "スマホの充電器より少ない電力で、860億個のニューロンが毎秒数兆回の計算をしている。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "一方、同じ処理をスパコンでやると数百万ワット必要。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "脳の消費エネルギーは体全体の約20%。体重の2%しかないのに、燃費の悪い大食いです。でもこの20ワットで、言語を操り、夢を見て、宇宙の謎を考えられる。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "あなたの頭の中には、宇宙で最も効率的なマシンが入っています。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "脳の秘密、まだまだあります。フォローで次回もお届け！"
+    },
+    {
+      "ep": 3,
+      "title_jp": "宇宙はステーキとラム酒の匂いがする",
+      "category": "宇宙",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "宇宙飛行士が宇宙服を脱いだ瞬間、焼肉の匂いがした。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "焼けたステーキ、火薬、そしてラム酒。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "NASAも公式に認めています。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "この匂いの正体は多環芳香族炭化水素。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "恒星が死ぬときに大量に放出される化学物質です。つまり宇宙の匂いは、星の死の匂い。ちなみにNASAは2020年にこの匂いを再現した香水「Eau de Space」のクラウドファンディングを支援しました。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "宇宙の香り、嗅いでみたくないですか？",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "宇宙の不思議、まだまだ続く。フォローで見逃すな！"
+    },
+    {
+      "ep": 4,
+      "title_jp": "ハチミツは3000年経っても腐らない",
+      "category": "食べ物",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "エジプトのピラミッドから見つかったハチミツ、まだ食べられた。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "驚くことに、まだ食べられる状態だった。ハチミツが腐らない理由は3つ。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "まず水分含有量が約17%と極端に低い。細菌が生きられない。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "次にpHが3.5前後と酸性。そして最強の武器、過酸化水素。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "ミツバチの酵素がグルコースを分解するとき、天然の消毒液を生み出す。古代エジプト人は傷薬としてハチミツを使っていました。3000年後の科学がそれを正しいと証明した。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "自然は最初から答えを知っていたんです。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "食べ物の秘密、次回もお届け。フォローをお忘れなく！"
+    },
+    {
+      "ep": 5,
+      "title_jp": "タコには心臓が3つ、血は青い",
+      "category": "動物",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "地球上で最もエイリアンに近い生物、それはタコ。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "心臓が3つ。2つはエラに血液を送るエラ心臓、1つは全身に送る体心臓。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "泳ぐとき体心臓は止まる。だからタコは泳ぐより歩くのが好き。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "血液は青い。人間のヘモグロビンの代わりに銅ベースのヘモシアニンを使うから。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "さらに脳が9つ。中央の脳に加え、8本の腕それぞれに独立した神経節がある。腕は自分で「考えて」動ける。遺伝子数は人間より多い3万3000個。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "タコは地球の生物なのに、まるで別の星から来たみたいです。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "動物界の驚き、まだまだあります。フォローしてね！"
+    },
+    {
+      "ep": 6,
+      "title_jp": "1日2万回のまばたき＝毎日30分目を閉じている",
+      "category": "人体",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたは今日、すでに何千回も目を閉じています。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "人間は1日に平均2万回まばたきする。1回約0.1秒。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "合計すると毎日約30分、目を閉じている計算になる。でもなぜ世界が暗転しないのか？",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "脳が「まばたき抑制」という処理をしているから。まばたきの瞬間、視覚野が自動的にオフになり、前後の映像をつなぎ合わせる。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "あなたの脳は、リアルタイムで動画編集をしているんです。さらに面白いのは、会話中は相手の話のリズムに合わせてまばたきが同期する。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "人間の脳、恐ろしいほど賢い。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "人体の不思議、もっと知りたくない？フォローで最新雑学をGET！"
+    },
+    {
+      "ep": 7,
+      "title_jp": "世界最短の戦争はたった38分で終わった",
+      "category": "歴史",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "昼休みより短い戦争があった。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "1896年、イギリスとザンジバルの間で起きた「英ザンジバル戦争」。原因はザンジバルの新スルタンがイギリスの承認なしに即位したこと。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "イギリスは最後通牒を出した。朝9時、期限切れ。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "イギリス海軍が砲撃開始。ザンジバル側の宮殿は炎上、唯一の軍艦は沈没。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "9時38分、ザンジバルが降伏。38分間の戦争。死者はザンジバル側約500名、イギリス側は1名が負傷しただけ。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "世界史上最も一方的で最短の戦争として、ギネスブックに記録されています。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "歴史のトンデモ事件、まだまだあるよ。フォロー！"
+    },
+    {
+      "ep": 8,
+      "title_jp": "任天堂は電話が普及する前から存在している",
+      "category": "テクノロジー",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "任天堂の創業年、マジで驚きます。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "1889年。明治22年。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "まだ電話が一般に普及していない時代。最初の商品はなんと花札。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "京都の小さな花札屋として始まった任天堂は、その後タクシー会社、ラブホテル、インスタント食品と迷走を経て、1970年代にゲーム業界に参入。そこからファミコン、ゲームボーイ、Wii、Switch。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "創業から130年以上、任天堂はまだ現役。同じ時代に創業した会社のほとんどが消えている中で。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "1889年のおじさんが花札を作っていなければ、マリオは生まれなかった。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "テクノロジーの意外な歴史、フォローでもっと知ろう！"
+    },
+    {
+      "ep": 9,
+      "title_jp": "地球上の全アリの重さは全人類とほぼ同じ",
+      "category": "自然",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたの体重と同じ重さのアリ、何匹だと思う？",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "約60kgの人間なら、約4000万匹。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "そして地球には推定2京匹のアリがいる。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "2の後にゼロが16個。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "全部合わせると約800億kg。一方、人類80億人の総重量は約3500億kg。最新の研究では、アリの総重量は人類の約20%とされていますが、1万年前なら人類はもっと少なく、アリの方が重かった可能性が高い。アリは1億年以上前から地球にいる大先輩。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "人間なんて、アリの歴史から見ればほんの一瞬の新参者です。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "自然界のスケール、想像を超えてる。フォローで次回も！"
+    },
+    {
+      "ep": 10,
+      "title_jp": "あなたの体は星のかけらでできている",
+      "category": "宇宙",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたの体の原子、どこから来たか知ってますか？",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "水素を除く体の全元素は、かつて巨大な恒星の内部で核融合によって作られた。その星が超新星爆発で散らばり、数十億年後に地球の一部になり、やがてあなたになった。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "カルシウム、鉄、酸素、炭素。全部、星の残骸です。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "NASAの天体物理学者カール・セーガンは言いました。「私たちは星の材料でできている」。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "これはポエムじゃない。科学的事実。今夜空を見上げたら、思い出してください。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "あの星と、あなたは同じものでできている。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "宇宙とあなたは繋がっている。フォローして、もっと知ろう。"
+    },
+    {
+      "ep": 11,
+      "title_jp": "キリンの睡眠時間は1日たった30分",
+      "category": "動物",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "もし1日30分しか眠れなかったら？キリンはそれが普通。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "キリンにとってはそれが日常です。キリンの睡眠時間は哺乳類最短レベル。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "しかも一度に数分ずつしか眠らない。理由は簡単。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "5メートルの高さから横になって、また立ち上がるのに時間がかかりすぎる。その間に捕食者に襲われたら終わり。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "だからキリンは立ったまま眠ることもある。首を体に巻きつけるようにして寝る姿は、一見すると芸術的。さらに赤ちゃんキリンは生まれて30分で立ち上がり、数時間で走れる。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "キリンの世界に寝坊という概念はない。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "動物のサバイバル術、面白くない？フォローで毎日雑学！"
+    },
+    {
+      "ep": 12,
+      "title_jp": "初代iPhoneの性能はアポロ宇宙船の10万倍",
+      "category": "テクノロジー",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "人類を月に送ったコンピュータより、あなたのスマホのほうが賢い。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "メモリはたった74KB。クロックは2MHz。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "現代の電卓以下のスペック。でもこれで月まで行って帰ってきた。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "2007年発売の初代iPhoneですら、AGCの10万倍の処理能力。今のスマホは数百万倍。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "つまりあなたのポケットには、月に行く能力の数百万倍の性能が入っている。でもそれで何をしてますか？猫の動画を見ている。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "人類はテクノロジーの使い方が、少しだけ下手かもしれません。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "テクノロジーの進化、やばすぎ。フォローして一緒に驚こう！"
+    },
+    {
+      "ep": 13,
+      "title_jp": "チョコレートは通貨だった",
+      "category": "食べ物",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "もしチョコが今もお金だったら、バレンタインは大変なことに。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "古代アステカ文明では、カカオ豆が通貨として使われていました。カカオ豆10粒でウサギ1羽、100粒で奴隷1人。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "あまりに価値が高かったため、偽造カカオ豆まで登場。粘土をカカオの皮で包んだ精巧な偽物。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "人類初の通貨偽造犯です。スペイン人が侵略するまで、カカオは神の食べ物として崇められていた。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "ちなみにチョコレートが甘いお菓子になったのは19世紀。それまでは苦い飲み物でした。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "歴史を変えた一粒の豆の話。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "食べ物の歴史、意外すぎ。フォローで毎日新発見！"
+    },
+    {
+      "ep": 14,
+      "title_jp": "あなたの胃酸は金属を溶かすほど強い",
+      "category": "人体",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたのお腹の中に、金属を溶かす液体が入っています。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "胃酸のpHは1.5〜3.5。これは塩酸とほぼ同じ濃度。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "カミソリの刃を入れると、24時間で溶け始める。じゃあなぜ胃自体が溶けないのか？",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "胃の内壁は厚い粘液層で保護されていて、3〜4日ごとに完全に入れ替わる。胃は文字通り、自分自身を溶かしながら再生し続けている。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "もしこの粘液層が壊れると、胃潰瘍になる。つまり胃潰瘍とは「胃が自分を消化してしまう病気」。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "あなたの体は毎日、自己崩壊と再生の戦いをしています。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "人体のヤバい仕組み、もっと聞きたい？フォロー！"
+    },
+    {
+      "ep": 15,
+      "title_jp": "クレオパトラはピラミッドよりiPhoneに近い時代の人",
+      "category": "歴史",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "歴史のタイムラインの感覚、完全にバグってます。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "クレオパトラが生きていたのは紀元前69年〜30年。大ピラミッドが建てられたのは紀元前2560年頃。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "その差、約2500年。一方、クレオパトラから現代までは約2050年。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "つまりクレオパトラにとって、ピラミッドは「超古代の遺物」。私たちがクレオパトラを見るより、クレオパトラからピラミッドの方が遠い。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "もっと言うと、ティラノサウルスとステゴサウルスの時代差は8000万年。ティラノサウルスは、私たち人間の方が時代的に近い。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "歴史のスケール、おかしすぎる。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "歴史のスケール感、壊れるよ。フォローで次の衝撃を！"
+    },
+    {
+      "ep": 16,
+      "title_jp": "雷は太陽の5倍熱い",
+      "category": "自然",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "太陽より熱いものが、あなたの頭の上で毎日発生している。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "太陽の表面温度は約5500度。つまり雷は太陽の約5倍熱い。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "この超高温が空気を瞬時に膨張させ、衝撃波を生む。これが雷の音。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "地球上では毎秒約100回、1日約860万回の落雷が発生。この瞬間も、どこかで太陽より熱い稲妻が地面に突き刺さっている。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "ちなみに雷に打たれて生存する確率は約90%。致死率は意外と低い。でも後遺症は深刻。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "自然の電気ショックは、やっぱり怖い。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "自然の力、ハンパない。フォローで明日も雑学！"
+    },
+    {
+      "ep": 17,
+      "title_jp": "ラッコは寝るとき手をつないで流されないようにする",
+      "category": "動物",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "世界一かわいい睡眠法を持つ動物がいます。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "それはラッコです。ラッコは海面に仰向けに浮かんで眠る。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "でも寝てる間に潮に流されたら大変。だからラッコは寝るとき、仲間と手をつなぐ。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "これを「ラフト」と呼びます。時には数十匹が手をつないで巨大な筏のように浮かんでいる。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "さらにラッコはお気に入りの石を持っていて、脇の下の皮膚のたるみをポケットとして使い、そこに石をしまう。貝を割るマイ工具。ラッコは道具を使う数少ない海洋哺乳類。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "かわいいだけじゃなく、めちゃくちゃ賢いんです。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "かわいい動物雑学、フォローでもっとお届け！"
+    },
+    {
+      "ep": 18,
+      "title_jp": "世界初のウェブサイトはまだ生きている",
+      "category": "テクノロジー",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "インターネットの最初のページ、まだ見れるんです。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "1991年8月6日、ティム・バーナーズ＝リーがCERN（欧州原子核研究機構）で世界初のウェブサイトを公開。内容は「World Wide Webとは何か」の説明。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "デザインは文字だけ。画像ゼロ。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "リンクが数個。当時、世界のウェブサイト数はこの1つだけ。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "今は約20億サイト。バーナーズ＝リーはWWWの技術を特許化せず、無料で公開した。もし彼が特許を取っていたら、世界で最も裕福な人物になっていたはず。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "でも彼は「インターネットは全人類のものであるべき」と考えた。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "インターネットの歴史、奥深い。フォローで続きを！"
+    },
+    {
+      "ep": 19,
+      "title_jp": "ニンジンが元々オレンジ色じゃなかった理由が政治的",
+      "category": "食べ物",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "ニンジンがオレンジ色なのは、王様のせいです。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "元々ニンジンは紫や白、黄色だった。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "17世紀、オランダの農家がオラニエ公ウィリアムに敬意を表して、オレンジ色のニンジンを品種改良で作った。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "オラニエ（Orange）家の象徴カラーに合わせたんです。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "このオレンジニンジンがβカロテン豊富で甘くて美味しかったため、世界中に広まった。政治的な忖度から生まれた品種が、偶然にも最も栄養価の高い品種だった。ちなみに今でも紫や白のニンジンは存在します。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "でもスーパーで見かけないのは、400年前の政治の影響がまだ続いているから。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "食べ物の裏話、まだまだあるよ。フォロー！"
+    },
+    {
+      "ep": 20,
+      "title_jp": "あなたの体のDNAを伸ばすと太陽系を往復できる",
+      "category": "人体",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたの体の中に、太陽系を超える長さの紐が入っています。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "人間の1つの細胞に含まれるDNAを伸ばすと約2メートル。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "体の全細胞37兆個分を全部つなげると、その長さは約740億キロメートル。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "地球から太陽までの距離が1.5億キロなので、太陽を約250往復できる。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "冥王星まででも往復できる距離。この天文学的な長さの情報が、直径わずか6マイクロメートルの細胞核に折りたたまれている。もし正確に折りたたまれなければ、細胞はがん化する。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "あなたが健康でいる今この瞬間も、37兆個の細胞が完璧な折り紙をしている。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "人体×宇宙の驚き、フォローでもっと！"
+    },
+    {
+      "ep": 21,
+      "title_jp": "金星の1日は1年より長い",
+      "category": "宇宙",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "1日が1年より長い惑星があります。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "金星。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "金星の自転周期は約243地球日。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "でも公転周期は約225地球日。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "つまり金星では、太陽の周りを1周する方が、自分が1回転するより速い。さらに金星は太陽系で唯一、逆回転している惑星。地球では太陽は東から昇るけど、金星では西から昇る。気温は約460度、気圧は地球の90倍、硫酸の雨が降る。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "金星は地球の「姉妹惑星」と呼ばれるけど、実態は地獄の姉妹です。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "太陽系の変な惑星、まだあるよ。フォロー！"
+    },
+    {
+      "ep": 22,
+      "title_jp": "オックスフォード大学はアステカ文明より古い",
+      "category": "歴史",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あの大学、文明より長生きしてます。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "オックスフォード大学の講義記録は1096年から。アステカ文明の建国は1325年。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "つまりオックスフォードはアステカより229年古い。もっと驚くのは、オックスフォードの設立時、まだコンパスが欧州に伝わっていない。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "印刷機もない。メガネすらない。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "それから約930年、オックスフォードはまだ現役。その間にアステカ帝国は建国され、繁栄し、スペインに滅ぼされた。大学が文明の寿命を超える。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "教育の力は、帝国より強いのかもしれません。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "歴史のバグ、もっと知りたい？フォローで！"
+    },
+    {
+      "ep": 23,
+      "title_jp": "地球の酸素の50%以上は海から来ている",
+      "category": "自然",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたが今吸った空気、半分は海で作られた。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "その半分以上は、海で作られました。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "地球の酸素の50〜80%は、海洋の植物プランクトンが光合成で生み出している。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "特にプロクロロコッカスという直径0.6マイクロメートルの微生物が、地球の酸素の約20%を単独で生産。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "地球上で最も多い光合成生物なのに、1986年まで発見されなかった。アマゾンの熱帯雨林は「地球の肺」と呼ばれるけど、実は海のプランクトンの方がずっと多くの酸素を作っている。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "本当の地球の肺は海です。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "地球の仕組み、奥が深い。フォローで毎日発見！"
+    },
+    {
+      "ep": 24,
+      "title_jp": "カラスは人間の顔を覚えて仲間に伝える",
+      "category": "動物",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "カラスに一度嫌われたら、一生つきまとわれます。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "ワシントン大学の実験で、研究者がマスクをかぶってカラスを捕獲。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "その後マスクをかぶって歩くだけで、カラスが威嚇してきた。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "5年後も同じマスクに反応。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "しかも最初の捕獲を見ていないカラスまで威嚇するようになった。カラスは「あの顔は危険」という情報を仲間に伝達していた。カラスの脳は鳥類で最大級。道具を作り、パズルを解き、信号を理解して車にクルミを割らせる。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "カラスは空飛ぶ霊長類と呼ばれています。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "カラスの知能、ヤバすぎ。フォローで動物雑学！"
+    },
+    {
+      "ep": 25,
+      "title_jp": "GPSは相対性理論がないと機能しない",
+      "category": "テクノロジー",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたのスマホの地図、実はアインシュタインのおかげで動いてます。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "GPS衛星は高度2万kmを秒速3.9kmで飛んでいる。特殊相対性理論によると、高速移動する物体の時計は遅れる。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "1日あたり約7マイクロ秒。一方、一般相対性理論によると、重力が弱い場所の時計は速く進む。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "1日あたり約45マイクロ秒。差し引き1日38マイクロ秒の誤差。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "たった38マイクロ秒？でもこれを無視すると、GPSの位置は1日で約10kmずれる。相対性理論の補正なしでは、カーナビは隣の町を案内する。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "100年前の理論が、今日のあなたの道案内をしている。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "科学×日常の驚き、フォローでもっと！"
+    },
+    {
+      "ep": 26,
+      "title_jp": "パイナップルはあなたを食べ返している",
+      "category": "食べ物",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "パイナップルを食べると舌がピリピリする理由、怖い。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "あれ、パイナップルがあなたを食べ返しているんです。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "パイナップルにはブロメラインというタンパク質分解酵素が含まれている。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "あなたの口の中の粘膜はタンパク質。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "つまりパイナップルは文字通り、あなたの口を消化しようとしている。缶詰のパイナップルがピリピリしないのは、加熱処理でブロメラインが壊れるから。ちなみにブロメラインは肉を柔らかくする効果があり、料理にも使われる。パイナップルジュースに肉を漬けると柔らかくなるのはこのため。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "あなたの口も、パイナップルにとっては「お肉」です。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "食べ物のヤバい真実、フォローで毎日配信！"
+    },
+    {
+      "ep": 27,
+      "title_jp": "あなたの体の原子は10年で全部入れ替わる",
+      "category": "人体",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "10年前のあなたと、今のあなたは物理的に別人です。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "人間の体の原子は常に入れ替わっていて、約7〜10年で全ての原子が新しいものに交換される。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "胃の内壁は5日、皮膚は2〜3週間、赤血球は4ヶ月、骨は約10年。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "あなたが「自分」だと思っている体は、食べ物と水と空気の集合体が一時的に人間の形をしているだけ。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "じゃあ「あなた」とは何なのか？原子が全て入れ替わっても、記憶や人格は残る。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "あなたは物質ではなく、パターンなのかもしれません。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "あなたとは何か？深い話、フォローで続きます。"
+    },
+    {
+      "ep": 28,
+      "title_jp": "サメはツリーより先に地球にいた",
+      "category": "歴史",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "木がまだ存在しない地球で、サメはもう泳いでいた。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "サメの最古の化石は約4億5000万年前。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "一方、最初の木が登場したのは約3億5000万年前。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "サメは木より1億年も先輩。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "サメは恐竜の出現と絶滅、5回の大量絶滅を全て生き延びた。でも現代の乱獲で、毎年約1億匹が殺されている。4億5000万年生き延びた種が、たった数十年の人間活動で絶滅の危機に瀕している。サメは地球の歴史の生き証人。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "その証人を、人間が消そうとしています。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "地球の歴史、守るべき命。フォローで応援！"
+    },
+    {
+      "ep": 29,
+      "title_jp": "ダイヤモンドの雨が降る惑星がある",
+      "category": "自然",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "宝石が空から降ってくる惑星が、太陽系にあります。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "天王星と海王星の大気深部では、メタンが超高圧と高温で分解され、炭素がダイヤモンドの結晶になって降り注いでいると考えられている。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "2017年、研究者がこの環境を再現してダイヤモンドの雨の生成に成功。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "推定では、年間1000トンのダイヤモンドが降っている可能性。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "ダイヤモンドの海が存在するかもしれない。地球ではダイヤモンドは「永遠の愛」の象徴。でも宇宙では、ただの雨粒です。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "価値とは、結局希少性が作るもの。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "宇宙のロマン、フォローでもっと届けます！"
+    },
+    {
+      "ep": 30,
+      "title_jp": "ミツバチは民主主義で引っ越し先を決める",
+      "category": "動物",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "昆虫の世界に、人間より公平な民主主義がありました。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "ミツバチの巣が手狭になると、新しい巣の場所を探す必要がある。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "まず数百匹の偵察バチが候補地を探索。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "戻ってきたら「8の字ダンス」でプレゼン。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "ダンスの激しさで候補地の良さを表現。他のハチが候補地を視察し、良いと思ったらそのダンスに参加。最終的に8割以上のハチが同じダンスを踊ると、決定。この意思決定プロセスは、実は最適解を選ぶ確率が非常に高い。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "コーネル大学の研究では、ミツバチの判断は人間の委員会より正確だった。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "虫の知恵、人間以上かも。フォローで次回も！"
+    },
+    {
+      "ep": 31,
+      "title_jp": "あなたのスマホの中に世界中の写真の90%が入っている時代",
+      "category": "テクノロジー",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "人類が今まで撮った写真の90%は、ここ数年のもの。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "その200年分の写真のうち、90%以上はここ数年で撮影されたものです。2024年だけで推定1.8兆枚の写真が撮影された。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "1日に約50億枚。1秒に約5万7000枚。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "19世紀の人々は、人生で1枚しか写真を撮らなかった。それが今は1日に数十枚。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "あなたのスマホには、おそらくベートーベンが生涯で見た画像の総数より多くの写真が入っている。情報の洪水。問題は、もう誰もその写真を見返さないこと。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "撮ることが目的になった時代です。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "デジタル時代の不思議、フォローでもっと！"
+    },
+    {
+      "ep": 32,
+      "title_jp": "ケチャップは元々は薬として売られていた",
+      "category": "食べ物",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "ケチャップの始まりは、ホットドッグじゃなく薬局です。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "1834年、オハイオ州の医師ジョン・クック・ベネットが「トマトケチャップ」を下痢、消化不良、黄疸の治療薬として販売。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "当時トマトは「毒リンゴ」と呼ばれて恐れられていたが、ベネットは「トマトは万能薬」と主張。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "実際にケチャップの錠剤まで作った。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "その後科学的根拠がないとバレて薬としては消えたけど、調味料としては大成功。ちなみにトマトケチャップが主流になったのは20世紀から。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "元々のケチャップはキノコや魚醤ベースだった。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "調味料の意外な歴史、フォローで次のネタも！"
+    },
+    {
+      "ep": 33,
+      "title_jp": "あなたの体には地球の人口より多い細菌がいる",
+      "category": "人体",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたの体は、あなた自身のものじゃないかもしれない。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "人間の体に住む細菌の数は約38兆個。人間の細胞は約30兆個。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "つまりあなたの体の中で、人間の細胞は「少数派」。遺伝子レベルで見ると差はもっと大きい。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "人間の遺伝子は約2万個。体内細菌の遺伝子は合計約200万個。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "あなたの体の遺伝情報の99%は、人間のものじゃない。腸内細菌はあなたの気分、食欲、免疫、さらには性格にまで影響している可能性がある。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "「自分の意志」だと思っている判断が、実は細菌に操られているのかもしれない。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "あなたは誰？深い話フォローで続く！"
+    },
+    {
+      "ep": 34,
+      "title_jp": "宇宙の96%は目に見えない物質で出来ている",
+      "category": "宇宙",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたが見える世界は、宇宙のたった4%です。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "星、銀河、惑星、あなた自身。これは宇宙のたった4%。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "残り96%は、ダークマター（約27%）とダークエネルギー（約69%）。ダークマターは光を出さず、触れず、見えない。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "でも重力を持つことだけはわかっている。ダークエネルギーは宇宙の膨張を加速させている謎の力。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "何でできているかは不明。つまり人類は宇宙の96%が何なのか、全く理解していない。最先端の物理学の結論は「ほとんどわからない」。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "宇宙最大の謎は、宇宙そのものです。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "宇宙の謎、一緒に考えよう。フォロー！"
+    },
+    {
+      "ep": 35,
+      "title_jp": "ポンペイの遺跡にWi-Fiマークに似た落書きがある",
+      "category": "歴史",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "2000年前の壁に書かれた落書き、現代人と変わらなかった。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "その内容が、現代のSNSと変わらない。ポンペイの遺跡には1万以上の落書きが残されている。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "「ここに来た」という訪問記録。店の口コミ（「この宿のベッドはノミだらけ」）。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "恋愛の告白（「マルクスはスパタクスを愛す」）。政治への不満。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "そして大量の下ネタ。2000年前の人類も、壁に「いいね」を求め、レビューを書き、推しを語り、愚痴を言っていた。プラットフォームが壁からスマホに変わっただけ。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "人間の本質は2000年間、何も変わっていません。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "人間って変わらないよね。フォローで歴史雑学！"
+    },
+    {
+      "ep": 36,
+      "title_jp": "世界で最も孤独なクジラは52ヘルツで歌う",
+      "category": "自然",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "誰にも聞こえない歌を、30年以上歌い続けるクジラがいる。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "通称「52ヘルツのクジラ」。普通のクジラは15〜25ヘルツで歌う。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "でもこのクジラは52ヘルツ。他のクジラには聞こえない周波数。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "1989年にアメリカ海軍の水中聴音器で初めて検出されてから、毎年その歌が記録されている。種は不明。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "仲間と会ったことがあるかも不明。ただ一匹、誰にも聞こえない歌を歌いながら、太平洋を泳ぎ続けている。「世界で最も孤独な存在」と呼ばれています。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "でも最近の研究では、実は他のクジラも聞こえているかもしれない、という希望も。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "自然界の物語、心に残る。フォローで毎日お届け。"
+    },
+    {
+      "ep": 37,
+      "title_jp": "犬は人間の病気の匂いを嗅ぎ分けられる",
+      "category": "動物",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "犬の鼻は、最新の医療機器より正確かもしれない。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "犬の嗅覚受容体は3億個。人間は600万個。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "50倍の差。訓練された犬は、がん患者の尿や呼気からがんの匂いを97%の精度で検出できる。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "新型コロナウイルスも94%の精度で検出。糖尿病患者の低血糖も、てんかん発作の前兆も嗅ぎ分ける。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "犬が検出しているのは、病気が作る揮発性有機化合物。数兆分の1の濃度でも感知可能。これは水泳プール2つ分の水に1滴のインクを垂らして、それを見つけるレベル。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "犬は命を救えるパートナーです。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "犬ってすごい。動物雑学フォローで毎日！"
+    },
+    {
+      "ep": 38,
+      "title_jp": "世界のデータの90%はこの2年で生まれた",
+      "category": "テクノロジー",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "人類が今まで生み出したデータの9割は、たったの2年前以降のもの。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "その全てを合わせても、世界のデータの10%にしかならない。残り90%は、直近2年で生み出された。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "2025年、世界のデータ量は約180ゼタバイト。ゼタバイトは1兆ギガバイト。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "毎日2.5兆バイトのデータが新しく生まれている。メール、SNS投稿、IoTセンサー、監視カメラ、医療記録。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "しかしこのデータの90%以上は一度も分析されない「ダークデータ」。人類は膨大な情報を生み出しながら、そのほとんどを見ていない。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "図書館に本を無限に入れて、誰も読まないのと同じです。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "データ社会の真実、フォローでもっと深掘り！"
+    },
+    {
+      "ep": 39,
+      "title_jp": "世界で一番高い食材はサフラン（金より高い）",
+      "category": "食べ物",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "金より高い食材が、あなたの台所にあるかもしれない。サフラン。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "1kgあたり約30〜50万円。なぜそんなに高いのか？",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "サフランはクロッカスの花のめしべから採れる。1つの花からたった3本。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "1kgのサフランを作るのに約15万本の花が必要。収穫は全て手作業。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "しかも花が咲くのは年に2週間だけ。朝の限られた時間に1本1本手で摘む。1人が1日に採れるのは約60g。農家にとっては過酷な作業。サフランが高いのは、希少だからじゃない。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "途方もない人間の労働が詰まっているからです。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "食材の秘密、奥が深い。フォローで毎日雑学！"
+    },
+    {
+      "ep": 40,
+      "title_jp": "赤ちゃんの骨は大人より100本多い",
+      "category": "人体",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "あなたは成長しながら、骨を失っていた。赤ちゃんの骨は約300個。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "大人は206個。約100個の骨はどこへ消えたのか？",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "答えは「くっついた」。赤ちゃんの骨の多くは軟骨で、成長とともに複数の骨が融合する。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "頭蓋骨は出産時、産道を通るために6つの骨に分かれている。大泉門と呼ばれる柔らかい隙間がある。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "これが2歳頃までに閉じて1つの頭蓋骨になる。尾骨も元は3〜5個の椎骨。仙骨は5個が融合。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "つまり大人の体は、赤ちゃんの骨が合体してできたメカです。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "人体の不思議、まだまだ。フォロー！"
+    },
+    {
+      "ep": 41,
+      "title_jp": "宇宙に浮かぶ巨大なアルコールの雲がある",
+      "category": "宇宙",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "宇宙で最大のバーを見つけました。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "射手座B2という星形成領域に、巨大なメチルアルコールの雲が浮かんでいる。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "その大きさは直径約460億km。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "ビールに換算すると、約4000垓リットル。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "地球の全人類が毎日飲んでも、数十億年は持つ量。残念ながらメチルアルコールなので飲んだら死にます。でもこの雲からは、エチルアルコール（飲めるお酒の成分）も検出されている。ちなみに宇宙にはラズベリーの匂いの化学物質（ギ酸エチル）も大量に浮かんでいる。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "宇宙は巨大なカクテルバーなのかもしれません。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "宇宙のバカバカしい事実、フォローでもっと！"
+    },
+    {
+      "ep": 42,
+      "title_jp": "ナポレオンは実は背が低くなかった",
+      "category": "歴史",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "歴史上最も有名なウソの一つを暴きます。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "ナポレオンの身長は約170cm。当時のフランス人男性の平均とほぼ同じ。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "ではなぜ「チビ」と呼ばれたのか？理由は3つ。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "まずフランスのインチとイギリスのインチが違った。フランスの5ピエ2プス（約170cm）が英語に変換されて5フィート2インチ（約157cm）と誤解された。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "次にイギリスの風刺画家ジェームズ・ギルレイが、プロパガンダとしてナポレオンを小さく描いた。そして常に身長190cm以上の近衛兵に囲まれていた。情報戦の勝者はイギリス。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "200年経っても皆がナポレオンをチビだと信じている。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "歴史のウソ、まだまだあるよ。フォローで！"
+    },
+    {
+      "ep": 43,
+      "title_jp": "地球上の水の97%は飲めない",
+      "category": "自然",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "青い惑星なのに、飲める水はほぼない。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "地球の水の97%は海水。残り3%が淡水。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "でもその淡水の68.7%は氷河や氷冠として凍っている。30.1%は地下深くにあって簡単にアクセスできない。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "湖、川、大気中の水は淡水のたった1.2%。地球全体の水の約0.036%。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "バスタブ1杯分の水で地球の水を表すと、飲める水はスプーン1杯分。80億人がこのスプーン1杯を分け合っている。水は無限じゃない。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "地球で最も貴重な資源は、石油でも金でもなく、きれいな水です。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "地球を知ろう。フォローで毎日雑学！"
+    },
+    {
+      "ep": 44,
+      "title_jp": "ゴキブリは頭を切られても1週間生きる",
+      "category": "動物",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "最強の生存者は、あなたの家の台所にいます。ゴキブリは頭を切断されても約1週間生きる。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "理由は3つ。まずゴキブリの血液は開放血管系で、切断面がすぐに固まる。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "出血死しない。次に呼吸は頭ではなく体の気門で行う。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "窒息しない。そして脳の主要な神経節が体中に分散しているため、頭なしでも基本動作が可能。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "最終的に死ぬ原因は脳がないと口で水を飲めないから。脱水で死ぬ。ゴキブリは3億年前から地球にいる。恐竜絶滅の隕石衝突も、氷河期も、核実験も生き延びた。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "人類が滅びても、ゴキブリは生き残る。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "最強の生物、まだまだいるよ。フォロー！"
+    },
+    {
+      "ep": 45,
+      "title_jp": "QRコードは日本のカーパーツ工場で生まれた",
+      "category": "テクノロジー",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "世界中で毎日使われるあのコード、日本の工場生まれです。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "実は日本の自動車部品メーカー、デンソーウェーブが1994年に開発した。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "開発者の原昌宏さんは、工場で部品管理に使うバーコードの情報量に不満があった。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "バーコードは横方向のみ。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "QRコードは縦横両方に情報を持たせることで、約200倍の情報量を実現。しかもデンソーウェーブは特許を無料で公開した。もし特許料を取っていたら、世界中のQR決済から莫大なロイヤリティが入っていたはず。原さんは「普及することが大事」と語っています。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "インターネットと同じく、世界を変えた技術は無償で生まれた。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "日本発の世界技術、フォローでもっと知ろう！"
+    },
+    {
+      "ep": 46,
+      "title_jp": "コーヒーはヤギが発見した",
+      "category": "食べ物",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "朝のコーヒー、ヤギのおかげで飲めてます。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "伝説によると、9世紀のエチオピア。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "ヤギ飼いのカルディは、ヤギたちが赤い実を食べた後、異常に興奮して夜通し踊り回ることに気づいた。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "カルディ自身も試してみると、確かに目が覚めた。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "これを修道院に持ち込んだところ、修道士たちの夜の祈りが捗るようになった。コーヒーは「悪魔の飲み物」と呼ばれて一時禁止されたこともある。しかし教皇クレメンス8世がコーヒーを飲んで「こんな美味いものを悪魔に独占させるな」と公認。世界で1日25億杯飲まれるコーヒー。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "始まりは踊るヤギでした。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "食の歴史、おもしろい。フォローで毎日新ネタ！"
+    },
+    {
+      "ep": 47,
+      "title_jp": "人間の鼻は1兆種類の匂いを嗅ぎ分けられる",
+      "category": "人体",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "人間の鼻は、1万種類じゃなかった。1兆種類です。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "これは100年以上信じられてきた定説。でも2014年、ロックフェラー大学の研究でこの数字が大幅に更新された。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "実際は少なくとも1兆種類。1万の10億倍。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "人間の嗅覚は「犬に比べて劣っている」と思われがちだけど、実はある種の匂いでは犬より鋭い。例えばバナナの匂い成分（酢酸アミル）は、犬より人間の方が低濃度で検出できる。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "目は数百万色、耳は約34万の音を区別する。でも鼻は1兆。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "最も過小評価されている感覚器官は、鼻です。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "人体の常識、覆ります。フォロー！"
+    },
+    {
+      "ep": 48,
+      "title_jp": "古代ローマにはショッピングモールがあった",
+      "category": "歴史",
+      "speaker_id": 8,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "2000年前に、すでにショッピングモールが存在していた。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "トラヤヌスの市場。西暦110年頃、ローマ皇帝トラヤヌスが建設した半円形の巨大商業施設。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "6階建て、150以上の店舗。食料品、衣類、スパイス、さらにはフードコートまであった。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "構造的には現代のモールとほぼ同じ。アーケード状の通路に店が並び、上層階にはオフィス。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "しかも無料の穀物配給所も併設。古代ローマの福祉制度です。ローマ帝国が崩壊して1500年後、人類は「ショッピングモールを発明した」と思い込んだ。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "歴史は繰り返すのではなく、忘れられるだけです。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "古代の驚き、まだまだ。フォロー！"
+    },
+    {
+      "ep": 49,
+      "title_jp": "植物は攻撃されると隣の植物に警告する",
+      "category": "自然",
+      "speaker_id": 3,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "植物は話す。ただし、匂いで。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "ただし匂いで。虫に食べられた植物は、揮発性有機化合物を放出する。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "周囲の植物がこれを感知すると、事前に防御物質を生成し始める。まるで「敵が来たぞ」と警告しているよう。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "アカシアの木は食べられるとタンニンを増やし、風下の木にも信号を送る。受け取った木は先にタンニンを増やす。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "トマトは虫に噛まれると、天敵の寄生蜂を呼び寄せる化学物質を出す。援軍を呼んでいる。植物は動けない代わりに、化学コミュニケーションの達人になった。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "あなたが草の匂いと感じるもの、実は植物の悲鳴かもしれません。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "植物の秘密、想像以上。フォローで自然雑学！"
+    },
+    {
+      "ep": 50,
+      "title_jp": "クラゲには脳がないのに700種以上が存在する",
+      "category": "動物",
+      "speaker_id": 2,
+      "total_sections": 6,
+      "sections": [
+        {
+          "section": "hook",
+          "label": "フック",
+          "text": "脳がなくても、6億年生き延びる方法がある。クラゲには脳がない。",
+          "speed_scale": 1.1,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.3,
+          "pause_after_ms": 800
+        },
+        {
+          "section": "develop_1",
+          "label": "展開1",
+          "text": "心臓もない。血液もない。骨もない。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "develop_2",
+          "label": "展開2（驚き）",
+          "text": "体の95%は水。それなのに7億年以上前から地球に存在し、700種以上に多様化している。クラゲの体は散在神経系という神経のネットワークだけで制御されている。",
+          "speed_scale": 0.95,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 600
+        },
+        {
+          "section": "develop_3",
+          "label": "展開3",
+          "text": "中央処理装置なしで、泳ぎ、獲物を捕らえ、敵から逃げる。さらにベニクラゲは生物学的に不老不死。老化すると幼体に戻る。",
+          "speed_scale": 1.0,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.1,
+          "pause_after_ms": 500
+        },
+        {
+          "section": "climax",
+          "label": "クライマックス",
+          "text": "脳なし、心臓なし、骨なし。でも不老不死。クラゲは生命の設計図を根本から覆している。",
+          "speed_scale": 0.9,
+          "pitch_scale": 0.02,
+          "intonation_scale": 1.4,
+          "pause_after_ms": 1000
+        },
+        {
+          "section": "cta",
+          "label": "CTA",
+          "text": "脳は生存に必須じゃなかった。",
+          "speed_scale": 1.05,
+          "pitch_scale": 0.0,
+          "intonation_scale": 1.2,
+          "pause_after_ms": 0
+        }
+      ],
+      "cta_text": "生命の不思議、まだ終わらない。フォローで毎日雑学！"
+    }
+  ]
+}
