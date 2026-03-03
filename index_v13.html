@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>訪問看護ステーション経営シミュレーション v13</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #game-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 60px 1fr 200px;
+            height: 100vh;
+            gap: 4px;
+            padding: 4px;
+            background: #16213e;
+        }
+
+        /* Header spanning full width */
+        #header {
+            grid-column: 1 / 3;
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        #header h1 {
+            font-size: 1.4em;
+            color: #e94560;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #game-info {
+            display: flex;
+            gap: 30px;
+            font-size: 1.1em;
+        }
+
+        #game-info span {
+            background: rgba(233, 69, 96, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #e94560;
+        }
+
+        #game-info .money {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* Station Interior Panel */
+        #station-panel {
+            background: #0f3460;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        #station-panel .panel-title {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(15, 52, 96, 0.9);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            z-index: 10;
+            border: 1px solid #e94560;
+        }
+
+        #station-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #staff-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .staff-portrait {
+            width: 120px;
+            height: 180px;
+            position: relative;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .staff-portrait:hover {
+            transform: scale(1.05);
+        }
+
+        .staff-portrait img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .staff-portrait .name-tag {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .staff-portrait .status-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65em;
+            font-weight: bold;
+        }
+
+        .status-idle { background: #27ae60; }
+        .status-preparing { background: #f39c12; }
+        .status-visiting { background: #3498db; }
+        .status-returning { background: #9b59b6; }
+
+        /* Map Panel */
+        #map-panel {
+            background: #0f3460;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        #map-panel .panel-title {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(15, 52, 96, 0.9);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            z-index: 10;
+            border: 1px solid #e94560;
+        }
+
+        #map-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Staff moving on map */
+        .map-staff-marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #e94560;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            transition: all 0.5s ease-out;
+        }
+
+        .map-staff-marker img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Patient markers on map */
+        .patient-marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #e74c3c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            cursor: pointer;
+            animation: pulse 2s infinite;
+            box-shadow: 0 2px 10px rgba(231, 76, 60, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        /* Control Panel */
+        #control-panel {
+            grid-column: 1 / 3;
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .control-section {
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(233, 69, 96, 0.3);
+        }
+
+        .control-section h3 {
+            color: #e94560;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+            padding-bottom: 5px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            margin: 3px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-small {
+            padding: 5px 12px;
+            font-size: 0.8em;
+        }
+
+        /* Speed Control */
+        .speed-controls {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .speed-btn {
+            background: rgba(233, 69, 96, 0.2);
+            border: 1px solid #e94560;
+            padding: 5px 12px;
+        }
+
+        .speed-btn.active {
+            background: #e94560;
+        }
+
+        /* Staff List */
+        .staff-list {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.8em;
+        }
+
+        .staff-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.05);
+            margin: 2px 0;
+            border-radius: 4px;
+        }
+
+        /* Patient Queue */
+        .patient-queue {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.8em;
+        }
+
+        .patient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            background: rgba(231, 76, 60, 0.2);
+            margin: 2px 0;
+            border-radius: 4px;
+            border-left: 3px solid #e74c3c;
+        }
+
+        /* Log */
+        .log-container {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.75em;
+        }
+
+        .log-item {
+            padding: 3px 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #aaa;
+        }
+
+        .log-item.revenue { color: #2ecc71; }
+        .log-item.expense { color: #e74c3c; }
+        .log-item.event { color: #f1c40f; }
+
+        /* Revenue Popup */
+        .revenue-popup {
+            position: fixed;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2ecc71;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+            animation: floatUp 2s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #e94560;
+            box-shadow: 0 10px 40px rgba(233, 69, 96, 0.3);
+        }
+
+        .modal h2 {
+            color: #e94560;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .hire-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(233, 69, 96, 0.3);
+        }
+
+        .hire-card img {
+            width: 80px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .hire-card-info {
+            flex: 1;
+        }
+
+        .hire-card-info h4 {
+            color: #e94560;
+            margin-bottom: 5px;
+        }
+
+        .hire-card-info p {
+            font-size: 0.85em;
+            color: #aaa;
+        }
+
+        /* Accounting Modal */
+        .accounting-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .accounting-table th,
+        .accounting-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .accounting-table th {
+            color: #e94560;
+        }
+
+        .accounting-table .income { color: #2ecc71; }
+        .accounting-table .expense { color: #e74c3c; }
+        .accounting-table .total {
+            font-weight: bold;
+            font-size: 1.2em;
+            border-top: 2px solid #e94560;
+        }
+
+        /* Station HQ marker on map */
+        .station-marker {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Header -->
+        <header id="header">
+            <h1>訪問看護ステーション経営シミュレーション</h1>
+            <div id="game-info">
+                <span id="date-display">1年目 4月 第1週</span>
+                <span id="money-display" class="money">資金: ¥10,000,000</span>
+                <span id="reputation-display">評判: ★★★☆☆</span>
+            </div>
+        </header>
+
+        <!-- Station Interior -->
+        <div id="station-panel">
+            <div class="panel-title">訪問看護ステーション</div>
+            <img id="station-bg" src="copd_project_backup_20260107/copd_project/backgrounds/bg_clinic.png" alt="Station Interior">
+            <div id="staff-container"></div>
+        </div>
+
+        <!-- Map Panel -->
+        <div id="map-panel">
+            <div class="panel-title">担当エリアマップ</div>
+            <canvas id="map-canvas"></canvas>
+            <div id="map-markers"></div>
+        </div>
+
+        <!-- Control Panel -->
+        <div id="control-panel">
+            <!-- Game Speed -->
+            <div class="control-section">
+                <h3>ゲーム速度</h3>
+                <div class="speed-controls">
+                    <button class="btn btn-small speed-btn" data-speed="0">⏸</button>
+                    <button class="btn btn-small speed-btn active" data-speed="1">▶️</button>
+                    <button class="btn btn-small speed-btn" data-speed="2">▶▶</button>
+                    <button class="btn btn-small speed-btn" data-speed="4">▶▶▶</button>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button class="btn" onclick="openHireModal()">採用</button>
+                    <button class="btn" onclick="openSalesModal()">営業</button>
+                </div>
+            </div>
+
+            <!-- Staff Status -->
+            <div class="control-section">
+                <h3>スタッフ状況</h3>
+                <div id="staff-list" class="staff-list"></div>
+            </div>
+
+            <!-- Patient Queue -->
+            <div class="control-section">
+                <h3>訪問予定</h3>
+                <div id="patient-queue" class="patient-queue"></div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="control-section">
+                <h3>活動ログ</h3>
+                <div id="activity-log" class="log-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hire Modal -->
+    <div id="hire-modal" class="modal">
+        <div class="modal-content">
+            <h2>スタッフ採用</h2>
+            <div id="hire-candidates"></div>
+            <button class="btn" onclick="closeModal('hire-modal')">閉じる</button>
+        </div>
+    </div>
+
+    <!-- Sales Modal -->
+    <div id="sales-modal" class="modal">
+        <div class="modal-content">
+            <h2>営業活動</h2>
+            <p style="margin-bottom: 15px; color: #aaa;">周辺の医療機関や居宅介護支援事業所に営業を行い、新規患者を獲得します。</p>
+            <div id="sales-options"></div>
+            <button class="btn" onclick="closeModal('sales-modal')">閉じる</button>
+        </div>
+    </div>
+
+    <!-- Monthly Report Modal -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="report-title">月次決算報告</h2>
+            <div id="report-content"></div>
+            <button class="btn" onclick="closeModal('report-modal'); gameState.paused = false;">次の月へ</button>
+        </div>
+    </div>
+
+    <script>
+        // Asset paths
+        const ASSETS = {
+            backgrounds: {
+                station: 'copd_project_backup_20260107/copd_project/backgrounds/bg_clinic.png',
+                home_living: 'copd_project_backup_20260107/copd_project/backgrounds/bg_home_living.png',
+                home_bedroom: 'copd_project_backup_20260107/copd_project/backgrounds/bg_home_bedroom.png'
+            },
+            maps: {
+                town: 'copd_project_backup_20260107/copd_project/maps/map_town.png'
+            },
+            characters: {
+                sato: {
+                    name: '佐藤',
+                    role: '看護師',
+                    salary: 350000,
+                    skill: 85,
+                    expressions: {
+                        smile: 'copd_project_backup_20260107/copd_project/characters/sato_expressions/sato_01_smile.png',
+                        worried: 'copd_project_backup_20260107/copd_project/characters/sato_expressions/sato_02_worried.png',
+                        neutral: 'copd_project_backup_20260107/copd_project/characters/sato_expressions/sato_05_neutral.png',
+                        thinking: 'copd_project_backup_20260107/copd_project/characters/sato_expressions/sato_04_thinking.png'
+                    }
+                },
+                yamada: {
+                    name: '山田',
+                    role: '看護師',
+                    salary: 320000,
+                    skill: 75,
+                    expressions: {
+                        smile: 'copd_project_backup_20260107/copd_project/characters/yamada_expressions/yamada_01_smile.png',
+                        worried: 'copd_project_backup_20260107/copd_project/characters/yamada_expressions/yamada_02_worried.png',
+                        neutral: 'copd_project_backup_20260107/copd_project/characters/yamada_expressions/yamada_05_neutral.png',
+                        thinking: 'copd_project_backup_20260107/copd_project/characters/yamada_expressions/yamada_04_thinking.png'
+                    }
+                },
+                doctor: {
+                    name: '田中医師',
+                    role: '医師',
+                    salary: 800000,
+                    skill: 95,
+                    expressions: {
+                        smile: 'copd_project_backup_20260107/copd_project/characters/doctor_expressions/doctor_01_smile.png',
+                        worried: 'copd_project_backup_20260107/copd_project/characters/doctor_expressions/doctor_02_worried.png',
+                        neutral: 'copd_project_backup_20260107/copd_project/characters/doctor_expressions/doctor_05_neutral.png',
+                        thinking: 'copd_project_backup_20260107/copd_project/characters/doctor_expressions/doctor_04_thinking.png'
+                    }
+                },
+                pharmacist: {
+                    name: '鈴木',
+                    role: '理学療法士',
+                    salary: 300000,
+                    skill: 80,
+                    expressions: {
+                        smile: 'copd_project_backup_20260107/copd_project/characters/pharmacist_expressions/pharmacist_01_smile.png',
+                        worried: 'copd_project_backup_20260107/copd_project/characters/pharmacist_expressions/pharmacist_02_worried.png',
+                        neutral: 'copd_project_backup_20260107/copd_project/characters/pharmacist_expressions/pharmacist_05_neutral.png',
+                        thinking: 'copd_project_backup_20260107/copd_project/characters/pharmacist_expressions/pharmacist_04_thinking.png'
+                    }
+                },
+                ichiko: {
+                    name: '伊藤',
+                    role: '看護師',
+                    salary: 280000,
+                    skill: 70,
+                    expressions: {
+                        smile: 'copd_project_backup_20260107/copd_project/characters/ichiko_expressions/ichiko_01_smile.png',
+                        worried: 'copd_project_backup_20260107/copd_project/characters/ichiko_expressions/ichiko_02_worried.png',
+                        neutral: 'copd_project_backup_20260107/copd_project/characters/ichiko_expressions/ichiko_05_neutral.png',
+                        thinking: 'copd_project_backup_20260107/copd_project/characters/ichiko_expressions/ichiko_04_thinking.png'
+                    }
+                }
+            },
+            patients: {
+                kazuo: {
+                    name: '一郎さん',
+                    condition: 'COPD',
+                    visitFee: 12850,
+                    expressions: {
+                        smile: 'copd_project_backup_20260107/copd_project/characters/kazuo_expressions/kazuo_general_01_smile.png',
+                        worried: 'copd_project_backup_20260107/copd_project/characters/kazuo_expressions/kazuo_general_02_worried.png'
+                    }
+                }
+            }
+        };
+
+        // Game State
+        const gameState = {
+            money: 10000000,
+            year: 1,
+            month: 4,
+            week: 1,
+            day: 1,
+            speed: 1,
+            paused: false,
+            reputation: 3,
+            staff: [],
+            patients: [],
+            pendingRevenue: [], // 2-month delayed payment
+            visitQueue: [],
+            logs: [],
+            monthlyStats: {
+                visits: 0,
+                revenue: 0,
+                expenses: 0
+            }
+        };
+
+        // Station position on map (percentage)
+        const STATION_POS = { x: 50, y: 30 };
+
+        // Patient home positions on map
+        const PATIENT_POSITIONS = [
+            { x: 25, y: 45 },
+            { x: 70, y: 55 },
+            { x: 35, y: 70 },
+            { x: 80, y: 35 },
+            { x: 15, y: 60 },
+            { x: 60, y: 75 },
+            { x: 45, y: 50 },
+            { x: 75, y: 65 }
+        ];
+
+        // Initialize
+        let mapImage = new Image();
+        let mapCanvas, mapCtx;
+
+        function init() {
+            mapCanvas = document.getElementById('map-canvas');
+            mapCtx = mapCanvas.getContext('2d');
+
+            // Load map image
+            mapImage.onload = () => {
+                resizeMap();
+                renderMap();
+            };
+            mapImage.src = ASSETS.maps.town;
+
+            // Add initial staff
+            addStaff('sato');
+
+            // Add initial patients
+            addPatient('田中太郎', 'COPD', 12850);
+            addPatient('山本花子', '糖尿病', 8450);
+            addPatient('佐々木次郎', '心不全', 14200);
+
+            // Setup event listeners
+            setupSpeedControls();
+
+            // Handle resize
+            window.addEventListener('resize', resizeMap);
+
+            // Start game loop
+            requestAnimationFrame(gameLoop);
+
+            addLog('訪問看護ステーションを開設しました', 'event');
+        }
+
+        function resizeMap() {
+            const panel = document.getElementById('map-panel');
+            mapCanvas.width = panel.clientWidth;
+            mapCanvas.height = panel.clientHeight;
+        }
+
+        function renderMap() {
+            if (!mapCtx) return;
+
+            // Draw map background
+            mapCtx.drawImage(mapImage, 0, 0, mapCanvas.width, mapCanvas.height);
+
+            // Draw station marker
+            const stationX = mapCanvas.width * STATION_POS.x / 100;
+            const stationY = mapCanvas.height * STATION_POS.y / 100;
+
+            // Station building icon
+            mapCtx.fillStyle = '#e94560';
+            mapCtx.beginPath();
+            mapCtx.arc(stationX, stationY, 20, 0, Math.PI * 2);
+            mapCtx.fill();
+            mapCtx.fillStyle = '#fff';
+            mapCtx.font = 'bold 16px sans-serif';
+            mapCtx.textAlign = 'center';
+            mapCtx.textBaseline = 'middle';
+            mapCtx.fillText('🏥', stationX, stationY);
+
+            // Draw patient home markers
+            gameState.patients.forEach((patient, index) => {
+                const pos = patient.mapPos;
+                const px = mapCanvas.width * pos.x / 100;
+                const py = mapCanvas.height * pos.y / 100;
+
+                mapCtx.fillStyle = patient.needsVisit ? '#e74c3c' : '#27ae60';
+                mapCtx.beginPath();
+                mapCtx.arc(px, py, 12, 0, Math.PI * 2);
+                mapCtx.fill();
+                mapCtx.fillStyle = '#fff';
+                mapCtx.font = '10px sans-serif';
+                mapCtx.fillText('🏠', px, py);
+            });
+
+            // Draw staff on map (when visiting)
+            gameState.staff.forEach(staff => {
+                if (staff.state === 'visiting' || staff.state === 'going' || staff.state === 'returning') {
+                    const sx = mapCanvas.width * staff.mapX / 100;
+                    const sy = mapCanvas.height * staff.mapY / 100;
+
+                    // Draw staff marker
+                    mapCtx.save();
+                    mapCtx.beginPath();
+                    mapCtx.arc(sx, sy, 15, 0, Math.PI * 2);
+                    mapCtx.fillStyle = '#3498db';
+                    mapCtx.fill();
+                    mapCtx.strokeStyle = '#fff';
+                    mapCtx.lineWidth = 2;
+                    mapCtx.stroke();
+
+                    // Draw avatar
+                    mapCtx.beginPath();
+                    mapCtx.arc(sx, sy, 13, 0, Math.PI * 2);
+                    mapCtx.clip();
+
+                    if (staff.imageLoaded) {
+                        mapCtx.drawImage(staff.image, sx - 13, sy - 13, 26, 26);
+                    }
+                    mapCtx.restore();
+                }
+            });
+        }
+
+        function addStaff(characterKey) {
+            const charData = ASSETS.characters[characterKey];
+            const staff = {
+                id: Date.now(),
+                key: characterKey,
+                name: charData.name,
+                role: charData.role,
+                salary: charData.salary,
+                skill: charData.skill,
+                expressions: charData.expressions,
+                state: 'idle', // idle, preparing, going, visiting, returning
+                currentPatient: null,
+                mapX: STATION_POS.x,
+                mapY: STATION_POS.y,
+                targetX: STATION_POS.x,
+                targetY: STATION_POS.y,
+                visitProgress: 0,
+                image: new Image(),
+                imageLoaded: false
+            };
+
+            staff.image.onload = () => { staff.imageLoaded = true; };
+            staff.image.src = charData.expressions.smile;
+
+            gameState.staff.push(staff);
+            updateStaffDisplay();
+            addLog(`${staff.name}（${staff.role}）が入職しました`, 'event');
+        }
+
+        function addPatient(name, condition, fee) {
+            const posIndex = gameState.patients.length % PATIENT_POSITIONS.length;
+            const patient = {
+                id: Date.now() + Math.random(),
+                name: name,
+                condition: condition,
+                visitFee: fee,
+                needsVisit: true,
+                lastVisit: null,
+                mapPos: PATIENT_POSITIONS[posIndex]
+            };
+            gameState.patients.push(patient);
+            updatePatientQueue();
+        }
+
+        function updateStaffDisplay() {
+            const container = document.getElementById('staff-container');
+            const list = document.getElementById('staff-list');
+
+            // Portrait display
+            container.innerHTML = gameState.staff.map(staff => {
+                const expression = staff.state === 'idle' ? 'smile' :
+                                   staff.state === 'visiting' ? 'thinking' : 'neutral';
+                return `
+                    <div class="staff-portrait" data-id="${staff.id}">
+                        <img src="${staff.expressions[expression]}" alt="${staff.name}">
+                        <div class="name-tag">${staff.name}</div>
+                        <div class="status-badge status-${staff.state}">${getStatusText(staff.state)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // List display
+            list.innerHTML = gameState.staff.map(staff => `
+                <div class="staff-list-item">
+                    <span>${staff.name}</span>
+                    <span style="color: ${getStatusColor(staff.state)}">${getStatusText(staff.state)}</span>
+                </div>
+            `).join('');
+        }
+
+        function getStatusText(state) {
+            const texts = {
+                idle: '待機中',
+                preparing: '準備中',
+                going: '移動中',
+                visiting: '訪問中',
+                returning: '帰所中'
+            };
+            return texts[state] || state;
+        }
+
+        function getStatusColor(state) {
+            const colors = {
+                idle: '#27ae60',
+                preparing: '#f39c12',
+                going: '#3498db',
+                visiting: '#9b59b6',
+                returning: '#e67e22'
+            };
+            return colors[state] || '#fff';
+        }
+
+        function updatePatientQueue() {
+            const queue = document.getElementById('patient-queue');
+            const needsVisit = gameState.patients.filter(p => p.needsVisit);
+
+            queue.innerHTML = needsVisit.map(p => `
+                <div class="patient-item">
+                    <span>${p.name}</span>
+                    <span style="font-size: 0.75em; color: #aaa;">${p.condition}</span>
+                </div>
+            `).join('') || '<div style="color: #666; font-size: 0.8em;">訪問予定なし</div>';
+        }
+
+        function assignVisit(staff, patient) {
+            staff.state = 'preparing';
+            staff.currentPatient = patient;
+            patient.needsVisit = false;
+
+            updateStaffDisplay();
+            updatePatientQueue();
+            addLog(`${staff.name}が${patient.name}宅への訪問準備を開始`, 'event');
+
+            // After preparation, start moving
+            setTimeout(() => {
+                if (staff.state === 'preparing') {
+                    staff.state = 'going';
+                    staff.targetX = patient.mapPos.x;
+                    staff.targetY = patient.mapPos.y;
+                    updateStaffDisplay();
+                }
+            }, 2000 / gameState.speed);
+        }
+
+        function completeVisit(staff) {
+            const patient = staff.currentPatient;
+            const revenue = patient.visitFee;
+
+            // Add to pending revenue (2-month delay)
+            const paymentMonth = (gameState.month + 2 - 1) % 12 + 1;
+            const paymentYear = gameState.month > 10 ? gameState.year + 1 : gameState.year;
+
+            gameState.pendingRevenue.push({
+                amount: revenue,
+                paymentYear: paymentYear,
+                paymentMonth: paymentMonth,
+                patientName: patient.name,
+                visitDate: `${gameState.year}年${gameState.month}月`
+            });
+
+            gameState.monthlyStats.visits++;
+            gameState.monthlyStats.revenue += revenue;
+
+            // Show revenue popup
+            showRevenuePopup(revenue);
+
+            addLog(`${patient.name}宅訪問完了 売上: ¥${revenue.toLocaleString()}`, 'revenue');
+
+            staff.state = 'returning';
+            staff.targetX = STATION_POS.x;
+            staff.targetY = STATION_POS.y;
+            staff.currentPatient = null;
+
+            // Patient will need visit again in a few days
+            setTimeout(() => {
+                patient.needsVisit = true;
+                updatePatientQueue();
+            }, 10000 / gameState.speed);
+
+            updateStaffDisplay();
+        }
+
+        function showRevenuePopup(amount) {
+            const popup = document.createElement('div');
+            popup.className = 'revenue-popup';
+            popup.textContent = `+¥${amount.toLocaleString()}`;
+            popup.style.left = Math.random() * 60 + 20 + '%';
+            popup.style.top = '40%';
+            document.body.appendChild(popup);
+
+            setTimeout(() => popup.remove(), 2000);
+        }
+
+        function setupSpeedControls() {
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameState.speed = parseInt(btn.dataset.speed);
+                    gameState.paused = gameState.speed === 0;
+                });
+            });
+        }
+
+        function addLog(message, type = '') {
+            gameState.logs.unshift({ message, type, time: new Date() });
+            if (gameState.logs.length > 50) gameState.logs.pop();
+
+            const logContainer = document.getElementById('activity-log');
+            logContainer.innerHTML = gameState.logs.slice(0, 20).map(log =>
+                `<div class="log-item ${log.type}">${log.message}</div>`
+            ).join('');
+        }
+
+        function openHireModal() {
+            const modal = document.getElementById('hire-modal');
+            const candidates = document.getElementById('hire-candidates');
+
+            // Generate random candidates based on available characters
+            const availableKeys = Object.keys(ASSETS.characters).filter(
+                key => !gameState.staff.find(s => s.key === key)
+            );
+
+            if (availableKeys.length === 0) {
+                candidates.innerHTML = '<p style="color: #aaa;">現在、採用可能な候補者がいません。</p>';
+            } else {
+                candidates.innerHTML = availableKeys.map(key => {
+                    const char = ASSETS.characters[key];
+                    return `
+                        <div class="hire-card">
+                            <img src="${char.expressions.smile}" alt="${char.name}">
+                            <div class="hire-card-info">
+                                <h4>${char.name}</h4>
+                                <p>${char.role} / スキル: ${char.skill}</p>
+                                <p>月給: ¥${char.salary.toLocaleString()}</p>
+                            </div>
+                            <button class="btn" onclick="hireStaff('${key}')">採用する</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            modal.classList.add('active');
+        }
+
+        function hireStaff(key) {
+            addStaff(key);
+            closeModal('hire-modal');
+        }
+
+        function openSalesModal() {
+            const modal = document.getElementById('sales-modal');
+            const options = document.getElementById('sales-options');
+
+            options.innerHTML = `
+                <div class="hire-card">
+                    <div class="hire-card-info">
+                        <h4>地域の病院への営業</h4>
+                        <p>費用: ¥50,000 / 新規患者獲得の可能性: 高</p>
+                    </div>
+                    <button class="btn" onclick="doSales('hospital')">営業する</button>
+                </div>
+                <div class="hire-card">
+                    <div class="hire-card-info">
+                        <h4>居宅介護支援事業所への営業</h4>
+                        <p>費用: ¥30,000 / 新規患者獲得の可能性: 中</p>
+                    </div>
+                    <button class="btn" onclick="doSales('care')">営業する</button>
+                </div>
+                <div class="hire-card">
+                    <div class="hire-card-info">
+                        <h4>チラシ配布</h4>
+                        <p>費用: ¥10,000 / 新規患者獲得の可能性: 低</p>
+                    </div>
+                    <button class="btn" onclick="doSales('flyer')">実施する</button>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function doSales(type) {
+            const costs = { hospital: 50000, care: 30000, flyer: 10000 };
+            const chances = { hospital: 0.7, care: 0.5, flyer: 0.2 };
+            const patientNames = ['高橋三郎', '渡辺京子', '中村健一', '小林美咲', '加藤雄太', '吉田さくら'];
+            const conditions = ['高血圧', '脳卒中後遺症', 'がん緩和ケア', '認知症', 'パーキンソン病', '慢性腎臓病'];
+
+            const cost = costs[type];
+
+            if (gameState.money < cost) {
+                alert('資金が不足しています');
+                return;
+            }
+
+            gameState.money -= cost;
+            gameState.monthlyStats.expenses += cost;
+
+            if (Math.random() < chances[type]) {
+                const name = patientNames[Math.floor(Math.random() * patientNames.length)];
+                const condition = conditions[Math.floor(Math.random() * conditions.length)];
+                const fee = 8000 + Math.floor(Math.random() * 8000);
+                addPatient(name, condition, fee);
+                addLog(`営業成功！${name}様が新規患者として登録されました`, 'event');
+            } else {
+                addLog('営業活動を行いましたが、新規患者は獲得できませんでした', 'expense');
+            }
+
+            updateDisplay();
+            closeModal('sales-modal');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function showMonthlyReport() {
+            const modal = document.getElementById('report-modal');
+            const title = document.getElementById('report-title');
+            const content = document.getElementById('report-content');
+
+            // Calculate payments received this month
+            const payments = gameState.pendingRevenue.filter(
+                p => p.paymentYear === gameState.year && p.paymentMonth === gameState.month
+            );
+            const receivedAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+
+            // Remove paid items
+            gameState.pendingRevenue = gameState.pendingRevenue.filter(
+                p => !(p.paymentYear === gameState.year && p.paymentMonth === gameState.month)
+            );
+
+            // Calculate expenses
+            const salaryTotal = gameState.staff.reduce((sum, s) => sum + s.salary, 0);
+            const overhead = 200000; // Fixed overhead
+            const totalExpenses = salaryTotal + overhead + gameState.monthlyStats.expenses;
+
+            // Apply to money
+            gameState.money += receivedAmount;
+            gameState.money -= salaryTotal + overhead;
+
+            const profit = receivedAmount - totalExpenses;
+
+            title.textContent = `${gameState.year}年${gameState.month}月 月次決算報告`;
+            content.innerHTML = `
+                <table class="accounting-table">
+                    <tr><th colspan="2">収入</th></tr>
+                    <tr class="income">
+                        <td>レセプト入金（2ヶ月前の訪問分）</td>
+                        <td>¥${receivedAmount.toLocaleString()}</td>
+                    </tr>
+                    <tr><th colspan="2">支出</th></tr>
+                    <tr class="expense">
+                        <td>人件費（${gameState.staff.length}名）</td>
+                        <td>¥${salaryTotal.toLocaleString()}</td>
+                    </tr>
+                    <tr class="expense">
+                        <td>固定経費（家賃・光熱費等）</td>
+                        <td>¥${overhead.toLocaleString()}</td>
+                    </tr>
+                    <tr class="expense">
+                        <td>その他経費（営業費等）</td>
+                        <td>¥${gameState.monthlyStats.expenses.toLocaleString()}</td>
+                    </tr>
+                    <tr class="total">
+                        <td>当月損益</td>
+                        <td style="color: ${profit >= 0 ? '#2ecc71' : '#e74c3c'}">
+                            ${profit >= 0 ? '+' : ''}¥${profit.toLocaleString()}
+                        </td>
+                    </tr>
+                </table>
+                <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                    <p><strong>今月の実績:</strong></p>
+                    <p>訪問件数: ${gameState.monthlyStats.visits}件</p>
+                    <p>当月売上（来々月入金予定）: ¥${gameState.monthlyStats.revenue.toLocaleString()}</p>
+                    <p>現在の残高: ¥${gameState.money.toLocaleString()}</p>
+                </div>
+            `;
+
+            // Reset monthly stats
+            gameState.monthlyStats = { visits: 0, revenue: 0, expenses: 0 };
+
+            modal.classList.add('active');
+            gameState.paused = true;
+        }
+
+        function updateDisplay() {
+            document.getElementById('date-display').textContent =
+                `${gameState.year}年目 ${gameState.month}月 第${gameState.week}週`;
+            document.getElementById('money-display').textContent =
+                `資金: ¥${gameState.money.toLocaleString()}`;
+
+            const stars = '★'.repeat(gameState.reputation) + '☆'.repeat(5 - gameState.reputation);
+            document.getElementById('reputation-display').textContent = `評判: ${stars}`;
+        }
+
+        let lastTime = 0;
+        let gameTime = 0;
+        const DAY_DURATION = 5000; // 5 seconds per day at speed 1
+
+        function gameLoop(timestamp) {
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            if (!gameState.paused && gameState.speed > 0) {
+                gameTime += deltaTime * gameState.speed;
+
+                // Advance time
+                if (gameTime >= DAY_DURATION) {
+                    gameTime = 0;
+                    advanceDay();
+                }
+
+                // Update staff positions
+                updateStaffMovement(deltaTime);
+
+                // Auto-assign visits
+                autoAssignVisits();
+            }
+
+            // Render
+            renderMap();
+            updateDisplay();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateStaffMovement(deltaTime) {
+            const speed = 0.02 * gameState.speed;
+
+            gameState.staff.forEach(staff => {
+                if (staff.state === 'going' || staff.state === 'returning') {
+                    const dx = staff.targetX - staff.mapX;
+                    const dy = staff.targetY - staff.mapY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 1) {
+                        staff.mapX += (dx / dist) * speed * deltaTime / 16;
+                        staff.mapY += (dy / dist) * speed * deltaTime / 16;
+                    } else {
+                        staff.mapX = staff.targetX;
+                        staff.mapY = staff.targetY;
+
+                        if (staff.state === 'going') {
+                            staff.state = 'visiting';
+                            staff.visitProgress = 0;
+                            updateStaffDisplay();
+                        } else if (staff.state === 'returning') {
+                            staff.state = 'idle';
+                            updateStaffDisplay();
+                        }
+                    }
+                } else if (staff.state === 'visiting') {
+                    staff.visitProgress += deltaTime * gameState.speed / 3000;
+                    if (staff.visitProgress >= 1) {
+                        completeVisit(staff);
+                    }
+                }
+            });
+        }
+
+        function autoAssignVisits() {
+            const idleStaff = gameState.staff.filter(s => s.state === 'idle');
+            const needsVisit = gameState.patients.filter(p => p.needsVisit);
+
+            if (idleStaff.length > 0 && needsVisit.length > 0) {
+                assignVisit(idleStaff[0], needsVisit[0]);
+            }
+        }
+
+        function advanceDay() {
+            gameState.day++;
+
+            if (gameState.day > 7) {
+                gameState.day = 1;
+                gameState.week++;
+
+                if (gameState.week > 4) {
+                    gameState.week = 1;
+                    advanceMonth();
+                }
+            }
+        }
+
+        function advanceMonth() {
+            gameState.month++;
+
+            if (gameState.month > 12) {
+                gameState.month = 1;
+                gameState.year++;
+
+                if (gameState.year > 5) {
+                    endGame();
+                    return;
+                }
+            }
+
+            showMonthlyReport();
+        }
+
+        function endGame() {
+            gameState.paused = true;
+            alert(`ゲーム終了！\n最終資金: ¥${gameState.money.toLocaleString()}\n5年間の経営お疲れ様でした！`);
+        }
+
+        // Start game
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訪問看護ステーション始めました！</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'DotGothic16', sans-serif;
+    }
+
+    #game {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== トップバー ===== */
+    #topBar {
+      height: 60px;
+      background: linear-gradient(180deg, #4a3728 0%, #3d2e22 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 4px solid #2a1f17;
+      flex-shrink: 0;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .money-box {
+      background: #1a1a1a;
+      border: 3px solid #ffd700;
+      border-radius: 8px;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .money-icon { font-size: 24px; }
+    .money-amount {
+      font-size: 24px;
+      color: #ffd700;
+      font-weight: bold;
+      min-width: 150px;
+    }
+    .money-amount.negative { color: #ff4444; }
+
+    .date-box {
+      color: #fff;
+      text-align: center;
+    }
+    .date-main { font-size: 20px; }
+    .date-sub { font-size: 12px; color: #ccc; }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .stat-pill {
+      background: rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+    }
+    .stat-pill .icon { font-size: 18px; }
+    .stat-pill .value { font-size: 18px; font-weight: bold; }
+    .stat-pill .label { font-size: 11px; color: #ccc; }
+
+    .speed-btn {
+      background: #9c27b0;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+      border-bottom: 3px solid #6a1b9a;
+    }
+    .speed-btn:hover { filter: brightness(1.2); }
+    .speed-btn:active { border-bottom-width: 1px; transform: translateY(2px); }
+
+    /* ===== メインエリア ===== */
+    #mainArea {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ===== マップ ===== */
+    #mapContainer {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: #7cb342;
+      background-image:
+        radial-gradient(circle, #8bc34a 1px, transparent 1px),
+        radial-gradient(circle, #6a9e35 1px, transparent 1px);
+      background-size: 20px 20px, 30px 30px;
+      background-position: 0 0, 15px 15px;
+    }
+
+    /* 道路 */
+    .road {
+      position: absolute;
+      background: #9e9e9e;
+    }
+    .road::after {
+      content: '';
+      position: absolute;
+      background: #ffeb3b;
+    }
+    .road-h {
+      height: 40px;
+      left: 0;
+      right: 0;
+    }
+    .road-h::after {
+      height: 4px;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .road-v {
+      width: 40px;
+      top: 0;
+      bottom: 0;
+    }
+    .road-v::after {
+      width: 4px;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* ステーション */
+    #station {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 50;
+    }
+    .station-building {
+      width: 120px;
+      height: 100px;
+      background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%);
+      border: 4px solid #333;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.3);
+    }
+    .station-roof {
+      position: absolute;
+      top: -25px;
+      left: -10px;
+      right: -10px;
+      height: 30px;
+      background: linear-gradient(180deg, #e53935 0%, #b71c1c 100%);
+      border-radius: 8px 8px 0 0;
+      border: 3px solid #7f0000;
+    }
+    .station-cross {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+      color: #fff;
+    }
+    .station-sign {
+      position: absolute;
+      top: 15px;
+      left: 10px;
+      right: 10px;
+      background: #2196f3;
+      color: #fff;
+      text-align: center;
+      padding: 5px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .station-windows {
+      position: absolute;
+      bottom: 35px;
+      left: 15px;
+      right: 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .station-window {
+      width: 25px;
+      height: 25px;
+      background: #81d4fa;
+      border: 3px solid #333;
+    }
+    .station-door {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 40px;
+      background: linear-gradient(180deg, #8d6e63 0%, #5d4037 100%);
+      border: 3px solid #3e2723;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+    }
+    .station-label {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    /* 家 */
+    .house {
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .house:hover {
+      transform: scale(1.1);
+      z-index: 100;
+    }
+    .house-building {
+      width: 50px;
+      height: 40px;
+      background: linear-gradient(180deg, #fff8e1 0%, #ffe0b2 100%);
+      border: 3px solid #8d6e63;
+      border-radius: 4px;
+      position: relative;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    }
+    .house-roof {
+      position: absolute;
+      top: -18px;
+      left: -5px;
+      width: 0;
+      height: 0;
+      border-left: 30px solid transparent;
+      border-right: 30px solid transparent;
+      border-bottom: 20px solid #ff5722;
+    }
+    .house-window {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 12px;
+      height: 12px;
+      background: #81d4fa;
+      border: 2px solid #333;
+    }
+    .house-door {
+      position: absolute;
+      bottom: 0;
+      right: 10px;
+      width: 14px;
+      height: 20px;
+      background: #6d4c41;
+      border: 2px solid #3e2723;
+      border-bottom: none;
+    }
+    .house-label {
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.9);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      white-space: nowrap;
+      border: 1px solid #ccc;
+    }
+    .house-revenue {
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4caf50;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    /* スタッフ */
+    .staff {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      z-index: 60;
+      transition: left 0.8s linear, top 0.8s linear;
+      filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+    }
+    .staff-marker {
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 8px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 50%;
+    }
+    .staff.idle {
+      animation: staffBounce 1s ease-in-out infinite;
+    }
+    .staff.moving {
+      animation: staffWalk 0.2s steps(2) infinite;
+    }
+    @keyframes staffBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes staffWalk {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-8px) rotate(5deg); }
+    }
+
+    /* ふきだし */
+    .bubble {
+      position: absolute;
+      bottom: 45px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 5px 10px;
+      font-size: 11px;
+      white-space: nowrap;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+      animation: bubblePop 0.3s ease-out;
+      z-index: 200;
+    }
+    .bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: #333;
+    }
+    @keyframes bubblePop {
+      0% { transform: translateX(-50%) scale(0); }
+      60% { transform: translateX(-50%) scale(1.2); }
+      100% { transform: translateX(-50%) scale(1); }
+    }
+
+    /* 金額ポップアップ */
+    .money-pop {
+      position: absolute;
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 2px 2px 0 #2e7d32, -1px -1px 0 #2e7d32, 1px -1px 0 #2e7d32, -1px 1px 0 #2e7d32;
+      pointer-events: none;
+      z-index: 300;
+      animation: moneyFloat 1.5s ease-out forwards;
+    }
+    @keyframes moneyFloat {
+      0% { opacity: 1; transform: translateY(0) scale(0.5); }
+      20% { transform: translateY(-20px) scale(1.3); }
+      100% { opacity: 0; transform: translateY(-60px) scale(1); }
+    }
+
+    /* ===== サイドパネル ===== */
+    #sidePanel {
+      width: 280px;
+      background: linear-gradient(180deg, #5d4037 0%, #4e342e 100%);
+      display: flex;
+      flex-direction: column;
+      border-left: 4px solid #3e2723;
+      flex-shrink: 0;
+    }
+
+    .panel-section {
+      padding: 15px;
+      border-bottom: 3px solid #3e2723;
+    }
+    .panel-title {
+      color: #ffcc80;
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* アクションボタン */
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .action-btn {
+      padding: 15px 10px;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      border-bottom: 4px solid rgba(0,0,0,0.3);
+      transition: all 0.1s;
+    }
+    .action-btn:hover { filter: brightness(1.15); transform: translateY(-2px); }
+    .action-btn:active { border-bottom-width: 2px; transform: translateY(2px); }
+    .action-btn .icon { font-size: 28px; }
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    .btn-hire { background: linear-gradient(180deg, #42a5f5, #1e88e5); color: #fff; }
+    .btn-sales { background: linear-gradient(180deg, #ffa726, #fb8c00); color: #fff; }
+    .btn-week { background: linear-gradient(180deg, #66bb6a, #43a047); color: #fff; }
+    .btn-report { background: linear-gradient(180deg, #ab47bc, #8e24aa); color: #fff; }
+
+    /* スタッフリスト */
+    .staff-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .staff-item {
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .staff-avatar { font-size: 24px; }
+    .staff-info { flex: 1; color: #fff; }
+    .staff-name { font-size: 13px; }
+    .staff-status { font-size: 10px; color: #a5d6a7; }
+    .staff-status.busy { color: #ffcc80; }
+
+    /* ログ */
+    .log-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 10px;
+    }
+    .log-item {
+      background: rgba(0,0,0,0.2);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #d7ccc8;
+    }
+    .log-item.money { color: #ffd54f; }
+    .log-item.good { color: #a5d6a7; }
+    .log-item.bad { color: #ef9a9a; }
+
+    /* ===== モーダル ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: linear-gradient(180deg, #fff8e1, #ffe0b2);
+      border-radius: 16px;
+      padding: 25px;
+      width: 90%;
+      max-width: 450px;
+      border: 5px solid #8d6e63;
+      box-shadow: 0 0 0 5px #5d4037, 10px 10px 0 rgba(0,0,0,0.3);
+    }
+    .modal-title {
+      font-size: 22px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #4e342e;
+    }
+    .modal-body { margin-bottom: 20px; }
+
+    .hire-grid {
+      display: grid;
+      gap: 10px;
+    }
+    .hire-card {
+      background: #fff;
+      border: 3px solid #bcaaa4;
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .hire-card:hover {
+      border-color: #42a5f5;
+      background: #e3f2fd;
+      transform: translateX(5px);
+    }
+    .hire-card .avatar { font-size: 36px; }
+    .hire-card .info { flex: 1; }
+    .hire-card .name { font-size: 16px; font-weight: bold; color: #333; }
+    .hire-card .type { font-size: 12px; color: #666; }
+    .hire-card .salary { font-size: 14px; color: #e65100; font-weight: bold; }
+
+    .summary-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      border: 2px solid #bcaaa4;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+    .summary-row.income .value { color: #2e7d32; }
+    .summary-row.expense .value { color: #c62828; }
+    .summary-row.total {
+      border-top: 3px solid #bcaaa4;
+      margin-top: 10px;
+      padding-top: 12px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .summary-row.total.positive .value { color: #2e7d32; }
+    .summary-row.total.negative .value { color: #c62828; }
+
+    .modal-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      border-bottom: 4px solid rgba(0,0,0,0.2);
+    }
+    .modal-btn:hover { filter: brightness(1.1); }
+    .modal-btn.primary { background: linear-gradient(180deg, #66bb6a, #43a047); color: #fff; }
+    .modal-btn.secondary { background: #bdbdbd; color: #333; margin-top: 10px; }
+
+    /* エンディング */
+    .ending { text-align: center; }
+    .ending-rank { font-size: 80px; margin-bottom: 15px; }
+    .ending-title { font-size: 24px; color: #4e342e; margin-bottom: 20px; }
+    .ending-stats { text-align: left; }
+    .ending-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <!-- トップバー -->
+    <div id="topBar">
+      <div class="top-left">
+        <div class="money-box">
+          <span class="money-icon">💰</span>
+          <span class="money-amount" id="money">¥7,500,000</span>
+        </div>
+        <div class="date-box">
+          <div class="date-main" id="dateMain">2026年 1月 第1週</div>
+          <div class="date-sub" id="dateSub">1年目</div>
+        </div>
+      </div>
+      <div class="top-right">
+        <div class="stat-pill">
+          <span class="icon">👥</span>
+          <span class="value" id="patientCount">5</span>
+          <span class="label">利用者</span>
+        </div>
+        <div class="stat-pill">
+          <span class="icon">🏥</span>
+          <span class="value" id="staffCount">3</span>
+          <span class="label">スタッフ</span>
+        </div>
+        <div class="stat-pill">
+          <span class="icon">💵</span>
+          <span class="value" id="monthRev">¥0</span>
+          <span class="label">今月</span>
+        </div>
+        <button class="speed-btn" id="speedBtn">▶ x1</button>
+      </div>
+    </div>
+
+    <!-- メインエリア -->
+    <div id="mainArea">
+      <!-- マップ -->
+      <div id="mapContainer">
+        <div id="map">
+          <!-- 道路 -->
+          <div class="road road-h" style="top: 25%"></div>
+          <div class="road road-h" style="top: 50%"></div>
+          <div class="road road-h" style="top: 75%"></div>
+          <div class="road road-v" style="left: 20%"></div>
+          <div class="road road-v" style="left: 50%"></div>
+          <div class="road road-v" style="left: 80%"></div>
+
+          <!-- ステーション -->
+          <div id="station">
+            <div class="station-building">
+              <div class="station-roof">
+                <span class="station-cross">✚</span>
+              </div>
+              <div class="station-sign">訪問看護ステーション</div>
+              <div class="station-windows">
+                <div class="station-window"></div>
+                <div class="station-window"></div>
+              </div>
+              <div class="station-door"></div>
+            </div>
+            <div class="station-label">🏥 あなたのステーション</div>
+          </div>
+
+          <!-- 家とスタッフは動的生成 -->
+        </div>
+      </div>
+
+      <!-- サイドパネル -->
+      <div id="sidePanel">
+        <div class="panel-section">
+          <div class="panel-title">📋 アクション</div>
+          <div class="action-grid">
+            <button class="action-btn btn-hire" id="btnHire">
+              <span class="icon">👩‍⚕️</span>
+              <span>採用</span>
+            </button>
+            <button class="action-btn btn-sales" id="btnSales">
+              <span class="icon">🤝</span>
+              <span>営業</span>
+            </button>
+            <button class="action-btn btn-week" id="btnWeek">
+              <span class="icon">📅</span>
+              <span>次の週へ</span>
+            </button>
+            <button class="action-btn btn-report" id="btnReport">
+              <span class="icon">📊</span>
+              <span>経営状況</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-title">👥 スタッフ</div>
+          <div class="staff-list" id="staffList"></div>
+        </div>
+
+        <div class="panel-title" style="padding: 15px 15px 0;">📝 ログ</div>
+        <div class="log-list" id="logList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- モーダル: 採用 -->
+  <div class="modal-overlay" id="modalHire">
+    <div class="modal">
+      <div class="modal-title">👩‍⚕️ スタッフ採用</div>
+      <div class="modal-body">
+        <div class="hire-grid" id="hireGrid"></div>
+      </div>
+      <button class="modal-btn secondary" onclick="closeModal('modalHire')">閉じる</button>
+    </div>
+  </div>
+
+  <!-- モーダル: 営業 -->
+  <div class="modal-overlay" id="modalSales">
+    <div class="modal">
+      <div class="modal-title">🤝 営業活動</div>
+      <div class="modal-body">
+        <p style="text-align:center;margin-bottom:15px;color:#5d4037;">
+          ケアマネージャーを訪問して<br>新規利用者を紹介してもらいます
+        </p>
+        <div class="summary-box">
+          <div class="summary-row expense"><span>営業コスト</span><span class="value">-¥50,000</span></div>
+          <div class="summary-row"><span>成功確率</span><span class="value" style="color:#1565c0">60%</span></div>
+          <div class="summary-row"><span>獲得見込み</span><span class="value" style="color:#2e7d32">1〜3名</span></div>
+        </div>
+      </div>
+      <button class="modal-btn primary" id="btnDoSales">営業に行く！</button>
+      <button class="modal-btn secondary" onclick="closeModal('modalSales')">やめる</button>
+    </div>
+  </div>
+
+  <!-- モーダル: 月末決算 -->
+  <div class="modal-overlay" id="modalMonth">
+    <div class="modal">
+      <div class="modal-title">📊 月末決算レポート</div>
+      <div class="modal-body" id="monthBody"></div>
+      <button class="modal-btn primary" id="btnNextMonth">来月へ進む</button>
+    </div>
+  </div>
+
+  <!-- モーダル: 結果 -->
+  <div class="modal-overlay" id="modalResult">
+    <div class="modal">
+      <div class="modal-title" id="resultTitle">結果</div>
+      <div class="modal-body" id="resultBody" style="text-align:center;font-size:16px;color:#4e342e;"></div>
+      <button class="modal-btn secondary" onclick="closeModal('modalResult')">OK</button>
+    </div>
+  </div>
+
+  <!-- モーダル: エンディング -->
+  <div class="modal-overlay" id="modalEnding">
+    <div class="modal ending">
+      <div class="ending-rank" id="endRank">🏆</div>
+      <div class="ending-title" id="endTitle">5年間お疲れ様でした！</div>
+      <div class="summary-box ending-stats" id="endStats"></div>
+      <button class="modal-btn primary" onclick="location.reload()">もう一度プレイ</button>
+    </div>
+  </div>
+
+  <script>
+    // ===== ゲーム状態 =====
+    const G = {
+      year: 1, month: 1, week: 1,
+      money: 7500000,
+      monthRevenue: 0,
+      totalRevenue: 0,
+      totalExpense: 0,
+      pendingIncome: [0, 0],
+      speed: 1,
+      paused: false,
+      staff: [],
+      patients: [],
+      houses: [],
+      salesDone: false,
+      mapW: 0, mapH: 0,
+      stationX: 0, stationY: 0
+    };
+
+    const STAFF_INIT = [
+      { id: 1, name: "山田", avatar: "👩‍⚕️", salary: 350000, type: "管理者" },
+      { id: 2, name: "佐藤", avatar: "👩", salary: 280000, type: "看護師" },
+      { id: 3, name: "鈴木", avatar: "👨", salary: 280000, type: "看護師" }
+    ];
+
+    const PATIENT_INIT = [
+      { id: 1, name: "高橋", revenue: 74000 },
+      { id: 2, name: "山本", revenue: 65000 },
+      { id: 3, name: "田中", revenue: 35000 },
+      { id: 4, name: "伊藤", revenue: 65000 },
+      { id: 5, name: "渡辺", revenue: 49000 }
+    ];
+
+    let hireCandidates = [
+      { name: "中村", avatar: "👩", salary: 280000, type: "看護師" },
+      { name: "小林", avatar: "👨", salary: 260000, type: "看護師" },
+      { name: "加藤", avatar: "👩", salary: 300000, type: "看護師" },
+      { name: "吉田", avatar: "👨‍⚕️", salary: 320000, type: "ベテラン" }
+    ];
+
+    // ===== 初期化 =====
+    function init() {
+      const map = document.getElementById('map');
+      G.mapW = map.offsetWidth;
+      G.mapH = map.offsetHeight;
+      G.stationX = G.mapW / 2;
+      G.stationY = G.mapH / 2;
+
+      G.staff = STAFF_INIT.map(s => ({...s, state: 'idle', x: G.stationX, y: G.stationY}));
+      G.patients = [...PATIENT_INIT];
+
+      // 家を配置
+      generateHouses();
+      renderHouses();
+      renderStaff();
+      renderStaffList();
+      updateUI();
+      addLog("🏥 訪問看護ステーションを開業しました！");
+
+      // シミュレーション開始
+      setInterval(simulate, 100);
+
+      // リサイズ対応
+      window.addEventListener('resize', () => {
+        G.mapW = map.offsetWidth;
+        G.mapH = map.offsetHeight;
+        G.stationX = G.mapW / 2;
+        G.stationY = G.mapH / 2;
+      });
+    }
+
+    function generateHouses() {
+      G.houses = [];
+      const margin = 80;
+      const zones = [
+        { x1: margin, y1: margin, x2: G.mapW * 0.4, y2: G.mapH * 0.4 },
+        { x1: G.mapW * 0.6, y1: margin, x2: G.mapW - margin, y2: G.mapH * 0.4 },
+        { x1: margin, y1: G.mapH * 0.6, x2: G.mapW * 0.4, y2: G.mapH - margin },
+        { x1: G.mapW * 0.6, y1: G.mapH * 0.6, x2: G.mapW - margin, y2: G.mapH - margin }
+      ];
+
+      G.patients.forEach((p, i) => {
+        const zone = zones[i % zones.length];
+        const x = zone.x1 + Math.random() * (zone.x2 - zone.x1);
+        const y = zone.y1 + Math.random() * (zone.y2 - zone.y1);
+        G.houses.push({ id: p.id, name: p.name, revenue: p.revenue, x, y });
+      });
+    }
+
+    // ===== 描画 =====
+    function renderHouses() {
+      document.querySelectorAll('.house').forEach(e => e.remove());
+      const map = document.getElementById('map');
+
+      G.houses.forEach(h => {
+        const el = document.createElement('div');
+        el.className = 'house';
+        el.style.left = h.x + 'px';
+        el.style.top = h.y + 'px';
+        el.innerHTML = `
+          <div class="house-revenue">¥${Math.floor(h.revenue/1000)}K/月</div>
+          <div class="house-roof"></div>
+          <div class="house-building">
+            <div class="house-window"></div>
+            <div class="house-door"></div>
+          </div>
+          <div class="house-label">${h.name}様</div>
+        `;
+        el.dataset.id = h.id;
+        map.appendChild(el);
+      });
+    }
+
+    function renderStaff() {
+      document.querySelectorAll('.staff').forEach(e => e.remove());
+      const map = document.getElementById('map');
+
+      G.staff.forEach((s, i) => {
+        const el = document.createElement('div');
+        el.className = 'staff idle';
+        el.id = `staff-${s.id}`;
+        el.innerHTML = `<div class="staff-marker"></div>${s.avatar}`;
+        el.style.left = (G.stationX - 20 + (i - 1) * 45) + 'px';
+        el.style.top = (G.stationY + 60) + 'px';
+        map.appendChild(el);
+      });
+    }
+
+    function renderStaffList() {
+      const list = document.getElementById('staffList');
+      list.innerHTML = G.staff.map(s => `
+        <div class="staff-item">
+          <span class="staff-avatar">${s.avatar}</span>
+          <div class="staff-info">
+            <div class="staff-name">${s.name}（${s.type}）</div>
+            <div class="staff-status ${s.state !== 'idle' ? 'busy' : ''}" id="status-${s.id}">
+              ${s.state === 'idle' ? '待機中' : '訪問中...'}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateUI() {
+      const moneyEl = document.getElementById('money');
+      moneyEl.textContent = `¥${G.money.toLocaleString()}`;
+      moneyEl.className = 'money-amount' + (G.money < 0 ? ' negative' : '');
+
+      document.getElementById('dateMain').textContent = `${2025 + G.year}年 ${G.month}月 第${G.week}週`;
+      document.getElementById('dateSub').textContent = `${G.year}年目`;
+      document.getElementById('patientCount').textContent = G.patients.length;
+      document.getElementById('staffCount').textContent = G.staff.length;
+      document.getElementById('monthRev').textContent = `¥${Math.floor(G.monthRevenue / 1000)}K`;
+
+      const speeds = ['▶ x1', '▶▶ x2', '▶▶▶ x3'];
+      document.getElementById('speedBtn').textContent = speeds[G.speed - 1];
+    }
+
+    function addLog(text, type = '') {
+      const list = document.getElementById('logList');
+      const el = document.createElement('div');
+      el.className = 'log-item ' + type;
+      el.textContent = text;
+      list.insertBefore(el, list.firstChild);
+      while (list.children.length > 20) list.removeChild(list.lastChild);
+    }
+
+    function showBubble(staffEl, text) {
+      const old = staffEl.querySelector('.bubble');
+      if (old) old.remove();
+
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      b.textContent = text;
+      staffEl.appendChild(b);
+      setTimeout(() => b.remove(), 1500);
+    }
+
+    function showMoneyPop(x, y, amount) {
+      const map = document.getElementById('map');
+      const el = document.createElement('div');
+      el.className = 'money-pop';
+      el.textContent = `+¥${amount.toLocaleString()}`;
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      map.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }
+
+    // ===== シミュレーション =====
+    function simulate() {
+      if (G.paused) return;
+
+      G.staff.forEach(s => {
+        const el = document.getElementById(`staff-${s.id}`);
+        if (!el) return;
+
+        if (s.state === 'idle' && Math.random() < 0.015 * G.speed && G.houses.length > 0) {
+          // 訪問開始
+          const house = G.houses[Math.floor(Math.random() * G.houses.length)];
+          s.state = 'going';
+          s.targetHouse = house;
+
+          el.classList.remove('idle');
+          el.classList.add('moving');
+          showBubble(el, `${house.name}様宅へ！`);
+
+          el.style.left = (house.x - 20) + 'px';
+          el.style.top = (house.y - 50) + 'px';
+
+          updateStaffStatus(s.id, '移動中...');
+
+          setTimeout(() => {
+            if (s.state !== 'going') return;
+            s.state = 'visiting';
+            el.classList.remove('moving');
+            updateStaffStatus(s.id, '訪問中...');
+
+            setTimeout(() => {
+              if (s.state !== 'visiting') return;
+
+              // 収益発生
+              const rev = Math.floor(house.revenue / 4);
+              G.monthRevenue += rev;
+              G.money += rev;
+
+              showMoneyPop(house.x, house.y - 30, rev);
+              showBubble(el, '完了！');
+              addLog(`${s.name}：${house.name}様 +¥${rev.toLocaleString()}`, 'money');
+              updateUI();
+
+              // 戻る
+              s.state = 'returning';
+              el.classList.add('moving');
+              updateStaffStatus(s.id, '帰還中...');
+
+              const idx = G.staff.indexOf(s);
+              el.style.left = (G.stationX - 20 + (idx - 1) * 45) + 'px';
+              el.style.top = (G.stationY + 60) + 'px';
+
+              setTimeout(() => {
+                s.state = 'idle';
+                el.classList.remove('moving');
+                el.classList.add('idle');
+                updateStaffStatus(s.id, '待機中');
+              }, 800 / G.speed);
+
+            }, 1200 / G.speed);
+          }, 800 / G.speed);
+        }
+      });
+    }
+
+    function updateStaffStatus(id, text) {
+      const el = document.getElementById(`status-${id}`);
+      if (el) {
+        el.textContent = text;
+        el.className = 'staff-status' + (text !== '待機中' ? ' busy' : '');
+      }
+    }
+
+    // ===== イベント =====
+    document.getElementById('speedBtn').onclick = () => {
+      G.speed = G.speed % 3 + 1;
+      updateUI();
+    };
+
+    document.getElementById('btnHire').onclick = () => {
+      const grid = document.getElementById('hireGrid');
+      grid.innerHTML = hireCandidates.map((c, i) => `
+        <div class="hire-card" onclick="doHire(${i})">
+          <span class="avatar">${c.avatar}</span>
+          <div class="info">
+            <div class="name">${c.name}</div>
+            <div class="type">${c.type}</div>
+          </div>
+          <div class="salary">¥${(c.salary/1000).toFixed(0)}K/月</div>
+        </div>
+      `).join('');
+      openModal('modalHire');
+    };
+
+    function doHire(idx) {
+      if (G.staff.length >= 10) {
+        alert('スタッフは10名までです');
+        return;
+      }
+      const c = hireCandidates[idx];
+      const newStaff = {
+        id: Date.now(),
+        name: c.name,
+        avatar: c.avatar,
+        salary: c.salary,
+        type: c.type,
+        state: 'idle',
+        x: G.stationX,
+        y: G.stationY
+      };
+      G.staff.push(newStaff);
+      hireCandidates.splice(idx, 1);
+
+      // 新候補追加
+      const names = ["木村", "林", "清水", "山崎", "池田", "橋本", "前田", "石井"];
+      const avatars = ["👩", "👨", "👩‍⚕️", "👨‍⚕️"];
+      hireCandidates.push({
+        name: names[Math.floor(Math.random() * names.length)],
+        avatar: avatars[Math.floor(Math.random() * avatars.length)],
+        salary: 250000 + Math.floor(Math.random() * 80000),
+        type: "看護師"
+      });
+
+      renderStaff();
+      renderStaffList();
+      updateUI();
+      addLog(`${newStaff.name}が入職しました！`, 'good');
+      closeModal('modalHire');
+    }
+
+    document.getElementById('btnSales').onclick = () => {
+      if (G.salesDone) {
+        alert('今週は営業済みです');
+        return;
+      }
+      openModal('modalSales');
+    };
+
+    document.getElementById('btnDoSales').onclick = () => {
+      G.money -= 50000;
+      G.salesDone = true;
+      closeModal('modalSales');
+
+      if (Math.random() < 0.6) {
+        const count = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) addPatient();
+        showResult('🎉 営業成功！', `${count}名の新規利用者を獲得しました！`);
+        addLog(`営業成功！+${count}名`, 'good');
+      } else {
+        showResult('😅 残念...', '今回は紹介に繋がりませんでした');
+        addLog('営業：成果なし', 'bad');
+      }
+      updateUI();
+    };
+
+    function addPatient() {
+      const names = ["佐々木", "松本", "井上", "木村", "林", "斎藤", "清水", "阿部"];
+      const revenue = 30000 + Math.floor(Math.random() * 50000);
+      const p = {
+        id: Date.now() + Math.random(),
+        name: names[Math.floor(Math.random() * names.length)],
+        revenue
+      };
+      G.patients.push(p);
+
+      // 家追加
+      const zones = [
+        { x1: 80, y1: 80, x2: G.mapW * 0.4, y2: G.mapH * 0.4 },
+        { x1: G.mapW * 0.6, y1: 80, x2: G.mapW - 80, y2: G.mapH * 0.4 },
+        { x1: 80, y1: G.mapH * 0.6, x2: G.mapW * 0.4, y2: G.mapH - 80 },
+        { x1: G.mapW * 0.6, y1: G.mapH * 0.6, x2: G.mapW - 80, y2: G.mapH - 80 }
+      ];
+      const zone = zones[G.houses.length % zones.length];
+      const x = zone.x1 + Math.random() * (zone.x2 - zone.x1);
+      const y = zone.y1 + Math.random() * (zone.y2 - zone.y1);
+      G.houses.push({ id: p.id, name: p.name, revenue, x, y });
+      renderHouses();
+    }
+
+    document.getElementById('btnWeek').onclick = () => {
+      G.week++;
+      G.salesDone = false;
+      if (G.week > 4) {
+        G.week = 1;
+        showMonthEnd();
+      } else {
+        addLog(`${G.month}月 第${G.week}週`);
+        updateUI();
+      }
+    };
+
+    document.getElementById('btnReport').onclick = () => {
+      const salaries = G.staff.reduce((s, x) => s + x.salary, 0);
+      alert(`【経営状況】\n\n現金: ¥${G.money.toLocaleString()}\n今月売上: ¥${G.monthRevenue.toLocaleString()}\n人件費/月: ¥${salaries.toLocaleString()}\n利用者数: ${G.patients.length}名\nスタッフ: ${G.staff.length}名`);
+    };
+
+    function showMonthEnd() {
+      const revenue = G.monthRevenue;
+      const salaries = G.staff.reduce((s, x) => s + x.salary, 0);
+      const overhead = Math.floor(salaries * 0.15) + 260000;
+      const expenses = salaries + overhead;
+      const bonus = (G.month === 6 || G.month === 12) ? Math.floor(salaries * 1.7) : 0;
+      const totalExp = expenses + bonus;
+
+      G.pendingIncome.push(revenue);
+      const cashIn = G.pendingIncome.shift();
+      const pl = cashIn - totalExp;
+
+      G.totalRevenue += revenue;
+      G.totalExpense += totalExp;
+
+      document.getElementById('monthBody').innerHTML = `
+        <div class="summary-box">
+          <div class="summary-row income"><span>💰 売上（発生）</span><span class="value">+¥${revenue.toLocaleString()}</span></div>
+          <div class="summary-row income"><span>💵 入金（2ヶ月前）</span><span class="value">+¥${cashIn.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>👥 人件費</span><span class="value">-¥${salaries.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>🏢 諸経費</span><span class="value">-¥${overhead.toLocaleString()}</span></div>
+          ${bonus > 0 ? `<div class="summary-row expense"><span>🎁 賞与</span><span class="value">-¥${bonus.toLocaleString()}</span></div>` : ''}
+          <div class="summary-row total ${pl >= 0 ? 'positive' : 'negative'}">
+            <span>月間収支</span><span class="value">${pl >= 0 ? '+' : ''}¥${pl.toLocaleString()}</span>
+          </div>
+        </div>
+        <p style="text-align:center;margin-top:12px;font-size:11px;color:#888;">
+          ※訪問看護は国保連経由で2ヶ月後入金
+        </p>
+      `;
+
+      G.money = G.money - G.monthRevenue + pl;
+      G.monthRevenue = 0;
+      openModal('modalMonth');
+    }
+
+    document.getElementById('btnNextMonth').onclick = () => {
+      closeModal('modalMonth');
+      G.month++;
+      if (G.month > 12) { G.month = 1; G.year++; }
+
+      if (G.money < -3000000) {
+        showEnding('gameover');
+      } else if (G.year > 5) {
+        showEnding('clear');
+      } else {
+        addLog(`${G.month}月になりました`, 'good');
+        updateUI();
+      }
+    };
+
+    function showEnding(type) {
+      const pl = G.totalRevenue - G.totalExpense;
+      let rank, title;
+
+      if (type === 'gameover') {
+        rank = '💀';
+        title = 'GAME OVER';
+      } else {
+        if (pl > 30000000 && G.patients.length >= 15) rank = '🏆 S';
+        else if (pl > 20000000) rank = '🥇 A';
+        else if (pl > 0) rank = '🥈 B';
+        else rank = '🥉 C';
+        title = '5年間お疲れ様でした！';
+      }
+
+      document.getElementById('endRank').textContent = rank;
+      document.getElementById('endTitle').textContent = title;
+      document.getElementById('endStats').innerHTML = `
+        <div class="ending-stat"><span>累計売上</span><span style="color:#2e7d32">¥${G.totalRevenue.toLocaleString()}</span></div>
+        <div class="ending-stat"><span>累計支出</span><span style="color:#c62828">¥${G.totalExpense.toLocaleString()}</span></div>
+        <div class="ending-stat" style="border-top:2px solid #ccc;padding-top:10px;margin-top:10px">
+          <span>最終損益</span><span style="color:${pl>=0?'#2e7d32':'#c62828'}">¥${pl.toLocaleString()}</span>
+        </div>
+        <div class="ending-stat"><span>利用者</span><span>${G.patients.length}名</span></div>
+        <div class="ending-stat"><span>スタッフ</span><span>${G.staff.length}名</span></div>
+      `;
+      openModal('modalEnding');
+    }
+
+    function showResult(title, body) {
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultBody').innerHTML = body;
+      openModal('modalResult');
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+      G.paused = true;
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+      G.paused = false;
+    }
+
+    // ===== 開始 =====
+    window.onload = init;
+  </script>
+</body>
+</html>

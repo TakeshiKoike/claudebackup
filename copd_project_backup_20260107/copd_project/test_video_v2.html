@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>動画テスト</title>
+    <style>
+        body {
+            background: #333;
+            color: white;
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        video {
+            max-width: 400px;
+            border: 2px solid white;
+            margin: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>リップシンク動画テスト</h1>
+
+    <h2>1. 自動再生テスト</h2>
+    <video id="video1" src="videos/s02_01_doctor.mp4" autoplay playsinline controls></video>
+
+    <h2>2. ボタンで再生</h2>
+    <button onclick="playVideo()">動画を再生</button>
+    <video id="video2" src="videos/s02_04_kazuo.mp4" playsinline controls></video>
+
+    <h2>3. 全動画一覧</h2>
+    <div>
+        <video src="videos/s02_01_doctor.mp4" controls playsinline></video>
+        <video src="videos/s02_03_doctor.mp4" controls playsinline></video>
+        <video src="videos/s02_04_kazuo.mp4" controls playsinline></video>
+        <video src="videos/s02_05_doctor.mp4" controls playsinline></video>
+        <video src="videos/s02_06_kazuo.mp4" controls playsinline></video>
+    </div>
+
+    <script>
+        function playVideo() {
+            const video = document.getElementById('video2');
+            video.play().then(() => {
+                console.log('再生開始');
+            }).catch(e => {
+                alert('再生エラー: ' + e.message);
+                console.error(e);
+            });
+        }
+
+        // 自動再生の結果を確認
+        document.getElementById('video1').play().then(() => {
+            console.log('自動再生成功');
+        }).catch(e => {
+            console.log('自動再生失敗:', e.message);
+        });
+    </script>
+</body>
+</html>
