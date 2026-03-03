@@ -1,0 +1,23 @@
+[Script Info]
+Title: WakuFact EP03
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Hiragino Sans,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,8,40,40,600,1
+Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,40,40,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:03.00,Title,,0,0,0,,宇宙はステーキと\Nラム酒の匂いがする
+Dialogue: 0,0:00:00.00,0:00:05.11,Default,,0,0,0,,宇宙飛行士が宇宙服を脱いだ瞬間、\N焼肉の匂いがした。
+Dialogue: 0,0:00:05.91,0:00:15.37,Default,,0,0,0,,宇宙から帰ってきて宇宙服を脱ぐと、\N焼けたステーキ、火薬、\Nそしてラム酒の匂いがする。\NNASAも認めています。
+Dialogue: 0,0:00:15.87,0:00:24.60,Default,,0,0,0,,この匂いの正体は、\N星が死ぬときに出す化学物質。\Nつまり宇宙の匂いは、\N星の最後の香りなんです。
+Dialogue: 0,0:00:25.20,0:00:32.15,Default,,0,0,0,,ちなみにNASAは2020年に、\Nこの匂いを再現した香水の\Nプロジェクトを応援しました。
+Dialogue: 0,0:00:32.65,0:00:36.01,Default,,0,0,0,,宇宙の香り、\N嗅いでみたくないですか？
+Dialogue: 0,0:00:37.01,0:00:42.27,Default,,0,0,0,,宇宙にはまだまだ不思議がいっぱい。\Nフォローして次の雑学も見てね。
+Dialogue: 1,0:00:38.01,0:00:42.27,Title,,0,0,0,,フォローして次の雑学も見てね！
