@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訪問看護ステーション始めました！</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: #1a1a2e;
+    }
+
+    #app {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      grid-template-columns: 1fr 320px;
+      grid-template-areas:
+        "header header"
+        "canvas sidebar"
+        "footer sidebar";
+    }
+
+    /* ========== ヘッダー ========== */
+    header {
+      grid-area: header;
+      background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #4a5568;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+    }
+    .logo-text {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .money-display {
+      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      border: 2px solid #f6e05e;
+      border-radius: 12px;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 0 20px rgba(246, 224, 94, 0.2);
+    }
+    .money-icon {
+      font-size: 28px;
+      animation: coinSpin 3s linear infinite;
+    }
+    @keyframes coinSpin {
+      0%, 100% { transform: rotateY(0deg); }
+      50% { transform: rotateY(180deg); }
+    }
+    .money-value {
+      font-size: 28px;
+      font-weight: 900;
+      color: #f6e05e;
+      min-width: 180px;
+      text-shadow: 0 2px 10px rgba(246, 224, 94, 0.5);
+    }
+    .money-value.negative { color: #fc8181; }
+
+    .header-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .date-main {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .date-sub {
+      font-size: 13px;
+      color: #a0aec0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 10px 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: #a0aec0;
+    }
+
+    .speed-control {
+      display: flex;
+      gap: 4px;
+    }
+    .speed-btn {
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: #4a5568;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .speed-btn:hover { background: #718096; }
+    .speed-btn.active {
+      background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+      box-shadow: 0 4px 15px rgba(159, 122, 234, 0.4);
+    }
+
+    /* ========== キャンバス ========== */
+    .canvas-container {
+      grid-area: canvas;
+      position: relative;
+      overflow: hidden;
+      background: #87ceeb;
+    }
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* キャンバスオーバーレイUI */
+    .canvas-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    .floating-revenue {
+      position: absolute;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(72, 187, 120, 0.8);
+      pointer-events: none;
+      animation: floatUp 2s ease-out forwards;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.5); }
+      20% { transform: translateY(-20px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-80px) scale(1); }
+    }
+
+    /* ========== サイドバー ========== */
+    .sidebar {
+      grid-area: sidebar;
+      background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+      display: flex;
+      flex-direction: column;
+      border-left: 3px solid #4a5568;
+    }
+
+    .sidebar-section {
+      padding: 20px;
+      border-bottom: 2px solid #4a5568;
+    }
+    .sidebar-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #a0aec0;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .action-btn {
+      padding: 16px 12px;
+      border: none;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+      border-radius: 14px 14px 0 0;
+    }
+    .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+    .action-btn:active { transform: translateY(0); }
+    .action-btn .icon { font-size: 32px; }
+
+    .btn-hire {
+      background: linear-gradient(180deg, #4299e1 0%, #2b6cb0 100%);
+      color: #fff;
+    }
+    .btn-sales {
+      background: linear-gradient(180deg, #ed8936 0%, #c05621 100%);
+      color: #fff;
+    }
+    .btn-week {
+      background: linear-gradient(180deg, #48bb78 0%, #2f855a 100%);
+      color: #fff;
+    }
+    .btn-menu {
+      background: linear-gradient(180deg, #9f7aea 0%, #6b46c1 100%);
+      color: #fff;
+    }
+
+    /* スタッフリスト */
+    .staff-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .staff-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+    .staff-card:hover { background: rgba(255,255,255,0.1); }
+    .staff-avatar {
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .staff-info { flex: 1; }
+    .staff-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .staff-role {
+      font-size: 11px;
+      color: #a0aec0;
+    }
+    .staff-status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .staff-status.idle {
+      background: rgba(72, 187, 120, 0.2);
+      color: #68d391;
+    }
+    .staff-status.busy {
+      background: rgba(237, 137, 54, 0.2);
+      color: #f6ad55;
+    }
+
+    /* ログ */
+    .log-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .log-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 20px 20px;
+    }
+    .log-item {
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      font-size: 12px;
+      color: #e2e8f0;
+      border-left: 3px solid #4a5568;
+    }
+    .log-item.money { border-left-color: #f6e05e; color: #f6e05e; }
+    .log-item.good { border-left-color: #68d391; color: #68d391; }
+    .log-item.bad { border-left-color: #fc8181; color: #fc8181; }
+
+    /* ========== フッター ========== */
+    footer {
+      grid-area: footer;
+      background: #1a202c;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 2px solid #4a5568;
+    }
+    .footer-stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #a0aec0;
+      font-size: 13px;
+    }
+    .footer-stat .value {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* ========== モーダル ========== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      border: 2px solid #4a5568;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+    }
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+    .modal-body { margin-bottom: 24px; }
+
+    .hire-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .hire-card {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid #4a5568;
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .hire-card:hover {
+      background: rgba(66, 153, 225, 0.2);
+      border-color: #4299e1;
+      transform: translateX(8px);
+    }
+    .hire-card .avatar {
+      width: 56px;
+      height: 56px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+    .hire-card .info { flex: 1; }
+    .hire-card .name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .hire-card .type {
+      font-size: 13px;
+      color: #a0aec0;
+    }
+    .hire-card .salary {
+      font-size: 16px;
+      font-weight: 700;
+      color: #f6ad55;
+    }
+
+    .summary-card {
+      background: rgba(0,0,0,0.3);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 15px;
+      color: #e2e8f0;
+    }
+    .summary-row.income .value { color: #68d391; }
+    .summary-row.expense .value { color: #fc8181; }
+    .summary-row.total {
+      border-top: 2px solid #4a5568;
+      margin-top: 12px;
+      padding-top: 16px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .summary-row.total.positive .value { color: #68d391; }
+    .summary-row.total.negative .value { color: #fc8181; }
+
+    .modal-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-btn:hover { transform: translateY(-2px); }
+    .modal-btn.primary {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(72, 187, 120, 0.4);
+    }
+    .modal-btn.secondary {
+      background: #4a5568;
+      color: #fff;
+      margin-top: 12px;
+    }
+
+    /* エンディング */
+    .ending { text-align: center; }
+    .ending-rank {
+      font-size: 100px;
+      margin-bottom: 20px;
+      animation: bounce 0.6s ease-out;
+    }
+    @keyframes bounce {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .ending-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="header-left">
+        <div class="logo">
+          <div class="logo-icon">🏥</div>
+          <div class="logo-text">訪問看護ステーション<br>始めました！</div>
+        </div>
+        <div class="money-display">
+          <span class="money-icon">💰</span>
+          <span class="money-value" id="money">¥7,500,000</span>
+        </div>
+      </div>
+      <div class="header-center">
+        <div class="date-main" id="dateMain">2026年 1月 第1週</div>
+        <div class="date-sub" id="dateSub">1年目 / 60ヶ月中</div>
+      </div>
+      <div class="header-right">
+        <div class="stat-card">
+          <div class="stat-value" id="patientCount">5</div>
+          <div class="stat-label">利用者</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="monthRev">¥0</div>
+          <div class="stat-label">今月売上</div>
+        </div>
+        <div class="speed-control">
+          <button class="speed-btn active" data-speed="1">▶</button>
+          <button class="speed-btn" data-speed="2">▶▶</button>
+          <button class="speed-btn" data-speed="3">▶▶▶</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="canvas-container">
+      <canvas id="gameCanvas"></canvas>
+      <div class="canvas-overlay" id="overlay"></div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">📋 アクション</div>
+        <div class="action-grid">
+          <button class="action-btn btn-hire" id="btnHire">
+            <span class="icon">👩‍⚕️</span>
+            <span>採用</span>
+          </button>
+          <button class="action-btn btn-sales" id="btnSales">
+            <span class="icon">🤝</span>
+            <span>営業</span>
+          </button>
+          <button class="action-btn btn-week" id="btnWeek">
+            <span class="icon">📅</span>
+            <span>次週へ</span>
+          </button>
+          <button class="action-btn btn-menu" id="btnMenu">
+            <span class="icon">📊</span>
+            <span>経営</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">👥 スタッフ (<span id="staffCount">3</span>名)</div>
+        <div class="staff-list" id="staffList"></div>
+      </div>
+
+      <div class="sidebar-section log-section">
+        <div class="sidebar-title">📝 ログ</div>
+        <div class="log-list" id="logList"></div>
+      </div>
+    </aside>
+
+    <footer>
+      <div class="footer-stat">
+        <span>💵 今月売上:</span>
+        <span class="value" id="footerRev">¥0</span>
+      </div>
+      <div class="footer-stat">
+        <span>📊 累計利益:</span>
+        <span class="value" id="footerProfit">¥0</span>
+      </div>
+      <div class="footer-stat">
+        <span>⏱️ 速度:</span>
+        <span class="value" id="footerSpeed">x1</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- モーダル -->
+  <div class="modal-overlay" id="modalHire">
+    <div class="modal">
+      <div class="modal-title">👩‍⚕️ スタッフ採用</div>
+      <div class="modal-body">
+        <div class="hire-list" id="hireList"></div>
+      </div>
+      <button class="modal-btn secondary" onclick="closeModal('modalHire')">閉じる</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalSales">
+    <div class="modal">
+      <div class="modal-title">🤝 営業活動</div>
+      <div class="modal-body">
+        <p style="text-align:center;margin-bottom:20px;color:#a0aec0;line-height:1.8">
+          ケアマネージャーを訪問して<br>新規利用者を紹介してもらいます
+        </p>
+        <div class="summary-card">
+          <div class="summary-row expense"><span>営業コスト</span><span class="value">-¥50,000</span></div>
+          <div class="summary-row"><span>成功確率</span><span class="value" style="color:#4299e1">60%</span></div>
+          <div class="summary-row"><span>獲得見込み</span><span class="value" style="color:#68d391">1〜3名</span></div>
+        </div>
+      </div>
+      <button class="modal-btn primary" id="btnDoSales">営業に行く！</button>
+      <button class="modal-btn secondary" onclick="closeModal('modalSales')">やめる</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalMonth">
+    <div class="modal">
+      <div class="modal-title">📊 月末決算レポート</div>
+      <div class="modal-body" id="monthBody"></div>
+      <button class="modal-btn primary" id="btnNextMonth">来月へ進む</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalResult">
+    <div class="modal">
+      <div class="modal-title" id="resultTitle">結果</div>
+      <div class="modal-body" id="resultBody" style="text-align:center;font-size:18px;color:#e2e8f0;line-height:1.8"></div>
+      <button class="modal-btn secondary" onclick="closeModal('modalResult')">OK</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalEnding">
+    <div class="modal ending">
+      <div class="ending-rank" id="endRank">🏆</div>
+      <div class="ending-title" id="endTitle">5年間お疲れ様でした！</div>
+      <div class="summary-card" id="endStats"></div>
+      <button class="modal-btn primary" style="margin-top:24px" onclick="location.reload()">もう一度プレイ</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== ゲーム状態 ==========
+    const G = {
+      year: 1, month: 1, week: 1,
+      money: 7500000,
+      monthRevenue: 0,
+      totalRevenue: 0,
+      totalExpense: 0,
+      pendingIncome: [0, 0],
+      speed: 1,
+      paused: false,
+      staff: [],
+      patients: [],
+      houses: [],
+      trees: [],
+      clouds: [],
+      salesDone: false
+    };
+
+    let canvas, ctx, W, H;
+    let lastTime = 0;
+    let stationX, stationY;
+
+    const STAFF_INIT = [
+      { id: 1, name: "山田花子", avatar: "👩‍⚕️", salary: 350000, role: "管理者" },
+      { id: 2, name: "佐藤美咲", avatar: "👩", salary: 280000, role: "看護師" },
+      { id: 3, name: "鈴木太郎", avatar: "👨", salary: 280000, role: "看護師" }
+    ];
+
+    const PATIENT_INIT = [
+      { id: 1, name: "高橋", revenue: 74000 },
+      { id: 2, name: "山本", revenue: 65000 },
+      { id: 3, name: "田中", revenue: 35000 },
+      { id: 4, name: "伊藤", revenue: 65000 },
+      { id: 5, name: "渡辺", revenue: 49000 }
+    ];
+
+    let hireCandidates = [
+      { name: "中村さくら", avatar: "👩", salary: 280000, role: "看護師" },
+      { name: "小林健一", avatar: "👨", salary: 260000, role: "看護師" },
+      { name: "加藤理恵", avatar: "👩", salary: 300000, role: "看護師" },
+      { name: "吉田剛", avatar: "👨‍⚕️", salary: 320000, role: "ベテラン" }
+    ];
+
+    // ========== 初期化 ==========
+    function init() {
+      canvas = document.getElementById('gameCanvas');
+      ctx = canvas.getContext('2d');
+      resize();
+      window.addEventListener('resize', resize);
+
+      G.staff = STAFF_INIT.map(s => ({
+        ...s, state: 'idle', x: stationX, y: stationY + 40, targetX: 0, targetY: 0, progress: 0
+      }));
+      G.patients = [...PATIENT_INIT];
+
+      generateWorld();
+      renderStaffList();
+      updateUI();
+      addLog("🏥 訪問看護ステーションを開業しました！", "good");
+
+      requestAnimationFrame(gameLoop);
+      setupEvents();
+    }
+
+    function resize() {
+      const container = canvas.parentElement;
+      W = canvas.width = container.offsetWidth;
+      H = canvas.height = container.offsetHeight;
+      stationX = W / 2;
+      stationY = H / 2;
+
+      // 再配置
+      if (G.houses.length > 0) {
+        generateWorld();
+      }
+    }
+
+    function generateWorld() {
+      // 木を生成
+      G.trees = [];
+      for (let i = 0; i < 30; i++) {
+        G.trees.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          size: 15 + Math.random() * 20,
+          type: Math.floor(Math.random() * 3)
+        });
+      }
+
+      // 雲を生成
+      G.clouds = [];
+      for (let i = 0; i < 5; i++) {
+        G.clouds.push({
+          x: Math.random() * W,
+          y: 30 + Math.random() * 80,
+          size: 40 + Math.random() * 40,
+          speed: 0.2 + Math.random() * 0.3
+        });
+      }
+
+      // 家を生成
+      G.houses = [];
+      const padding = 120;
+      const zones = [
+        { x1: padding, y1: padding, x2: W * 0.35, y2: H * 0.35 },
+        { x1: W * 0.65, y1: padding, x2: W - padding, y2: H * 0.35 },
+        { x1: padding, y1: H * 0.65, x2: W * 0.35, y2: H - padding },
+        { x1: W * 0.65, y1: H * 0.65, x2: W - padding, y2: H - padding }
+      ];
+
+      G.patients.forEach((p, i) => {
+        const zone = zones[i % zones.length];
+        G.houses.push({
+          id: p.id,
+          name: p.name,
+          revenue: p.revenue,
+          x: zone.x1 + Math.random() * (zone.x2 - zone.x1),
+          y: zone.y1 + Math.random() * (zone.y2 - zone.y1),
+          color: `hsl(${Math.random() * 40 + 20}, 70%, 65%)`
+        });
+      });
+    }
+
+    // ========== 描画 ==========
+    function draw() {
+      // 背景（芝生）
+      const gradient = ctx.createLinearGradient(0, 0, 0, H);
+      gradient.addColorStop(0, '#87ceeb');
+      gradient.addColorStop(0.3, '#98d4ee');
+      gradient.addColorStop(0.3, '#7cb342');
+      gradient.addColorStop(1, '#558b2f');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, W, H);
+
+      // 芝生パターン
+      ctx.fillStyle = 'rgba(139, 195, 74, 0.3)';
+      for (let x = 0; x < W; x += 30) {
+        for (let y = H * 0.3; y < H; y += 30) {
+          if ((x + y) % 60 === 0) {
+            ctx.beginPath();
+            ctx.arc(x, y, 8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // 雲
+      G.clouds.forEach(c => {
+        c.x += c.speed * G.speed;
+        if (c.x > W + 100) c.x = -100;
+        drawCloud(c.x, c.y, c.size);
+      });
+
+      // 道路
+      drawRoads();
+
+      // 木
+      G.trees.forEach(t => {
+        if (t.y > H * 0.3) drawTree(t.x, t.y, t.size, t.type);
+      });
+
+      // 家
+      G.houses.forEach(h => drawHouse(h));
+
+      // ステーション
+      drawStation();
+
+      // スタッフ
+      G.staff.forEach((s, i) => drawStaff(s, i));
+    }
+
+    function drawCloud(x, y, size) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.4, y - size * 0.1, size * 0.4, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.8, y, size * 0.35, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.4, y + size * 0.15, size * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawRoads() {
+      ctx.fillStyle = '#9e9e9e';
+      // 横道路
+      ctx.fillRect(0, H * 0.3 - 20, W, 40);
+      ctx.fillRect(0, H * 0.5 - 20, W, 40);
+      ctx.fillRect(0, H * 0.7 - 20, W, 40);
+      // 縦道路
+      ctx.fillRect(W * 0.25 - 20, H * 0.3, 40, H * 0.7);
+      ctx.fillRect(W * 0.5 - 20, H * 0.3, 40, H * 0.7);
+      ctx.fillRect(W * 0.75 - 20, H * 0.3, 40, H * 0.7);
+
+      // センターライン
+      ctx.strokeStyle = '#ffeb3b';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([20, 15]);
+      [0.3, 0.5, 0.7].forEach(r => {
+        ctx.beginPath();
+        ctx.moveTo(0, H * r);
+        ctx.lineTo(W, H * r);
+        ctx.stroke();
+      });
+      [0.25, 0.5, 0.75].forEach(r => {
+        ctx.beginPath();
+        ctx.moveTo(W * r, H * 0.3);
+        ctx.lineTo(W * r, H);
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    }
+
+    function drawTree(x, y, size, type) {
+      // 幹
+      ctx.fillStyle = '#5d4037';
+      ctx.fillRect(x - size * 0.1, y, size * 0.2, size * 0.5);
+
+      // 葉
+      const colors = ['#388e3c', '#43a047', '#2e7d32'];
+      ctx.fillStyle = colors[type];
+
+      if (type === 0) {
+        // 丸い木
+        ctx.beginPath();
+        ctx.arc(x, y - size * 0.2, size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (type === 1) {
+        // 三角の木
+        ctx.beginPath();
+        ctx.moveTo(x, y - size * 0.8);
+        ctx.lineTo(x + size * 0.5, y);
+        ctx.lineTo(x - size * 0.5, y);
+        ctx.fill();
+      } else {
+        // もこもこの木
+        ctx.beginPath();
+        ctx.arc(x - size * 0.2, y - size * 0.1, size * 0.35, 0, Math.PI * 2);
+        ctx.arc(x + size * 0.2, y - size * 0.1, size * 0.35, 0, Math.PI * 2);
+        ctx.arc(x, y - size * 0.35, size * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawHouse(h) {
+      const x = h.x, y = h.y;
+
+      // 影
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath();
+      ctx.ellipse(x + 5, y + 40, 35, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 本体
+      ctx.fillStyle = h.color;
+      ctx.fillRect(x - 25, y, 50, 35);
+
+      // 屋根
+      ctx.fillStyle = '#d84315';
+      ctx.beginPath();
+      ctx.moveTo(x - 30, y);
+      ctx.lineTo(x, y - 25);
+      ctx.lineTo(x + 30, y);
+      ctx.fill();
+
+      // 窓
+      ctx.fillStyle = '#81d4fa';
+      ctx.fillRect(x - 18, y + 8, 12, 12);
+      ctx.fillRect(x + 6, y + 8, 12, 12);
+
+      // ドア
+      ctx.fillStyle = '#5d4037';
+      ctx.fillRect(x - 6, y + 15, 12, 20);
+
+      // ラベル
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.font = '11px "M PLUS Rounded 1c"';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${h.name}様`, x, y + 52);
+
+      // 収益
+      ctx.fillStyle = '#388e3c';
+      ctx.font = 'bold 10px "M PLUS Rounded 1c"';
+      ctx.fillText(`¥${Math.floor(h.revenue/1000)}K`, x, y - 30);
+    }
+
+    function drawStation() {
+      const x = stationX, y = stationY;
+
+      // 影
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.ellipse(x + 8, y + 55, 60, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 建物本体
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x - 50, y - 30, 100, 80);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x - 50, y - 30, 100, 80);
+
+      // 屋根
+      ctx.fillStyle = '#c62828';
+      ctx.beginPath();
+      ctx.moveTo(x - 60, y - 30);
+      ctx.lineTo(x, y - 60);
+      ctx.lineTo(x + 60, y - 30);
+      ctx.fill();
+      ctx.strokeStyle = '#8b0000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 十字マーク
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✚', x, y - 38);
+
+      // 看板
+      ctx.fillStyle = '#1976d2';
+      ctx.fillRect(x - 40, y - 18, 80, 22);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 12px "M PLUS Rounded 1c"';
+      ctx.fillText('訪問看護ステーション', x, y - 2);
+
+      // 窓
+      ctx.fillStyle = '#bbdefb';
+      ctx.fillRect(x - 35, y + 10, 25, 20);
+      ctx.fillRect(x + 10, y + 10, 25, 20);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x - 35, y + 10, 25, 20);
+      ctx.strokeRect(x + 10, y + 10, 25, 20);
+
+      // ドア
+      ctx.fillStyle = '#5d4037';
+      ctx.fillRect(x - 10, y + 25, 20, 25);
+      ctx.strokeStyle = '#3e2723';
+      ctx.strokeRect(x - 10, y + 25, 20, 25);
+
+      // ラベル
+      ctx.fillStyle = '#1976d2';
+      ctx.font = 'bold 14px "M PLUS Rounded 1c"';
+      ctx.fillText('🏥 あなたのステーション', x, y + 70);
+    }
+
+    function drawStaff(s, i) {
+      const size = 36;
+
+      // 影
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y + size/2 + 5, size/2, size/6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // アイコン背景
+      ctx.fillStyle = s.state === 'idle' ? '#48bb78' : '#ed8936';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, size/2 + 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // アイコン
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, size/2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = `${size * 0.7}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(s.avatar, s.x, s.y);
+    }
+
+    // ========== ゲームループ ==========
+    function gameLoop(time) {
+      if (!lastTime) lastTime = time;
+      const delta = (time - lastTime) / 1000;
+      lastTime = time;
+
+      if (!G.paused) {
+        update(delta);
+      }
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function update(delta) {
+      G.staff.forEach((s, i) => {
+        if (s.state === 'idle') {
+          // 待機位置
+          const targetX = stationX + (i - (G.staff.length - 1) / 2) * 50;
+          const targetY = stationY + 80;
+          s.x += (targetX - s.x) * 0.1;
+          s.y += (targetY - s.y) * 0.1;
+
+          // ランダムに訪問開始
+          if (Math.random() < 0.003 * G.speed && G.houses.length > 0) {
+            const house = G.houses[Math.floor(Math.random() * G.houses.length)];
+            s.state = 'going';
+            s.targetHouse = house;
+            s.targetX = house.x;
+            s.targetY = house.y - 20;
+            addLog(`${s.name.split(' ')[0]}：${house.name}様宅へ出発`);
+            updateStaffStatus(s.id, 'busy');
+          }
+        } else if (s.state === 'going') {
+          // 移動
+          const dx = s.targetX - s.x;
+          const dy = s.targetY - s.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const speed = 150 * G.speed;
+
+          if (dist < 10) {
+            s.state = 'visiting';
+            s.timer = 0;
+          } else {
+            s.x += (dx / dist) * speed * delta;
+            s.y += (dy / dist) * speed * delta;
+          }
+        } else if (s.state === 'visiting') {
+          s.timer += delta * G.speed;
+          if (s.timer > 1.5) {
+            // 訪問完了
+            const rev = Math.floor(s.targetHouse.revenue / 4);
+            G.monthRevenue += rev;
+            G.money += rev;
+            showFloatingRevenue(s.targetHouse.x, s.targetHouse.y - 50, rev);
+            addLog(`${s.name.split(' ')[0]}：${s.targetHouse.name}様 +¥${rev.toLocaleString()}`, 'money');
+            updateUI();
+
+            s.state = 'returning';
+            s.targetX = stationX;
+            s.targetY = stationY + 80;
+          }
+        } else if (s.state === 'returning') {
+          const dx = s.targetX - s.x;
+          const dy = s.targetY - s.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const speed = 150 * G.speed;
+
+          if (dist < 10) {
+            s.state = 'idle';
+            updateStaffStatus(s.id, 'idle');
+          } else {
+            s.x += (dx / dist) * speed * delta;
+            s.y += (dy / dist) * speed * delta;
+          }
+        }
+      });
+    }
+
+    function showFloatingRevenue(x, y, amount) {
+      const overlay = document.getElementById('overlay');
+      const el = document.createElement('div');
+      el.className = 'floating-revenue';
+      el.textContent = `+¥${amount.toLocaleString()}`;
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      overlay.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }
+
+    // ========== UI ==========
+    function renderStaffList() {
+      const list = document.getElementById('staffList');
+      list.innerHTML = G.staff.map(s => `
+        <div class="staff-card">
+          <div class="staff-avatar">${s.avatar}</div>
+          <div class="staff-info">
+            <div class="staff-name">${s.name}</div>
+            <div class="staff-role">${s.role}</div>
+          </div>
+          <div class="staff-status ${s.state === 'idle' ? 'idle' : 'busy'}" id="status-${s.id}">
+            ${s.state === 'idle' ? '待機中' : '訪問中'}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateStaffStatus(id, status) {
+      const el = document.getElementById(`status-${id}`);
+      if (el) {
+        el.className = `staff-status ${status}`;
+        el.textContent = status === 'idle' ? '待機中' : '訪問中';
+      }
+    }
+
+    function updateUI() {
+      const moneyEl = document.getElementById('money');
+      moneyEl.textContent = `¥${G.money.toLocaleString()}`;
+      moneyEl.className = 'money-value' + (G.money < 0 ? ' negative' : '');
+
+      document.getElementById('dateMain').textContent = `${2025 + G.year}年 ${G.month}月 第${G.week}週`;
+      document.getElementById('dateSub').textContent = `${G.year}年目 / ${60 - ((G.year - 1) * 12 + G.month - 1)}ヶ月`;
+      document.getElementById('patientCount').textContent = G.patients.length;
+      document.getElementById('staffCount').textContent = G.staff.length;
+      document.getElementById('monthRev').textContent = `¥${Math.floor(G.monthRevenue / 1000)}K`;
+      document.getElementById('footerRev').textContent = `¥${G.monthRevenue.toLocaleString()}`;
+      document.getElementById('footerProfit').textContent = `¥${(G.totalRevenue - G.totalExpense).toLocaleString()}`;
+      document.getElementById('footerSpeed').textContent = `x${G.speed}`;
+    }
+
+    function addLog(text, type = '') {
+      const list = document.getElementById('logList');
+      const el = document.createElement('div');
+      el.className = 'log-item ' + type;
+      el.textContent = text;
+      list.insertBefore(el, list.firstChild);
+      while (list.children.length > 30) list.removeChild(list.lastChild);
+    }
+
+    // ========== イベント ==========
+    function setupEvents() {
+      document.querySelectorAll('.speed-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          G.speed = parseInt(btn.dataset.speed);
+          document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          updateUI();
+        });
+      });
+
+      document.getElementById('btnHire').onclick = showHireModal;
+      document.getElementById('btnSales').onclick = () => {
+        if (G.salesDone) return alert('今週は営業済みです');
+        openModal('modalSales');
+      };
+      document.getElementById('btnDoSales').onclick = doSales;
+      document.getElementById('btnWeek').onclick = advanceWeek;
+      document.getElementById('btnNextMonth').onclick = nextMonth;
+      document.getElementById('btnMenu').onclick = showReport;
+    }
+
+    function showHireModal() {
+      const list = document.getElementById('hireList');
+      list.innerHTML = hireCandidates.map((c, i) => `
+        <div class="hire-card" onclick="doHire(${i})">
+          <div class="avatar">${c.avatar}</div>
+          <div class="info">
+            <div class="name">${c.name}</div>
+            <div class="type">${c.role}</div>
+          </div>
+          <div class="salary">¥${(c.salary/1000).toFixed(0)}K/月</div>
+        </div>
+      `).join('');
+      openModal('modalHire');
+    }
+
+    function doHire(idx) {
+      if (G.staff.length >= 12) return alert('スタッフは12名までです');
+      const c = hireCandidates[idx];
+      G.staff.push({
+        id: Date.now(), name: c.name, avatar: c.avatar, salary: c.salary, role: c.role,
+        state: 'idle', x: stationX, y: stationY + 80, targetX: 0, targetY: 0
+      });
+      hireCandidates.splice(idx, 1);
+
+      const names = ["木村明", "林由美", "清水誠", "山崎愛", "池田翔", "橋本恵"];
+      const avatars = ["👩", "👨", "👩‍⚕️", "👨‍⚕️"];
+      hireCandidates.push({
+        name: names[Math.floor(Math.random() * names.length)],
+        avatar: avatars[Math.floor(Math.random() * avatars.length)],
+        salary: 250000 + Math.floor(Math.random() * 80000),
+        role: "看護師"
+      });
+
+      renderStaffList();
+      updateUI();
+      addLog(`${c.name}が入職しました！`, 'good');
+      closeModal('modalHire');
+    }
+
+    function doSales() {
+      G.money -= 50000;
+      G.salesDone = true;
+      closeModal('modalSales');
+
+      if (Math.random() < 0.6) {
+        const count = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) addPatient();
+        showResult('🎉 営業成功！', `${count}名の新規利用者を獲得しました！`);
+        addLog(`営業成功！+${count}名獲得`, 'good');
+      } else {
+        showResult('😅 残念...', '今回は紹介に繋がりませんでした');
+        addLog('営業：成果なし', 'bad');
+      }
+      updateUI();
+    }
+
+    function addPatient() {
+      const names = ["佐々木", "松本", "井上", "木村", "林", "斎藤", "清水", "阿部", "石川"];
+      const revenue = 30000 + Math.floor(Math.random() * 50000);
+      const p = { id: Date.now() + Math.random(), name: names[Math.floor(Math.random() * names.length)], revenue };
+      G.patients.push(p);
+
+      const padding = 120;
+      const zones = [
+        { x1: padding, y1: padding, x2: W * 0.35, y2: H * 0.35 },
+        { x1: W * 0.65, y1: padding, x2: W - padding, y2: H * 0.35 },
+        { x1: padding, y1: H * 0.65, x2: W * 0.35, y2: H - padding },
+        { x1: W * 0.65, y1: H * 0.65, x2: W - padding, y2: H - padding }
+      ];
+      const zone = zones[G.houses.length % zones.length];
+      G.houses.push({
+        id: p.id, name: p.name, revenue,
+        x: zone.x1 + Math.random() * (zone.x2 - zone.x1),
+        y: zone.y1 + Math.random() * (zone.y2 - zone.y1),
+        color: `hsl(${Math.random() * 40 + 20}, 70%, 65%)`
+      });
+    }
+
+    function advanceWeek() {
+      G.week++;
+      G.salesDone = false;
+      if (G.week > 4) {
+        G.week = 1;
+        showMonthEnd();
+      } else {
+        addLog(`${G.month}月 第${G.week}週`);
+        updateUI();
+      }
+    }
+
+    function showMonthEnd() {
+      const revenue = G.monthRevenue;
+      const salaries = G.staff.reduce((s, x) => s + x.salary, 0);
+      const overhead = Math.floor(salaries * 0.15) + 260000;
+      const bonus = (G.month === 6 || G.month === 12) ? Math.floor(salaries * 1.7) : 0;
+      const totalExp = salaries + overhead + bonus;
+
+      G.pendingIncome.push(revenue);
+      const cashIn = G.pendingIncome.shift();
+      const pl = cashIn - totalExp;
+
+      G.totalRevenue += revenue;
+      G.totalExpense += totalExp;
+
+      document.getElementById('monthBody').innerHTML = `
+        <div class="summary-card">
+          <div class="summary-row income"><span>💰 売上（発生）</span><span class="value">+¥${revenue.toLocaleString()}</span></div>
+          <div class="summary-row income"><span>💵 入金（2ヶ月前分）</span><span class="value">+¥${cashIn.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>👥 人件費</span><span class="value">-¥${salaries.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>🏢 諸経費</span><span class="value">-¥${overhead.toLocaleString()}</span></div>
+          ${bonus > 0 ? `<div class="summary-row expense"><span>🎁 賞与</span><span class="value">-¥${bonus.toLocaleString()}</span></div>` : ''}
+          <div class="summary-row total ${pl >= 0 ? 'positive' : 'negative'}">
+            <span>月間収支</span><span class="value">${pl >= 0 ? '+' : ''}¥${pl.toLocaleString()}</span>
+          </div>
+        </div>
+        <p style="text-align:center;margin-top:15px;color:#a0aec0;font-size:12px">
+          ※訪問看護は国保連経由で2ヶ月後入金
+        </p>
+      `;
+
+      G.money = G.money - G.monthRevenue + pl;
+      G.monthRevenue = 0;
+      openModal('modalMonth');
+    }
+
+    function nextMonth() {
+      closeModal('modalMonth');
+      G.month++;
+      if (G.month > 12) { G.month = 1; G.year++; }
+
+      if (G.money < -3000000) {
+        showEnding('gameover');
+      } else if (G.year > 5) {
+        showEnding('clear');
+      } else {
+        addLog(`${G.month}月になりました`, 'good');
+        updateUI();
+      }
+    }
+
+    function showReport() {
+      const salaries = G.staff.reduce((s, x) => s + x.salary, 0);
+      const profit = G.totalRevenue - G.totalExpense;
+      alert(`【経営状況】\n\n現金残高: ¥${G.money.toLocaleString()}\n今月売上: ¥${G.monthRevenue.toLocaleString()}\n月間人件費: ¥${salaries.toLocaleString()}\n累計利益: ¥${profit.toLocaleString()}\n\n利用者: ${G.patients.length}名\nスタッフ: ${G.staff.length}名`);
+    }
+
+    function showEnding(type) {
+      const pl = G.totalRevenue - G.totalExpense;
+      let rank, title;
+
+      if (type === 'gameover') {
+        rank = '💀'; title = 'GAME OVER';
+      } else {
+        if (pl > 30000000 && G.patients.length >= 15) rank = '🏆 S';
+        else if (pl > 20000000) rank = '🥇 A';
+        else if (pl > 0) rank = '🥈 B';
+        else rank = '🥉 C';
+        title = '5年間お疲れ様でした！';
+      }
+
+      document.getElementById('endRank').textContent = rank;
+      document.getElementById('endTitle').textContent = title;
+      document.getElementById('endStats').innerHTML = `
+        <div class="summary-row"><span>累計売上</span><span class="value" style="color:#68d391">¥${G.totalRevenue.toLocaleString()}</span></div>
+        <div class="summary-row"><span>累計支出</span><span class="value" style="color:#fc8181">¥${G.totalExpense.toLocaleString()}</span></div>
+        <div class="summary-row total ${pl >= 0 ? 'positive' : 'negative'}"><span>最終損益</span><span class="value">¥${pl.toLocaleString()}</span></div>
+        <div class="summary-row"><span>最終利用者</span><span class="value">${G.patients.length}名</span></div>
+        <div class="summary-row"><span>最終スタッフ</span><span class="value">${G.staff.length}名</span></div>
+      `;
+      openModal('modalEnding');
+    }
+
+    function showResult(title, body) {
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultBody').innerHTML = body;
+      openModal('modalResult');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); G.paused = true; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); G.paused = false; }
+
+    init();
+  </script>
+</body>
+</html>

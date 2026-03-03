@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訪問看護ステーション始めました！</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #0f0f1a;
+    }
+
+    #app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== ヘッダー ===== */
+    header {
+      height: 70px;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      border-bottom: 3px solid #3d5a80;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 40px; }
+
+    .title-box { display: flex; align-items: center; gap: 15px; }
+    .title-icon {
+      width: 50px; height: 50px;
+      background: linear-gradient(135deg, #4ecdc4 0%, #2ec4b6 100%);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .title-text { font-size: 20px; font-weight: 900; color: #fff; }
+
+    .money-box {
+      background: #1a1a2e;
+      border: 2px solid #ffd700;
+      border-radius: 15px;
+      padding: 10px 25px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .money-icon { font-size: 28px; }
+    .money-value { font-size: 28px; font-weight: 900; color: #ffd700; }
+    .money-value.negative { color: #ff6b6b; }
+
+    .header-center { text-align: center; }
+    .date-main { font-size: 22px; font-weight: 700; color: #fff; }
+    .date-sub { font-size: 12px; color: #8ecae6; }
+
+    .header-right { display: flex; align-items: center; gap: 20px; }
+
+    .stat-box {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 8px 18px;
+      text-align: center;
+    }
+    .stat-value { font-size: 24px; font-weight: 900; color: #fff; }
+    .stat-label { font-size: 10px; color: #8ecae6; }
+
+    .speed-box { display: flex; background: rgba(0,0,0,0.3); border-radius: 10px; }
+    .speed-btn {
+      width: 45px; height: 40px;
+      border: none; background: transparent;
+      color: #8ecae6; font-size: 13px; cursor: pointer;
+    }
+    .speed-btn:hover { background: rgba(255,255,255,0.1); }
+    .speed-btn.active { background: #e63946; color: #fff; }
+
+    /* ===== メインエリア ===== */
+    .main-area {
+      flex: 1;
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: #0a0a14;
+      min-height: 0;
+    }
+
+    .view-panel {
+      flex: 1;
+      background: #1a1a2e;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      height: 40px;
+      background: linear-gradient(135deg, #2d3a4f 0%, #1a2332 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 15px;
+      border-bottom: 2px solid #3d5a80;
+    }
+    .panel-title { font-size: 14px; font-weight: 700; color: #fff; }
+    .panel-info { font-size: 11px; color: #8ecae6; }
+
+    .panel-content {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    canvas { width: 100%; height: 100%; display: block; }
+
+    /* ===== コントロール ===== */
+    .control-bar {
+      height: 75px;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%);
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      gap: 30px;
+      border-top: 3px solid #3d5a80;
+    }
+
+    .action-buttons { display: flex; gap: 12px; }
+
+    .action-btn {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .action-btn:hover { transform: translateY(-2px); }
+    .action-btn .icon { font-size: 20px; }
+
+    .btn-hire { background: linear-gradient(135deg, #4895ef, #3f37c9); color: #fff; }
+    .btn-sales { background: linear-gradient(135deg, #f77f00, #d62828); color: #fff; }
+    .btn-week { background: linear-gradient(135deg, #2ec4b6, #028090); color: #fff; }
+
+    .info-area {
+      flex: 1;
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+    }
+    .info-item { display: flex; align-items: center; gap: 10px; color: #fff; }
+    .info-icon { font-size: 22px; }
+    .info-text { font-size: 12px; color: #8ecae6; }
+    .info-value { font-size: 18px; font-weight: 700; }
+
+    .log-area {
+      width: 350px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 8px 12px;
+      max-height: 55px;
+      overflow-y: auto;
+    }
+    .log-item { font-size: 11px; color: #8ecae6; padding: 2px 0; }
+    .log-item.money { color: #ffd700; }
+    .log-item.good { color: #2ec4b6; }
+    .log-item.bad { color: #e63946; }
+
+    /* フローティング */
+    .floating-text {
+      position: absolute;
+      font-size: 22px;
+      font-weight: 900;
+      color: #2ec4b6;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      pointer-events: none;
+      animation: floatUp 2s ease-out forwards;
+      z-index: 100;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.8); }
+      20% { transform: translateY(-15px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-60px); }
+    }
+
+    /* ===== モーダル ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: linear-gradient(180deg, #1e3a5f, #0d1b2a);
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      border: 2px solid #3d5a80;
+    }
+    .modal-title {
+      font-size: 24px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 25px;
+      color: #fff;
+    }
+    .modal-body { margin-bottom: 20px; }
+
+    .hire-list { display: flex; flex-direction: column; gap: 12px; }
+    .hire-card {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid #3d5a80;
+      border-radius: 14px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .hire-card:hover {
+      background: rgba(78, 205, 196, 0.15);
+      border-color: #4ecdc4;
+      transform: translateX(8px);
+    }
+    .hire-avatar {
+      width: 55px; height: 55px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .hire-info { flex: 1; }
+    .hire-name { font-size: 16px; font-weight: 700; color: #fff; }
+    .hire-role { font-size: 12px; color: #8ecae6; }
+    .hire-salary { font-size: 16px; font-weight: 700; color: #ffd700; }
+
+    .summary-card {
+      background: rgba(0,0,0,0.4);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 15px;
+      color: #e0e0e0;
+    }
+    .summary-row.income .val { color: #2ec4b6; }
+    .summary-row.expense .val { color: #e63946; }
+    .summary-row.total {
+      border-top: 2px solid #3d5a80;
+      margin-top: 10px;
+      padding-top: 15px;
+      font-size: 20px;
+      font-weight: 900;
+    }
+    .summary-row.total.positive .val { color: #2ec4b6; }
+    .summary-row.total.negative .val { color: #e63946; }
+
+    .modal-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .modal-btn.primary { background: linear-gradient(135deg, #2ec4b6, #028090); color: #fff; }
+    .modal-btn.secondary { background: #3d5a80; color: #fff; margin-top: 10px; }
+
+    .ending { text-align: center; }
+    .ending-rank { font-size: 100px; margin-bottom: 15px; }
+    .ending-title { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 25px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="header-left">
+        <div class="title-box">
+          <div class="title-icon">🏥</div>
+          <div class="title-text">訪問看護ステーション<br>始めました！</div>
+        </div>
+        <div class="money-box">
+          <span class="money-icon">💰</span>
+          <span class="money-value" id="money">¥7,500,000</span>
+        </div>
+      </div>
+      <div class="header-center">
+        <div class="date-main" id="dateMain">2026年 1月 第1週</div>
+        <div class="date-sub" id="dateSub">1年目</div>
+      </div>
+      <div class="header-right">
+        <div class="stat-box">
+          <div class="stat-value" id="patientCount">5</div>
+          <div class="stat-label">利用者</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="staffCount">3</div>
+          <div class="stat-label">スタッフ</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="monthRev">¥0</div>
+          <div class="stat-label">今月売上</div>
+        </div>
+        <div class="speed-box">
+          <button class="speed-btn active" data-speed="1">×1</button>
+          <button class="speed-btn" data-speed="2">×2</button>
+          <button class="speed-btn" data-speed="3">×3</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-area">
+      <div class="view-panel">
+        <div class="panel-header">
+          <div class="panel-title">🏢 ステーション内</div>
+          <div class="panel-info" id="stationInfo">スタッフ待機中</div>
+        </div>
+        <div class="panel-content">
+          <canvas id="stationCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="view-panel">
+        <div class="panel-header">
+          <div class="panel-title">🗺️ 地域マップ</div>
+          <div class="panel-info" id="mapInfo">訪問エリア</div>
+        </div>
+        <div class="panel-content">
+          <canvas id="mapCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <div class="action-buttons">
+        <button class="action-btn btn-hire" id="btnHire">
+          <span class="icon">👩‍⚕️</span><span>採用</span>
+        </button>
+        <button class="action-btn btn-sales" id="btnSales">
+          <span class="icon">🤝</span><span>営業</span>
+        </button>
+        <button class="action-btn btn-week" id="btnWeek">
+          <span class="icon">📅</span><span>次週へ</span>
+        </button>
+      </div>
+      <div class="info-area">
+        <div class="info-item">
+          <span class="info-icon">💵</span>
+          <div><div class="info-text">今月売上</div><div class="info-value" id="infoRev">¥0</div></div>
+        </div>
+        <div class="info-item">
+          <span class="info-icon">📊</span>
+          <div><div class="info-text">累計利益</div><div class="info-value" id="infoProfit">¥0</div></div>
+        </div>
+      </div>
+      <div class="log-area" id="logArea"></div>
+    </div>
+  </div>
+
+  <!-- モーダル -->
+  <div class="modal-overlay" id="modalHire">
+    <div class="modal">
+      <div class="modal-title">👩‍⚕️ スタッフ採用</div>
+      <div class="modal-body"><div class="hire-list" id="hireList"></div></div>
+      <button class="modal-btn secondary" onclick="closeModal('modalHire')">閉じる</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalSales">
+    <div class="modal">
+      <div class="modal-title">🤝 営業活動</div>
+      <div class="modal-body">
+        <p style="text-align:center;margin-bottom:20px;color:#8ecae6;font-size:15px">
+          ケアマネージャーを訪問して新規利用者を獲得
+        </p>
+        <div class="summary-card">
+          <div class="summary-row expense"><span>コスト</span><span class="val">-¥50,000</span></div>
+          <div class="summary-row"><span>成功率</span><span class="val" style="color:#4895ef">60%</span></div>
+          <div class="summary-row"><span>獲得見込</span><span class="val" style="color:#2ec4b6">1〜3名</span></div>
+        </div>
+      </div>
+      <button class="modal-btn primary" id="btnDoSales">営業に行く！</button>
+      <button class="modal-btn secondary" onclick="closeModal('modalSales')">やめる</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalMonth">
+    <div class="modal">
+      <div class="modal-title">📊 月末決算</div>
+      <div class="modal-body" id="monthBody"></div>
+      <button class="modal-btn primary" id="btnNextMonth">来月へ</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalResult">
+    <div class="modal">
+      <div class="modal-title" id="resultTitle">結果</div>
+      <div class="modal-body" id="resultBody" style="text-align:center;font-size:18px;color:#e0e0e0"></div>
+      <button class="modal-btn secondary" onclick="closeModal('modalResult')">OK</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalEnding">
+    <div class="modal ending">
+      <div class="ending-rank" id="endRank">🏆</div>
+      <div class="ending-title" id="endTitle">5年間お疲れ様でした！</div>
+      <div class="summary-card" id="endStats"></div>
+      <button class="modal-btn primary" style="margin-top:20px" onclick="location.reload()">もう一度</button>
+    </div>
+  </div>
+
+  <script>
+    const G = {
+      year: 1, month: 1, week: 1,
+      money: 7500000,
+      monthRevenue: 0,
+      totalRevenue: 0,
+      totalExpense: 0,
+      pendingIncome: [0, 0],
+      speed: 1,
+      paused: false,
+      staff: [],
+      patients: [],
+      houses: [],
+      salesDone: false
+    };
+
+    let stationCanvas, stationCtx, mapCanvas, mapCtx;
+    let SW, SH, MW, MH;
+    let lastTime = 0;
+
+    const STAFF_INIT = [
+      { id: 1, name: "山田花子", gender: "female", salary: 350000, role: "管理者", skinColor: "#ffdcb5", hairColor: "#3d2314", uniformColor: "#e63946" },
+      { id: 2, name: "佐藤美咲", gender: "female", salary: 280000, role: "看護師", skinColor: "#ffe4c9", hairColor: "#1a1a1a", uniformColor: "#4895ef" },
+      { id: 3, name: "鈴木太郎", gender: "male", salary: 280000, role: "看護師", skinColor: "#f5d0b5", hairColor: "#2d2d2d", uniformColor: "#2ec4b6" }
+    ];
+
+    const PATIENT_INIT = [
+      { id: 1, name: "高橋", revenue: 74000 },
+      { id: 2, name: "山本", revenue: 65000 },
+      { id: 3, name: "田中", revenue: 35000 },
+      { id: 4, name: "伊藤", revenue: 65000 },
+      { id: 5, name: "渡辺", revenue: 49000 }
+    ];
+
+    let hireCandidates = [
+      { name: "中村さくら", gender: "female", salary: 280000, role: "看護師", skinColor: "#ffdcb5", hairColor: "#4a3728", uniformColor: "#f77f00" },
+      { name: "小林健一", gender: "male", salary: 260000, role: "看護師", skinColor: "#f5d0b5", hairColor: "#1a1a1a", uniformColor: "#7209b7" },
+      { name: "加藤理恵", gender: "female", salary: 300000, role: "看護師", skinColor: "#ffe4c9", hairColor: "#2d1810", uniformColor: "#3a86ff" },
+      { name: "吉田剛", gender: "male", salary: 320000, role: "ベテラン", skinColor: "#e8c4a0", hairColor: "#555555", uniformColor: "#06d6a0" }
+    ];
+
+    function init() {
+      stationCanvas = document.getElementById('stationCanvas');
+      stationCtx = stationCanvas.getContext('2d');
+      mapCanvas = document.getElementById('mapCanvas');
+      mapCtx = mapCanvas.getContext('2d');
+
+      resize();
+      window.addEventListener('resize', resize);
+
+      G.staff = STAFF_INIT.map((s, i) => ({
+        ...s,
+        state: 'idle',
+        sx: 0, sy: 0,
+        mx: 0, my: 0,
+        deskIndex: i,
+        animFrame: 0,
+        expression: 'normal'
+      }));
+
+      G.patients = [...PATIENT_INIT];
+      generateHouses();
+      updateUI();
+      addLog("🏥 訪問看護ステーションを開業しました！", "good");
+      setupEvents();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function resize() {
+      const sc = stationCanvas.parentElement;
+      SW = stationCanvas.width = sc.offsetWidth;
+      SH = stationCanvas.height = sc.offsetHeight;
+
+      const mc = mapCanvas.parentElement;
+      MW = mapCanvas.width = mc.offsetWidth;
+      MH = mapCanvas.height = mc.offsetHeight;
+
+      if (G.houses.length > 0) generateHouses();
+    }
+
+    function generateHouses() {
+      G.houses = [];
+      const cx = MW / 2, cy = MH / 2;
+      G.patients.forEach((p, i) => {
+        const angle = (i / G.patients.length) * Math.PI * 2 + 0.3;
+        const dist = 100 + Math.random() * (Math.min(MW, MH) / 2 - 130);
+        G.houses.push({
+          id: p.id, name: p.name, revenue: p.revenue,
+          x: cx + Math.cos(angle) * dist,
+          y: cy + Math.sin(angle) * dist,
+          hue: Math.random() * 60 + 15
+        });
+      });
+    }
+
+    // ===== キャラクター描画（大きな顔） =====
+    function drawCharacter(ctx, x, y, scale, char, showBody = true) {
+      const s = scale;
+
+      // 影
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + s * 55, s * 25, s * 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (showBody) {
+        // 体（ユニフォーム）
+        ctx.fillStyle = char.uniformColor;
+        ctx.beginPath();
+        ctx.ellipse(x, y + s * 30, s * 22, s * 28, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 白衣の襟
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.moveTo(x - s * 10, y + s * 5);
+        ctx.lineTo(x, y + s * 20);
+        ctx.lineTo(x + s * 10, y + s * 5);
+        ctx.lineTo(x + s * 8, y + s * 2);
+        ctx.lineTo(x, y + s * 12);
+        ctx.lineTo(x - s * 8, y + s * 2);
+        ctx.closePath();
+        ctx.fill();
+
+        // 名札
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x - s * 12, y + s * 20, s * 24, s * 12);
+        ctx.strokeStyle = char.uniformColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x - s * 12, y + s * 20, s * 24, s * 12);
+        ctx.fillStyle = '#333';
+        ctx.font = `bold ${s * 7}px "Noto Sans JP"`;
+        ctx.textAlign = 'center';
+        ctx.fillText(char.name.slice(0, 3), x, y + s * 29);
+      }
+
+      // 首
+      ctx.fillStyle = char.skinColor;
+      ctx.fillRect(x - s * 6, y - s * 5, s * 12, s * 15);
+
+      // 顔（大きめの楕円）
+      ctx.fillStyle = char.skinColor;
+      ctx.beginPath();
+      ctx.ellipse(x, y - s * 22, s * 22, s * 26, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 耳
+      ctx.beginPath();
+      ctx.ellipse(x - s * 21, y - s * 20, s * 5, s * 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + s * 21, y - s * 20, s * 5, s * 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 髪の毛
+      ctx.fillStyle = char.hairColor;
+      if (char.gender === 'female') {
+        // 女性の髪（ロングまたはボブ）
+        ctx.beginPath();
+        ctx.ellipse(x, y - s * 30, s * 24, s * 22, 0, Math.PI, Math.PI * 2);
+        ctx.fill();
+        // サイドの髪
+        ctx.beginPath();
+        ctx.ellipse(x - s * 20, y - s * 15, s * 8, s * 25, -0.2, 0, Math.PI * 2);
+        ctx.ellipse(x + s * 20, y - s * 15, s * 8, s * 25, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        // 前髪
+        ctx.beginPath();
+        ctx.moveTo(x - s * 18, y - s * 35);
+        ctx.quadraticCurveTo(x - s * 5, y - s * 28, x - s * 15, y - s * 42);
+        ctx.quadraticCurveTo(x, y - s * 32, x + s * 15, y - s * 42);
+        ctx.quadraticCurveTo(x + s * 5, y - s * 28, x + s * 18, y - s * 35);
+        ctx.fill();
+      } else {
+        // 男性の髪（短髪）
+        ctx.beginPath();
+        ctx.ellipse(x, y - s * 32, s * 22, s * 18, 0, Math.PI, Math.PI * 2);
+        ctx.fill();
+        // サイド
+        ctx.fillRect(x - s * 22, y - s * 35, s * 6, s * 20);
+        ctx.fillRect(x + s * 16, y - s * 35, s * 6, s * 20);
+      }
+
+      // 眉毛
+      ctx.strokeStyle = char.hairColor;
+      ctx.lineWidth = s * 2.5;
+      ctx.lineCap = 'round';
+      // 左眉
+      ctx.beginPath();
+      ctx.moveTo(x - s * 14, y - s * 32);
+      ctx.quadraticCurveTo(x - s * 10, y - s * 35, x - s * 5, y - s * 32);
+      ctx.stroke();
+      // 右眉
+      ctx.beginPath();
+      ctx.moveTo(x + s * 5, y - s * 32);
+      ctx.quadraticCurveTo(x + s * 10, y - s * 35, x + s * 14, y - s * 32);
+      ctx.stroke();
+
+      // 目（大きめでかわいく）
+      const eyeY = y - s * 22;
+      // 白目
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.ellipse(x - s * 9, eyeY, s * 8, s * 9, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + s * 9, eyeY, s * 8, s * 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 瞳（黒目）
+      const pupilOffset = char.expression === 'happy' ? 0 : (Math.sin(Date.now() / 500) * s * 2);
+      ctx.fillStyle = '#2d2d2d';
+      ctx.beginPath();
+      ctx.ellipse(x - s * 9 + pupilOffset, eyeY + s * 1, s * 5, s * 6, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + s * 9 + pupilOffset, eyeY + s * 1, s * 5, s * 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 瞳のハイライト
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(x - s * 11, eyeY - s * 2, s * 2.5, 0, Math.PI * 2);
+      ctx.arc(x + s * 7, eyeY - s * 2, s * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // まつ毛（女性のみ）
+      if (char.gender === 'female') {
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = s * 1.5;
+        for (let i = 0; i < 3; i++) {
+          const lx = x - s * 14 + i * s * 4;
+          ctx.beginPath();
+          ctx.moveTo(lx, eyeY - s * 8);
+          ctx.lineTo(lx - s * 1, eyeY - s * 11);
+          ctx.stroke();
+
+          const rx = x + s * 6 + i * s * 4;
+          ctx.beginPath();
+          ctx.moveTo(rx, eyeY - s * 8);
+          ctx.lineTo(rx + s * 1, eyeY - s * 11);
+          ctx.stroke();
+        }
+      }
+
+      // 鼻
+      ctx.fillStyle = darkenColor(char.skinColor, 15);
+      ctx.beginPath();
+      ctx.ellipse(x, y - s * 12, s * 3, s * 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 口
+      ctx.fillStyle = '#e57373';
+      if (char.expression === 'happy') {
+        // 笑顔
+        ctx.beginPath();
+        ctx.arc(x, y - s * 3, s * 8, 0.1, Math.PI - 0.1);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(x, y - s * 3, s * 6, 0.2, Math.PI - 0.2);
+        ctx.fill();
+      } else {
+        // 通常
+        ctx.beginPath();
+        ctx.ellipse(x, y - s * 2, s * 5, s * 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 頬のチーク
+      ctx.fillStyle = 'rgba(255, 150, 150, 0.3)';
+      ctx.beginPath();
+      ctx.ellipse(x - s * 16, y - s * 15, s * 6, s * 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + s * 16, y - s * 15, s * 6, s * 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function darkenColor(hex, percent) {
+      const num = parseInt(hex.slice(1), 16);
+      const r = Math.max(0, (num >> 16) - percent);
+      const g = Math.max(0, ((num >> 8) & 0x00FF) - percent);
+      const b = Math.max(0, (num & 0x0000FF) - percent);
+      return `rgb(${r},${g},${b})`;
+    }
+
+    // ===== ステーション内観 =====
+    function drawStation() {
+      const ctx = stationCtx;
+
+      // 床
+      ctx.fillStyle = '#f5f0e6';
+      ctx.fillRect(0, 0, SW, SH);
+
+      // 床タイル
+      ctx.strokeStyle = '#e0d8c8';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < SW; x += 60) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, SH); ctx.stroke();
+      }
+      for (let y = 0; y < SH; y += 60) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(SW, y); ctx.stroke();
+      }
+
+      // 壁
+      ctx.fillStyle = '#e8f4ea';
+      ctx.fillRect(0, 0, SW, 100);
+
+      // 窓
+      const windowCount = Math.floor(SW / 200);
+      for (let i = 0; i < windowCount; i++) {
+        const wx = 100 + i * 200;
+        drawWindow(ctx, wx, 20, 100, 60);
+      }
+
+      // ポスター
+      drawPoster(ctx, SW - 80, 25);
+
+      // 時計
+      drawClock(ctx, 50, 40, 30);
+
+      // デスクとキャラクター
+      const deskStartX = 120;
+      const deskSpacing = Math.min(200, (SW - 200) / 3);
+
+      G.staff.forEach((s, i) => {
+        if (s.state === 'idle') {
+          const deskX = deskStartX + (i % 3) * deskSpacing;
+          const deskY = 200 + Math.floor(i / 3) * 180;
+          s.sx = deskX;
+          s.sy = deskY;
+
+          // デスク
+          drawDesk(ctx, deskX, deskY + 50);
+
+          // キャラクター（大きめ）
+          drawCharacter(ctx, deskX, deskY - 20, 1.2, s, true);
+        }
+      });
+
+      // 出発中のスタッフを受付付近に表示
+      G.staff.forEach(s => {
+        if (s.state === 'preparing') {
+          s.expression = 'happy';
+          drawCharacter(ctx, SW / 2, SH - 120, 1.3, s, true);
+
+          // 吹き出し
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.roundRect(SW / 2 - 60, SH - 220, 120, 40, 10);
+          ctx.fill();
+          ctx.strokeStyle = '#333';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = '#333';
+          ctx.font = 'bold 14px "Noto Sans JP"';
+          ctx.textAlign = 'center';
+          ctx.fillText('行ってきます！', SW / 2, SH - 195);
+
+          // 吹き出しの三角
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.moveTo(SW / 2 - 10, SH - 180);
+          ctx.lineTo(SW / 2, SH - 165);
+          ctx.lineTo(SW / 2 + 10, SH - 180);
+          ctx.fill();
+        }
+      });
+
+      // 受付カウンター
+      ctx.fillStyle = '#4a5568';
+      ctx.fillRect(SW / 2 - 120, SH - 50, 240, 50);
+      ctx.fillStyle = '#2d3748';
+      ctx.fillRect(SW / 2 - 115, SH - 45, 230, 40);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 16px "Noto Sans JP"';
+      ctx.textAlign = 'center';
+      ctx.fillText('受付', SW / 2, SH - 20);
+
+      // 植物
+      drawPlant(ctx, 40, SH - 120, 1);
+      drawPlant(ctx, SW - 50, SH - 120, 1);
+    }
+
+    function drawWindow(ctx, x, y, w, h) {
+      ctx.fillStyle = '#87ceeb';
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = '#5d4e37';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(x, y, w, h);
+      ctx.beginPath();
+      ctx.moveTo(x + w/2, y); ctx.lineTo(x + w/2, y + h);
+      ctx.moveTo(x, y + h/2); ctx.lineTo(x + w, y + h/2);
+      ctx.stroke();
+
+      // カーテン
+      ctx.fillStyle = 'rgba(255,182,193,0.5)';
+      ctx.fillRect(x, y, 20, h);
+      ctx.fillRect(x + w - 20, y, 20, h);
+    }
+
+    function drawPoster(ctx, x, y) {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x - 25, y, 50, 60);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x - 25, y, 50, 60);
+      ctx.fillStyle = '#e63946';
+      ctx.font = 'bold 10px "Noto Sans JP"';
+      ctx.textAlign = 'center';
+      ctx.fillText('手洗い', x, y + 25);
+      ctx.fillText('うがい', x, y + 40);
+      ctx.fillText('😷', x, y + 55);
+    }
+
+    function drawClock(ctx, x, y, r) {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      const now = new Date();
+      const h = now.getHours() % 12, m = now.getMinutes();
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      const ha = (h / 12) * Math.PI * 2 - Math.PI / 2;
+      ctx.lineTo(x + Math.cos(ha) * r * 0.5, y + Math.sin(ha) * r * 0.5);
+      ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      const ma = (m / 60) * Math.PI * 2 - Math.PI / 2;
+      ctx.lineTo(x + Math.cos(ma) * r * 0.75, y + Math.sin(ma) * r * 0.75);
+      ctx.stroke();
+    }
+
+    function drawDesk(ctx, x, y) {
+      // デスク天板
+      ctx.fillStyle = '#d4a373';
+      ctx.fillRect(x - 50, y - 10, 100, 40);
+      ctx.strokeStyle = '#9c6644';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x - 50, y - 10, 100, 40);
+
+      // モニター
+      ctx.fillStyle = '#2a2a2a';
+      ctx.fillRect(x - 20, y - 45, 40, 35);
+      ctx.fillStyle = '#4a90d9';
+      ctx.fillRect(x - 17, y - 42, 34, 28);
+      ctx.fillStyle = '#2a2a2a';
+      ctx.fillRect(x - 5, y - 10, 10, 5);
+
+      // キーボード
+      ctx.fillStyle = '#333';
+      ctx.fillRect(x - 25, y + 5, 50, 12);
+    }
+
+    function drawPlant(ctx, x, y, s) {
+      ctx.fillStyle = '#c4a484';
+      ctx.beginPath();
+      ctx.moveTo(x - 18 * s, y);
+      ctx.lineTo(x - 14 * s, y + 35 * s);
+      ctx.lineTo(x + 14 * s, y + 35 * s);
+      ctx.lineTo(x + 18 * s, y);
+      ctx.fill();
+
+      ctx.fillStyle = '#2e7d32';
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI - Math.PI / 2;
+        ctx.beginPath();
+        ctx.ellipse(
+          x + Math.cos(angle) * 12 * s,
+          y - 25 * s + Math.sin(angle) * 8 * s,
+          10 * s, 22 * s,
+          angle + Math.PI / 2, 0, Math.PI * 2
+        );
+        ctx.fill();
+      }
+    }
+
+    // ===== マップ =====
+    function drawMap() {
+      const ctx = mapCtx;
+      const cx = MW / 2, cy = MH / 2;
+
+      // 背景
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(MW, MH));
+      grad.addColorStop(0, '#7cb342');
+      grad.addColorStop(1, '#558b2f');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, MW, MH);
+
+      // 芝生
+      ctx.fillStyle = 'rgba(139, 195, 74, 0.5)';
+      for (let i = 0; i < 150; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random() * MW, Math.random() * MH, 2 + Math.random() * 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 道路
+      ctx.strokeStyle = '#9e9e9e';
+      ctx.lineWidth = 30;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(MW, cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, MH); ctx.stroke();
+
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([15, 10]);
+      ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(MW, cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, MH); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 家
+      G.houses.forEach(h => drawHouse(ctx, h));
+
+      // ステーション
+      drawStationBuilding(ctx, cx, cy);
+
+      // 訪問中スタッフ（車+顔）
+      G.staff.forEach(s => {
+        if (s.state === 'going' || s.state === 'visiting' || s.state === 'returning') {
+          drawStaffOnMap(ctx, s);
+        }
+      });
+    }
+
+    function drawHouse(ctx, h) {
+      const x = h.x, y = h.y;
+
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath();
+      ctx.ellipse(x + 3, y + 35, 30, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = `hsl(${h.hue}, 55%, 75%)`;
+      ctx.fillRect(x - 25, y - 5, 50, 38);
+      ctx.strokeStyle = `hsl(${h.hue}, 55%, 50%)`;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x - 25, y - 5, 50, 38);
+
+      ctx.fillStyle = `hsl(${h.hue + 150}, 45%, 40%)`;
+      ctx.beginPath();
+      ctx.moveTo(x - 30, y - 5);
+      ctx.lineTo(x, y - 28);
+      ctx.lineTo(x + 30, y - 5);
+      ctx.fill();
+
+      ctx.fillStyle = '#87ceeb';
+      ctx.fillRect(x - 18, y + 3, 12, 12);
+      ctx.fillRect(x + 6, y + 3, 12, 12);
+
+      ctx.fillStyle = '#8b4513';
+      ctx.fillRect(x - 6, y + 16, 12, 17);
+
+      ctx.fillStyle = 'rgba(0,0,0,0.8)';
+      ctx.font = 'bold 11px "Noto Sans JP"';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${h.name}様`, x, y + 52);
+
+      ctx.fillStyle = '#2e7d32';
+      ctx.font = 'bold 10px "Noto Sans JP"';
+      ctx.fillText(`¥${Math.floor(h.revenue/1000)}K`, x, y - 35);
+    }
+
+    function drawStationBuilding(ctx, x, y) {
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.ellipse(x + 5, y + 50, 50, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x - 45, y - 25, 90, 70);
+      ctx.strokeStyle = '#1e3a5f';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x - 45, y - 25, 90, 70);
+
+      ctx.fillStyle = '#e63946';
+      ctx.beginPath();
+      ctx.moveTo(x - 55, y - 25);
+      ctx.lineTo(x, y - 50);
+      ctx.lineTo(x + 55, y - 25);
+      ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✚', x, y - 30);
+
+      ctx.fillStyle = '#4895ef';
+      ctx.fillRect(x - 38, y - 15, 76, 22);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px "Noto Sans JP"';
+      ctx.fillText('訪問看護ステーション', x, y);
+
+      ctx.fillStyle = '#5d4037';
+      ctx.fillRect(x - 10, y + 20, 20, 25);
+    }
+
+    function drawStaffOnMap(ctx, s) {
+      const x = s.mx, y = s.my;
+
+      // 車
+      ctx.fillStyle = s.uniformColor;
+      ctx.beginPath();
+      ctx.roundRect(x - 22, y - 12, 44, 24, 6);
+      ctx.fill();
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.roundRect(x - 18, y - 8, 36, 12, 3);
+      ctx.fill();
+
+      // 車内の顔（小さめ）
+      ctx.fillStyle = s.skinColor;
+      ctx.beginPath();
+      ctx.arc(x, y - 2, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 目
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.arc(x - 3, y - 3, 2, 0, Math.PI * 2);
+      ctx.arc(x + 3, y - 3, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // タイヤ
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.arc(x - 12, y + 12, 6, 0, Math.PI * 2);
+      ctx.arc(x + 12, y + 12, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 名前
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px "Noto Sans JP"';
+      ctx.textAlign = 'center';
+      ctx.fillText(s.name.slice(0, 2), x, y - 22);
+    }
+
+    // ===== ゲームループ =====
+    function gameLoop(time) {
+      if (!lastTime) lastTime = time;
+      const delta = (time - lastTime) / 1000;
+      lastTime = time;
+
+      if (!G.paused) update(delta);
+      drawStation();
+      drawMap();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function update(delta) {
+      const cx = MW / 2, cy = MH / 2;
+
+      G.staff.forEach((s, i) => {
+        s.expression = 'normal';
+
+        if (s.state === 'idle') {
+          if (Math.random() < 0.004 * G.speed && G.houses.length > 0) {
+            const house = G.houses[Math.floor(Math.random() * G.houses.length)];
+            s.state = 'preparing';
+            s.targetHouse = house;
+            s.prepareTimer = 0;
+            s.mx = cx;
+            s.my = cy + 30;
+          }
+        } else if (s.state === 'preparing') {
+          s.prepareTimer += delta * G.speed;
+          s.expression = 'happy';
+          if (s.prepareTimer > 1.2) {
+            s.state = 'going';
+            addLog(`${s.name.slice(0,3)}：${s.targetHouse.name}様宅へ出発`);
+          }
+        } else if (s.state === 'going') {
+          const dx = s.targetHouse.x - s.mx;
+          const dy = s.targetHouse.y - s.my;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const speed = 100 * G.speed;
+          if (dist < 25) {
+            s.state = 'visiting';
+            s.visitTimer = 0;
+          } else {
+            s.mx += (dx / dist) * speed * delta;
+            s.my += (dy / dist) * speed * delta;
+          }
+        } else if (s.state === 'visiting') {
+          s.visitTimer += delta * G.speed;
+          if (s.visitTimer > 2.5) {
+            const rev = Math.floor(s.targetHouse.revenue / 4);
+            G.monthRevenue += rev;
+            G.money += rev;
+            addLog(`${s.name.slice(0,3)}：${s.targetHouse.name}様 +¥${rev.toLocaleString()}`, 'money');
+            showFloating(mapCanvas.parentElement, s.targetHouse.x, s.targetHouse.y - 60, `+¥${rev.toLocaleString()}`);
+            updateUI();
+            s.state = 'returning';
+          }
+        } else if (s.state === 'returning') {
+          const dx = cx - s.mx;
+          const dy = cy + 30 - s.my;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const speed = 100 * G.speed;
+          if (dist < 25) {
+            s.state = 'idle';
+          } else {
+            s.mx += (dx / dist) * speed * delta;
+            s.my += (dy / dist) * speed * delta;
+          }
+        }
+      });
+
+      const working = G.staff.filter(s => s.state !== 'idle').length;
+      document.getElementById('stationInfo').textContent = working > 0 ? `${working}名が訪問中` : 'スタッフ待機中';
+      document.getElementById('mapInfo').textContent = `利用者 ${G.patients.length}名`;
+    }
+
+    function showFloating(container, x, y, text) {
+      const el = document.createElement('div');
+      el.className = 'floating-text';
+      el.textContent = text;
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }
+
+    function updateUI() {
+      const me = document.getElementById('money');
+      me.textContent = `¥${G.money.toLocaleString()}`;
+      me.className = 'money-value' + (G.money < 0 ? ' negative' : '');
+
+      document.getElementById('dateMain').textContent = `${2025 + G.year}年 ${G.month}月 第${G.week}週`;
+      document.getElementById('dateSub').textContent = `${G.year}年目`;
+      document.getElementById('patientCount').textContent = G.patients.length;
+      document.getElementById('staffCount').textContent = G.staff.length;
+      document.getElementById('monthRev').textContent = `¥${Math.floor(G.monthRevenue / 1000)}K`;
+      document.getElementById('infoRev').textContent = `¥${G.monthRevenue.toLocaleString()}`;
+      document.getElementById('infoProfit').textContent = `¥${(G.totalRevenue - G.totalExpense).toLocaleString()}`;
+    }
+
+    function addLog(text, type = '') {
+      const area = document.getElementById('logArea');
+      const el = document.createElement('div');
+      el.className = 'log-item ' + type;
+      el.textContent = text;
+      area.insertBefore(el, area.firstChild);
+      while (area.children.length > 8) area.removeChild(area.lastChild);
+    }
+
+    function setupEvents() {
+      document.querySelectorAll('.speed-btn').forEach(btn => {
+        btn.onclick = () => {
+          G.speed = parseInt(btn.dataset.speed);
+          document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        };
+      });
+
+      document.getElementById('btnHire').onclick = showHireModal;
+      document.getElementById('btnSales').onclick = () => {
+        if (G.salesDone) return alert('今週は営業済みです');
+        openModal('modalSales');
+      };
+      document.getElementById('btnDoSales').onclick = doSales;
+      document.getElementById('btnWeek').onclick = advanceWeek;
+      document.getElementById('btnNextMonth').onclick = nextMonth;
+    }
+
+    function showHireModal() {
+      document.getElementById('hireList').innerHTML = hireCandidates.map((c, i) => `
+        <div class="hire-card" onclick="doHire(${i})">
+          <div class="hire-avatar" style="background:${c.uniformColor}">${c.gender === 'female' ? '👩' : '👨'}</div>
+          <div class="hire-info">
+            <div class="hire-name">${c.name}</div>
+            <div class="hire-role">${c.role}</div>
+          </div>
+          <div class="hire-salary">¥${(c.salary/1000).toFixed(0)}K/月</div>
+        </div>
+      `).join('');
+      openModal('modalHire');
+    }
+
+    function doHire(idx) {
+      if (G.staff.length >= 6) return alert('スタッフは6名までです');
+      const c = hireCandidates[idx];
+      G.staff.push({
+        id: Date.now(), ...c,
+        state: 'idle', sx: 0, sy: 0, mx: MW/2, my: MH/2,
+        deskIndex: G.staff.length, expression: 'normal'
+      });
+      hireCandidates.splice(idx, 1);
+
+      const names = ["木村明日香", "林由美子", "清水誠一", "山崎愛美"];
+      const genders = ["female", "male"];
+      const colors = ["#f77f00", "#7209b7", "#3a86ff", "#06d6a0", "#e63946"];
+      const g = genders[Math.floor(Math.random() * 2)];
+      hireCandidates.push({
+        name: names[Math.floor(Math.random() * names.length)],
+        gender: g,
+        salary: 250000 + Math.floor(Math.random() * 80000),
+        role: "看護師",
+        skinColor: g === 'female' ? '#ffdcb5' : '#f5d0b5',
+        hairColor: '#2d2d2d',
+        uniformColor: colors[Math.floor(Math.random() * colors.length)]
+      });
+
+      updateUI();
+      addLog(`${c.name}が入職しました！`, 'good');
+      closeModal('modalHire');
+    }
+
+    function doSales() {
+      G.money -= 50000;
+      G.salesDone = true;
+      closeModal('modalSales');
+
+      if (Math.random() < 0.6) {
+        const count = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) addPatient();
+        showResult('🎉 営業成功！', `${count}名の新規利用者を獲得！`);
+        addLog(`営業成功！+${count}名`, 'good');
+      } else {
+        showResult('😅 残念...', '紹介に繋がりませんでした');
+        addLog('営業：成果なし', 'bad');
+      }
+      updateUI();
+    }
+
+    function addPatient() {
+      const names = ["佐々木", "松本", "井上", "木村", "林", "斎藤"];
+      const revenue = 30000 + Math.floor(Math.random() * 50000);
+      const p = { id: Date.now() + Math.random(), name: names[Math.floor(Math.random() * names.length)], revenue };
+      G.patients.push(p);
+
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 100 + Math.random() * (Math.min(MW, MH) / 2 - 130);
+      G.houses.push({
+        id: p.id, name: p.name, revenue,
+        x: MW/2 + Math.cos(angle) * dist,
+        y: MH/2 + Math.sin(angle) * dist,
+        hue: Math.random() * 60 + 15
+      });
+    }
+
+    function advanceWeek() {
+      G.week++;
+      G.salesDone = false;
+      if (G.week > 4) { G.week = 1; showMonthEnd(); }
+      else { addLog(`${G.month}月 第${G.week}週`); updateUI(); }
+    }
+
+    function showMonthEnd() {
+      const revenue = G.monthRevenue;
+      const salaries = G.staff.reduce((s, x) => s + x.salary, 0);
+      const overhead = Math.floor(salaries * 0.15) + 260000;
+      const bonus = (G.month === 6 || G.month === 12) ? Math.floor(salaries * 1.7) : 0;
+      const totalExp = salaries + overhead + bonus;
+
+      G.pendingIncome.push(revenue);
+      const cashIn = G.pendingIncome.shift();
+      const pl = cashIn - totalExp;
+
+      G.totalRevenue += revenue;
+      G.totalExpense += totalExp;
+
+      document.getElementById('monthBody').innerHTML = `
+        <div class="summary-card">
+          <div class="summary-row income"><span>💰 売上</span><span class="val">+¥${revenue.toLocaleString()}</span></div>
+          <div class="summary-row income"><span>💵 入金(2ヶ月前)</span><span class="val">+¥${cashIn.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>👥 人件費</span><span class="val">-¥${salaries.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>🏢 諸経費</span><span class="val">-¥${overhead.toLocaleString()}</span></div>
+          ${bonus > 0 ? `<div class="summary-row expense"><span>🎁 賞与</span><span class="val">-¥${bonus.toLocaleString()}</span></div>` : ''}
+          <div class="summary-row total ${pl >= 0 ? 'positive' : 'negative'}">
+            <span>月間収支</span><span class="val">${pl >= 0 ? '+' : ''}¥${pl.toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+
+      G.money = G.money - G.monthRevenue + pl;
+      G.monthRevenue = 0;
+      openModal('modalMonth');
+    }
+
+    function nextMonth() {
+      closeModal('modalMonth');
+      G.month++;
+      if (G.month > 12) { G.month = 1; G.year++; }
+
+      if (G.money < -3000000) showEnding('gameover');
+      else if (G.year > 5) showEnding('clear');
+      else { addLog(`${G.month}月になりました`, 'good'); updateUI(); }
+    }
+
+    function showEnding(type) {
+      const pl = G.totalRevenue - G.totalExpense;
+      let rank, title;
+      if (type === 'gameover') { rank = '💀'; title = 'GAME OVER'; }
+      else {
+        if (pl > 30000000 && G.patients.length >= 15) rank = '🏆 S';
+        else if (pl > 20000000) rank = '🥇 A';
+        else if (pl > 0) rank = '🥈 B';
+        else rank = '🥉 C';
+        title = '5年間お疲れ様でした！';
+      }
+      document.getElementById('endRank').textContent = rank;
+      document.getElementById('endTitle').textContent = title;
+      document.getElementById('endStats').innerHTML = `
+        <div class="summary-row"><span>累計売上</span><span class="val" style="color:#2ec4b6">¥${G.totalRevenue.toLocaleString()}</span></div>
+        <div class="summary-row"><span>累計支出</span><span class="val" style="color:#e63946">¥${G.totalExpense.toLocaleString()}</span></div>
+        <div class="summary-row total ${pl >= 0 ? 'positive' : 'negative'}"><span>最終損益</span><span class="val">¥${pl.toLocaleString()}</span></div>
+        <div class="summary-row"><span>利用者</span><span class="val">${G.patients.length}名</span></div>
+        <div class="summary-row"><span>スタッフ</span><span class="val">${G.staff.length}名</span></div>
+      `;
+      openModal('modalEnding');
+    }
+
+    function showResult(title, body) {
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultBody').innerHTML = body;
+      openModal('modalResult');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); G.paused = true; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); G.paused = false; }
+
+    init();
+  </script>
+</body>
+</html>

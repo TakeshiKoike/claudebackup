@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訪問看護ステーション始めました！</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+      background: #2c3e50;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+    
+    .game-wrapper {
+      width: 100%;
+      max-width: 500px;
+    }
+    
+    .game-container {
+      background: #87ceeb;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      border: 4px solid #5d4e37;
+    }
+    
+    /* ヘッダー */
+    .header {
+      background: linear-gradient(180deg, #4a7c59 0%, #3d6b4f 100%);
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #2d4a3e;
+    }
+    
+    .money-display {
+      background: #1a1a2e;
+      padding: 6px 15px;
+      border-radius: 8px;
+      border: 2px solid #ffd700;
+    }
+    .money-label { font-size: 9px; color: #aaa; }
+    .money-value { font-size: 20px; font-weight: bold; color: #ffd700; font-family: 'Courier New', monospace; }
+    
+    .date-display {
+      text-align: right;
+      color: white;
+    }
+    .date-main { font-size: 14px; font-weight: bold; }
+    .date-sub { font-size: 10px; opacity: 0.8; }
+    
+    /* ゲームエリア */
+    .game-area {
+      position: relative;
+      height: 320px;
+      background: linear-gradient(180deg, #87ceeb 0%, #98d4ee 50%, #90c695 50%, #7ab87f 100%);
+      overflow: hidden;
+    }
+    
+    /* 道路 */
+    .road {
+      position: absolute;
+      background: #888;
+      border: 2px solid #666;
+    }
+    .road-h { height: 20px; left: 0; right: 0; }
+    .road-v { width: 20px; top: 0; bottom: 0; }
+    .road-h.top { top: 80px; }
+    .road-h.bottom { top: 220px; }
+    .road-v.left { left: 100px; }
+    .road-v.right { right: 100px; }
+    .road-center-v { left: 50%; transform: translateX(-50%); }
+    
+    /* ステーション */
+    .station {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+    }
+    .station-building {
+      width: 80px;
+      height: 60px;
+      background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+      border: 3px solid #666;
+      border-radius: 8px 8px 0 0;
+      position: relative;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+    }
+    .station-roof {
+      position: absolute;
+      top: -15px;
+      left: -5px;
+      right: -5px;
+      height: 20px;
+      background: linear-gradient(180deg, #c0392b 0%, #a93226 100%);
+      border-radius: 5px 5px 0 0;
+    }
+    .station-sign {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      background: #3498db;
+      color: white;
+      font-size: 7px;
+      padding: 2px;
+      border-radius: 2px;
+      font-weight: bold;
+    }
+    .station-door {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 25px;
+      background: #8b4513;
+      border: 2px solid #5d3a1a;
+      border-bottom: none;
+    }
+    .station-label {
+      font-size: 10px;
+      color: #333;
+      margin-top: 5px;
+      font-weight: bold;
+    }
+    
+    /* 利用者の家 */
+    .house {
+      position: absolute;
+      width: 40px;
+      height: 35px;
+      transition: transform 0.3s;
+    }
+    .house:hover { transform: scale(1.1); }
+    .house-body {
+      width: 100%;
+      height: 25px;
+      background: linear-gradient(180deg, #fff 0%, #eee 100%);
+      border: 2px solid #999;
+      border-radius: 3px;
+      position: relative;
+    }
+    .house-roof {
+      width: 0;
+      height: 0;
+      border-left: 24px solid transparent;
+      border-right: 24px solid transparent;
+      border-bottom: 15px solid #e74c3c;
+      position: absolute;
+      top: -13px;
+      left: -4px;
+    }
+    .house-door {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 12px;
+      background: #8b4513;
+    }
+    .house-revenue {
+      font-size: 8px;
+      text-align: center;
+      color: #27ae60;
+      font-weight: bold;
+      margin-top: 2px;
+    }
+    
+    /* スタッフ（動くキャラ） */
+    .staff {
+      position: absolute;
+      font-size: 24px;
+      transition: all 0.5s ease-in-out;
+      z-index: 20;
+      filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+    }
+    .staff.moving {
+      animation: bounce 0.3s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    /* 車 */
+    .car {
+      position: absolute;
+      font-size: 20px;
+      z-index: 15;
+      transition: all 0.8s linear;
+    }
+    
+    /* お金ポップアップ */
+    .money-popup {
+      position: absolute;
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffd700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5), 0 0 10px rgba(255,215,0,0.5);
+      pointer-events: none;
+      z-index: 100;
+      animation: popupFloat 1.5s ease-out forwards;
+    }
+    @keyframes popupFloat {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      50% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
+    }
+    
+    /* コントロールパネル */
+    .control-panel {
+      background: linear-gradient(180deg, #34495e 0%, #2c3e50 100%);
+      padding: 10px;
+      border-top: 3px solid #1a252f;
+    }
+    
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 10px;
+    }
+    .stat-box {
+      text-align: center;
+      background: rgba(255,255,255,0.1);
+      padding: 8px 15px;
+      border-radius: 8px;
+    }
+    .stat-icon { font-size: 18px; }
+    .stat-value { font-size: 18px; font-weight: bold; color: white; }
+    .stat-label { font-size: 9px; color: #aaa; }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .action-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    .action-btn:active { transform: translateY(0); }
+    .action-btn .icon { font-size: 20px; }
+    
+    .btn-hire { background: linear-gradient(180deg, #3498db, #2980b9); color: white; }
+    .btn-sales { background: linear-gradient(180deg, #e67e22, #d35400); color: white; }
+    .btn-speed { background: linear-gradient(180deg, #9b59b6, #8e44ad); color: white; }
+    .btn-next { background: linear-gradient(180deg, #27ae60, #1e8449); color: white; }
+    
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    /* ログエリア */
+    .log-area {
+      background: #1a1a2e;
+      padding: 8px;
+      max-height: 60px;
+      overflow-y: auto;
+      font-size: 10px;
+      color: #aaa;
+      border-top: 2px solid #0d0d1a;
+    }
+    .log-item { padding: 2px 0; border-bottom: 1px solid #2a2a4e; }
+    .log-item:last-child { border-bottom: none; }
+    .log-money { color: #ffd700; }
+    .log-good { color: #2ecc71; }
+    .log-bad { color: #e74c3c; }
+    
+    /* モーダル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: linear-gradient(180deg, #4a7c59 0%, #3d6b4f 100%);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 350px;
+      border: 4px solid #2d4a3e;
+      color: white;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    .modal-content { margin-bottom: 15px; }
+    
+    .hire-option {
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hire-option:hover { background: rgba(255,255,255,0.2); transform: translateX(5px); }
+    .hire-avatar { font-size: 32px; }
+    .hire-info { flex: 1; }
+    .hire-name { font-weight: bold; font-size: 14px; }
+    .hire-detail { font-size: 11px; opacity: 0.8; }
+    .hire-cost { text-align: right; }
+    .hire-salary { font-size: 12px; color: #ffd700; }
+    
+    .modal-close {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.3); }
+    
+    /* 月末モーダル */
+    .month-summary {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 13px;
+    }
+    .summary-row.income { color: #2ecc71; }
+    .summary-row.expense { color: #e74c3c; }
+    .summary-row.total { border-top: 2px solid rgba(255,255,255,0.3); margin-top: 8px; padding-top: 8px; font-weight: bold; font-size: 16px; }
+    .summary-row.total.positive { color: #ffd700; }
+    .summary-row.total.negative { color: #e74c3c; }
+    
+    /* ゲームオーバー・クリア */
+    .ending-modal {
+      text-align: center;
+    }
+    .ending-rank {
+      font-size: 60px;
+      margin-bottom: 10px;
+    }
+    .ending-title {
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+    .ending-stats {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .ending-btn {
+      padding: 12px 30px;
+      background: #ffd700;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #333;
+    }
+    
+    /* スピード表示 */
+    .speed-indicator {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <div class="game-container">
+      <!-- ヘッダー -->
+      <div class="header">
+        <div class="money-display">
+          <div class="money-label">所持金</div>
+          <div class="money-value" id="moneyDisplay">¥7,500,000</div>
+        </div>
+        <div class="date-display">
+          <div class="date-main" id="dateMain">2026年 1月</div>
+          <div class="date-sub" id="dateSub">1年目 / 第1週</div>
+        </div>
+      </div>
+      
+      <!-- ゲームエリア -->
+      <div class="game-area" id="gameArea">
+        <div class="speed-indicator" id="speedIndicator">▶ x1</div>
+        
+        <!-- 道路 -->
+        <div class="road road-h top"></div>
+        <div class="road road-h bottom"></div>
+        <div class="road road-v road-center-v"></div>
+        
+        <!-- ステーション -->
+        <div class="station">
+          <div class="station-building">
+            <div class="station-roof"></div>
+            <div class="station-sign">訪問看護ST</div>
+            <div class="station-door"></div>
+          </div>
+          <div class="station-label">あなたのステーション</div>
+        </div>
+        
+        <!-- 家・スタッフ・車は動的に生成 -->
+      </div>
+      
+      <!-- コントロールパネル -->
+      <div class="control-panel">
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value" id="patientCount">5</div>
+            <div class="stat-label">利用者</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">🏠</div>
+            <div class="stat-value" id="staffCount">3</div>
+            <div class="stat-label">スタッフ</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value" id="monthRevenue">¥0</div>
+            <div class="stat-label">今月売上</div>
+          </div>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="action-btn btn-hire" id="btnHire">
+            <span class="icon">👩‍⚕️</span>
+            <span>採用</span>
+          </button>
+          <button class="action-btn btn-sales" id="btnSales">
+            <span class="icon">🤝</span>
+            <span>営業</span>
+          </button>
+          <button class="action-btn btn-speed" id="btnSpeed">
+            <span class="icon">⏩</span>
+            <span>速度</span>
+          </button>
+          <button class="action-btn btn-next" id="btnNext">
+            <span class="icon">📅</span>
+            <span>次週</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- ログ -->
+      <div class="log-area" id="logArea">
+        <div class="log-item">🏥 訪問看護ステーションを開業しました！</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 採用モーダル -->
+  <div class="modal-overlay" id="hireModal">
+    <div class="modal">
+      <div class="modal-title">👩‍⚕️ スタッフ採用</div>
+      <div class="modal-content" id="hireList"></div>
+      <button class="modal-close" onclick="closeModal('hireModal')">閉じる</button>
+    </div>
+  </div>
+  
+  <!-- 営業モーダル -->
+  <div class="modal-overlay" id="salesModal">
+    <div class="modal">
+      <div class="modal-title">🤝 営業活動</div>
+      <div class="modal-content">
+        <p style="margin-bottom: 15px; font-size: 13px;">ケアマネージャーに営業して新規利用者を獲得します。</p>
+        <div class="month-summary">
+          <div class="summary-row"><span>営業コスト</span><span class="expense">-¥50,000</span></div>
+          <div class="summary-row"><span>成功確率</span><span>60%</span></div>
+          <div class="summary-row"><span>獲得見込</span><span>1〜3名</span></div>
+        </div>
+        <button class="action-btn btn-sales" style="width:100%" id="btnDoSales">
+          <span>営業に行く！</span>
+        </button>
+      </div>
+      <button class="modal-close" style="margin-top:10px" onclick="closeModal('salesModal')">やめる</button>
+    </div>
+  </div>
+  
+  <!-- 月末モーダル -->
+  <div class="modal-overlay" id="monthEndModal">
+    <div class="modal">
+      <div class="modal-title">📊 月末決算</div>
+      <div class="modal-content" id="monthEndContent"></div>
+      <button class="action-btn btn-next" style="width:100%" id="btnNextMonth">来月へ進む</button>
+    </div>
+  </div>
+  
+  <!-- 結果モーダル -->
+  <div class="modal-overlay" id="resultModal">
+    <div class="modal">
+      <div class="modal-title" id="resultTitle">結果</div>
+      <div class="modal-content" id="resultContent"></div>
+      <button class="modal-close" onclick="closeModal('resultModal')">OK</button>
+    </div>
+  </div>
+  
+  <!-- エンディング -->
+  <div class="modal-overlay" id="endingModal">
+    <div class="modal ending-modal">
+      <div class="ending-rank" id="endingRank">🏆</div>
+      <div class="ending-title" id="endingTitle">5年間お疲れ様でした！</div>
+      <div class="ending-stats" id="endingStats"></div>
+      <button class="ending-btn" onclick="location.reload()">もう一度プレイ</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== ゲーム状態 ==========
+    const game = {
+      year: 1, month: 1, week: 1,
+      money: 7500000,
+      monthRevenue: 0,
+      totalRevenue: 0,
+      totalExpense: 0,
+      pendingIncome: [0, 0],
+      speed: 1, // 1, 2, 3
+      paused: false,
+      patients: [],
+      staff: [],
+      houses: [],
+      animations: [],
+      salesDone: false
+    };
+    
+    // 初期スタッフ
+    const initialStaff = [
+      { id: 1, name: "山田", avatar: "👩‍⚕️", salary: 350000, type: "manager" },
+      { id: 2, name: "佐藤", avatar: "👩", salary: 280000, type: "nurse" },
+      { id: 3, name: "鈴木", avatar: "👨", salary: 280000, type: "nurse" }
+    ];
+    
+    // 初期利用者
+    const initialPatients = [
+      { id: 1, name: "高橋", revenue: 74000 },
+      { id: 2, name: "山本", revenue: 65000 },
+      { id: 3, name: "田中", revenue: 35000 },
+      { id: 4, name: "伊藤", revenue: 65000 },
+      { id: 5, name: "渡辺", revenue: 49000 }
+    ];
+    
+    // 家の位置プリセット
+    const housePositions = [
+      { x: 30, y: 40 }, { x: 120, y: 30 }, { x: 350, y: 35 }, { x: 420, y: 50 },
+      { x: 20, y: 120 }, { x: 400, y: 110 },
+      { x: 40, y: 250 }, { x: 130, y: 270 }, { x: 340, y: 260 }, { x: 430, y: 250 },
+      { x: 25, y: 180 }, { x: 440, y: 180 }
+    ];
+    
+    // 採用候補
+    const hireCandidates = [
+      { name: "中村", avatar: "👩", salary: 280000, type: "nurse" },
+      { name: "小林", avatar: "👨", salary: 260000, type: "nurse" },
+      { name: "加藤", avatar: "👩", salary: 300000, type: "nurse" },
+      { name: "吉田", avatar: "👨‍⚕️", salary: 320000, type: "senior" }
+    ];
+    
+    // ========== 初期化 ==========
+    function init() {
+      game.staff = [...initialStaff];
+      game.patients = [...initialPatients];
+      
+      // 家を配置
+      game.patients.forEach((p, i) => {
+        const pos = housePositions[i % housePositions.length];
+        game.houses.push({
+          id: p.id,
+          x: pos.x,
+          y: pos.y,
+          revenue: p.revenue
+        });
+      });
+      
+      renderHouses();
+      renderStaff();
+      updateUI();
+      
+      // アニメーションループ開始
+      startSimulation();
+    }
+    
+    // ========== 描画 ==========
+    function renderHouses() {
+      // 既存の家を削除
+      document.querySelectorAll('.house').forEach(el => el.remove());
+      
+      const area = document.getElementById('gameArea');
+      game.houses.forEach(h => {
+        const house = document.createElement('div');
+        house.className = 'house';
+        house.style.left = h.x + 'px';
+        house.style.top = h.y + 'px';
+        house.innerHTML = `
+          <div class="house-roof"></div>
+          <div class="house-body">
+            <div class="house-door"></div>
+          </div>
+          <div class="house-revenue">¥${Math.floor(h.revenue/1000)}K</div>
+        `;
+        house.dataset.id = h.id;
+        area.appendChild(house);
+      });
+    }
+    
+    function renderStaff() {
+      // 既存のスタッフ削除
+      document.querySelectorAll('.staff').forEach(el => el.remove());
+      
+      const area = document.getElementById('gameArea');
+      const stationX = 250 - 12;
+      const stationY = 160 - 12;
+      
+      game.staff.forEach((s, i) => {
+        const staff = document.createElement('div');
+        staff.className = 'staff';
+        staff.id = `staff-${s.id}`;
+        staff.textContent = s.avatar;
+        staff.style.left = (stationX + (i - 1) * 25) + 'px';
+        staff.style.top = stationY + 'px';
+        staff.dataset.state = 'idle'; // idle, going, visiting, returning
+        staff.dataset.targetHouse = '';
+        area.appendChild(staff);
+      });
+    }
+    
+    function updateUI() {
+      document.getElementById('moneyDisplay').textContent = `¥${game.money.toLocaleString()}`;
+      document.getElementById('dateMain').textContent = `${2025 + game.year}年 ${game.month}月`;
+      document.getElementById('dateSub').textContent = `${game.year}年目 / 第${game.week}週`;
+      document.getElementById('patientCount').textContent = game.patients.length;
+      document.getElementById('staffCount').textContent = game.staff.length;
+      document.getElementById('monthRevenue').textContent = `¥${Math.floor(game.monthRevenue / 1000)}K`;
+      
+      const speeds = ['▶ x1', '▶▶ x2', '▶▶▶ x3'];
+      document.getElementById('speedIndicator').textContent = speeds[game.speed - 1];
+    }
+    
+    function addLog(text, type = '') {
+      const logArea = document.getElementById('logArea');
+      const item = document.createElement('div');
+      item.className = 'log-item ' + (type ? `log-${type}` : '');
+      item.textContent = text;
+      logArea.insertBefore(item, logArea.firstChild);
+      
+      // ログを10件に制限
+      while (logArea.children.length > 10) {
+        logArea.removeChild(logArea.lastChild);
+      }
+    }
+    
+    function showMoneyPopup(x, y, amount) {
+      const area = document.getElementById('gameArea');
+      const popup = document.createElement('div');
+      popup.className = 'money-popup';
+      popup.textContent = `+¥${amount.toLocaleString()}`;
+      popup.style.left = x + 'px';
+      popup.style.top = y + 'px';
+      area.appendChild(popup);
+      
+      setTimeout(() => popup.remove(), 1500);
+    }
+    
+    // ========== シミュレーション ==========
+    function startSimulation() {
+      setInterval(() => {
+        if (game.paused) return;
+        
+        game.staff.forEach(s => {
+          const el = document.getElementById(`staff-${s.id}`);
+          if (!el) return;
+          
+          const state = el.dataset.state;
+          
+          if (state === 'idle') {
+            // ランダムに訪問開始
+            if (Math.random() < 0.02 * game.speed && game.houses.length > 0) {
+              const house = game.houses[Math.floor(Math.random() * game.houses.length)];
+              el.dataset.state = 'going';
+              el.dataset.targetHouse = house.id;
+              el.classList.add('moving');
+              
+              // 家の位置へ移動
+              el.style.left = (house.x + 8) + 'px';
+              el.style.top = (house.y - 20) + 'px';
+              
+              setTimeout(() => {
+                if (el.dataset.state === 'going') {
+                  el.dataset.state = 'visiting';
+                  el.classList.remove('moving');
+                  
+                  // 訪問完了後、収益発生
+                  setTimeout(() => {
+                    if (el.dataset.state === 'visiting') {
+                      const revenue = house.revenue / 4; // 週単位なので1/4
+                      game.monthRevenue += revenue;
+                      game.money += revenue; // リアルタイムで増える
+                      
+                      showMoneyPopup(house.x, house.y, Math.floor(revenue));
+                      addLog(`${s.name}：${house.revenue/1000}K/月の訪問完了`, 'money');
+                      
+                      // ステーションに戻る
+                      el.dataset.state = 'returning';
+                      el.classList.add('moving');
+                      el.style.left = (250 - 12 + (game.staff.indexOf(s) - 1) * 25) + 'px';
+                      el.style.top = (160 - 12) + 'px';
+                      
+                      setTimeout(() => {
+                        el.dataset.state = 'idle';
+                        el.classList.remove('moving');
+                      }, 500 / game.speed);
+                    }
+                  }, 1000 / game.speed);
+                }
+              }, 500 / game.speed);
+            }
+          }
+        });
+        
+        updateUI();
+      }, 100);
+    }
+    
+    // ========== アクション ==========
+    document.getElementById('btnHire').onclick = () => {
+      const list = document.getElementById('hireList');
+      list.innerHTML = '';
+      
+      hireCandidates.forEach(c => {
+        const opt = document.createElement('div');
+        opt.className = 'hire-option';
+        opt.innerHTML = `
+          <div class="hire-avatar">${c.avatar}</div>
+          <div class="hire-info">
+            <div class="hire-name">${c.name}</div>
+            <div class="hire-detail">${c.type === 'senior' ? 'ベテラン看護師' : '看護師'}</div>
+          </div>
+          <div class="hire-cost">
+            <div class="hire-salary">月給 ¥${(c.salary/1000)}K</div>
+          </div>
+        `;
+        opt.onclick = () => hireStaff(c);
+        list.appendChild(opt);
+      });
+      
+      openModal('hireModal');
+    };
+    
+    function hireStaff(candidate) {
+      if (game.staff.length >= 8) {
+        alert('スタッフは8名までです');
+        return;
+      }
+      
+      const newStaff = {
+        id: Date.now(),
+        name: candidate.name,
+        avatar: candidate.avatar,
+        salary: candidate.salary,
+        type: candidate.type
+      };
+      game.staff.push(newStaff);
+      
+      // 候補から削除
+      const idx = hireCandidates.findIndex(c => c.name === candidate.name);
+      if (idx !== -1) hireCandidates.splice(idx, 1);
+      
+      // 新しい候補を追加
+      const names = ["木村", "林", "清水", "山崎", "池田", "橋本", "石川"];
+      const avatars = ["👩", "👨", "👩‍⚕️", "👨‍⚕️"];
+      hireCandidates.push({
+        name: names[Math.floor(Math.random() * names.length)],
+        avatar: avatars[Math.floor(Math.random() * avatars.length)],
+        salary: 250000 + Math.floor(Math.random() * 80000),
+        type: "nurse"
+      });
+      
+      renderStaff();
+      addLog(`${newStaff.name}さんを採用しました！`, 'good');
+      closeModal('hireModal');
+      updateUI();
+    }
+    
+    document.getElementById('btnSales').onclick = () => {
+      if (game.salesDone) {
+        alert('今週はすでに営業済みです');
+        return;
+      }
+      openModal('salesModal');
+    };
+    
+    document.getElementById('btnDoSales').onclick = () => {
+      game.money -= 50000;
+      game.salesDone = true;
+      closeModal('salesModal');
+      
+      if (Math.random() < 0.6) {
+        const count = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) {
+          addPatient();
+        }
+        showResult('🎉 営業成功！', `${count}名の新規利用者を獲得しました！`);
+        addLog(`営業成功！${count}名獲得`, 'good');
+      } else {
+        showResult('😅 残念...', '今回は紹介に繋がりませんでした。');
+        addLog('営業：成果なし', 'bad');
+      }
+      
+      updateUI();
+    };
+    
+    function addPatient() {
+      const names = ["佐々木", "松本", "井上", "木村", "林", "斎藤", "清水", "山崎"];
+      const revenue = 30000 + Math.floor(Math.random() * 50000);
+      const newPatient = {
+        id: Date.now() + Math.random(),
+        name: names[Math.floor(Math.random() * names.length)],
+        revenue: revenue
+      };
+      game.patients.push(newPatient);
+      
+      // 家を追加
+      if (game.houses.length < housePositions.length) {
+        const pos = housePositions[game.houses.length];
+        game.houses.push({
+          id: newPatient.id,
+          x: pos.x,
+          y: pos.y,
+          revenue: revenue
+        });
+        renderHouses();
+      }
+    }
+    
+    document.getElementById('btnSpeed').onclick = () => {
+      game.speed = game.speed % 3 + 1;
+      updateUI();
+    };
+    
+    document.getElementById('btnNext').onclick = () => {
+      advanceWeek();
+    };
+    
+    function advanceWeek() {
+      game.week++;
+      game.salesDone = false;
+      
+      if (game.week > 4) {
+        game.week = 1;
+        showMonthEnd();
+      } else {
+        addLog(`${game.month}月 第${game.week}週になりました`);
+        updateUI();
+      }
+    }
+    
+    function showMonthEnd() {
+      const revenue = game.monthRevenue;
+      const salaries = game.staff.reduce((s, x) => s + x.salary, 0);
+      const expenses = salaries + Math.floor(salaries * 0.15) + 260000;
+      const bonus = (game.month === 6 || game.month === 12) ? Math.floor(salaries * 1.7) : 0;
+      const totalExp = expenses + bonus;
+      
+      // 2ヶ月遅れ入金
+      game.pendingIncome.push(revenue);
+      const cashIn = game.pendingIncome.shift();
+      
+      const pl = cashIn - totalExp;
+      game.totalRevenue += revenue;
+      game.totalExpense += totalExp;
+      
+      let content = `
+        <div class="month-summary">
+          <div class="summary-row income"><span>売上（発生）</span><span>+¥${revenue.toLocaleString()}</span></div>
+          <div class="summary-row income"><span>入金（2ヶ月前）</span><span>+¥${cashIn.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>人件費</span><span>-¥${salaries.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>諸経費</span><span>-¥${(expenses - salaries).toLocaleString()}</span></div>
+          ${bonus > 0 ? `<div class="summary-row expense"><span>賞与</span><span>-¥${bonus.toLocaleString()}</span></div>` : ''}
+          <div class="summary-row total ${pl >= 0 ? 'positive' : 'negative'}">
+            <span>月間収支</span><span>${pl >= 0 ? '+' : ''}¥${pl.toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('monthEndContent').innerHTML = content;
+      openModal('monthEndModal');
+      
+      // 実際のお金を更新
+      game.money = game.money - game.monthRevenue + pl; // リアルタイム加算分を戻して正式計算
+      game.monthRevenue = 0;
+    }
+    
+    document.getElementById('btnNextMonth').onclick = () => {
+      closeModal('monthEndModal');
+      
+      game.month++;
+      if (game.month > 12) {
+        game.month = 1;
+        game.year++;
+      }
+      
+      // ゲームオーバー/クリアチェック
+      if (game.money < -3000000) {
+        showEnding('gameover');
+      } else if (game.year > 5) {
+        showEnding('clear');
+      } else {
+        addLog(`${game.month}月になりました`, 'good');
+        updateUI();
+      }
+    };
+    
+    function showEnding(type) {
+      const pl = game.totalRevenue - game.totalExpense;
+      let rank, title;
+      
+      if (type === 'gameover') {
+        rank = '💀';
+        title = 'GAME OVER';
+      } else {
+        if (pl > 30000000 && game.patients.length >= 15) rank = '🏆 S';
+        else if (pl > 20000000) rank = '🥇 A';
+        else if (pl > 0) rank = '🥈 B';
+        else rank = '🥉 C';
+        title = '5年間お疲れ様でした！';
+      }
+      
+      document.getElementById('endingRank').textContent = rank;
+      document.getElementById('endingTitle').textContent = title;
+      document.getElementById('endingStats').innerHTML = `
+        累計売上: ¥${game.totalRevenue.toLocaleString()}<br>
+        累計支出: ¥${game.totalExpense.toLocaleString()}<br>
+        最終損益: ¥${pl.toLocaleString()}<br>
+        最終利用者: ${game.patients.length}名<br>
+        最終スタッフ: ${game.staff.length}名
+      `;
+      openModal('endingModal');
+    }
+    
+    function showResult(title, content) {
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultContent').textContent = content;
+      openModal('resultModal');
+    }
+    
+    // ========== モーダル ==========
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+      game.paused = true;
+    }
+    
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+      game.paused = false;
+    }
+    
+    // ========== 開始 ==========
+    init();
+  </script>
+</body>
+</html>

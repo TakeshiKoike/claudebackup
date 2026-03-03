@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訪問看護ステーション始めました！</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Hiragino Sans', 'Noto Sans JP', 'Meiryo', sans-serif;
+      background: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .game-wrapper {
+      width: 100%;
+      max-width: 540px;
+    }
+
+    .game-container {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    /* ヘッダー - 洗練されたデザイン */
+    .header {
+      background: linear-gradient(135deg, #2d3a4f 0%, #1e2836 100%);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .money-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .money-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #ffd700 0%, #f4a100 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(255,215,0,0.4);
+    }
+    .money-info {}
+    .money-label { font-size: 10px; color: #8892a0; letter-spacing: 0.5px; }
+    .money-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      letter-spacing: -0.5px;
+    }
+    .money-value.negative { color: #ff6b6b; }
+
+    .date-display {
+      text-align: right;
+      color: white;
+    }
+    .date-main {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .date-sub {
+      font-size: 11px;
+      color: #8892a0;
+      margin-top: 2px;
+    }
+
+    /* ゲームエリア - 地図風 */
+    .game-area {
+      position: relative;
+      height: 360px;
+      background: #e8e4de; /* Google Maps風の背景色 */
+      overflow: hidden;
+    }
+
+    /* 緑地エリア */
+    .park {
+      position: absolute;
+      background: #c5e1a5;
+      border-radius: 8px;
+    }
+    .park-1 { width: 60px; height: 45px; left: 10px; top: 10px; }
+    .park-2 { width: 50px; height: 35px; right: 15px; bottom: 60px; }
+
+    /* 道路 - 地図風 */
+    .road {
+      position: absolute;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .road-h {
+      height: 24px;
+      left: 0;
+      right: 0;
+    }
+    .road-v {
+      width: 24px;
+      top: 0;
+      bottom: 0;
+    }
+    .road-main {
+      background: #fff;
+    }
+    .road-h.main { top: 168px; height: 28px; }
+    .road-v.main { left: 50%; transform: translateX(-50%); width: 28px; }
+    .road-h.top { top: 70px; }
+    .road-h.bottom { top: 280px; }
+    .road-v.left { left: 80px; }
+    .road-v.right { right: 80px; }
+
+    /* 道路のセンターライン */
+    .road-line {
+      position: absolute;
+      background: #ffc107;
+    }
+    .road-line-h {
+      height: 2px;
+      left: 0;
+      right: 0;
+    }
+    .road-line-v {
+      width: 2px;
+      top: 0;
+      bottom: 0;
+    }
+
+    /* ステーション - 地図風建物 */
+    .station {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+    .station-building {
+      width: 90px;
+      height: 65px;
+      background: linear-gradient(180deg, #4a90d9 0%, #3a7bc8 100%);
+      border-radius: 6px;
+      position: relative;
+      box-shadow:
+        0 4px 12px rgba(74,144,217,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+      border: 2px solid #2d5a8a;
+    }
+    .station-marker {
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 24px;
+      background: #e53935;
+      border-radius: 50% 50% 50% 0;
+      transform: translateX(-50%) rotate(-45deg);
+      box-shadow: 0 2px 8px rgba(229,57,53,0.5);
+    }
+    .station-marker::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #fff;
+      border-radius: 50%;
+      top: 7px;
+      left: 7px;
+    }
+    .station-label {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      background: rgba(255,255,255,0.95);
+      color: #1a237e;
+      font-size: 9px;
+      padding: 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+    .station-name {
+      font-size: 10px;
+      color: #333;
+      text-align: center;
+      margin-top: 4px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.9);
+      padding: 3px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    /* 利用者の家 - 地図風建物 */
+    .house {
+      position: absolute;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .house:hover { transform: scale(1.08); }
+    .house-body {
+      width: 38px;
+      height: 32px;
+      background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%);
+      border-radius: 4px;
+      border: 1.5px solid #bdbdbd;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .house-body::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      right: 4px;
+      height: 8px;
+      background: #90a4ae;
+      border-radius: 2px;
+    }
+    .house-body::after {
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 10px;
+      background: #795548;
+      border-radius: 1px;
+    }
+    .house-label {
+      font-size: 9px;
+      text-align: center;
+      color: #37474f;
+      font-weight: 600;
+      margin-top: 2px;
+      background: rgba(255,255,255,0.85);
+      padding: 1px 4px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .house-revenue {
+      font-size: 8px;
+      text-align: center;
+      color: #43a047;
+      font-weight: 700;
+    }
+
+    /* スタッフ（動くキャラ）- 地図上のマーカー風 */
+    .staff {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      border: 3px solid #4caf50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 0.6s ease-in-out;
+      z-index: 20;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .staff.moving {
+      border-color: #ff9800;
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+      50% { box-shadow: 0 2px 16px rgba(255,152,0,0.6); }
+    }
+
+    /* 訪問経路ライン */
+    .visit-line {
+      position: absolute;
+      height: 2px;
+      background: #4caf50;
+      transform-origin: left center;
+      z-index: 5;
+      opacity: 0.6;
+    }
+
+    /* お金ポップアップ */
+    .money-popup {
+      position: absolute;
+      font-size: 13px;
+      font-weight: 700;
+      color: #43a047;
+      background: rgba(255,255,255,0.95);
+      padding: 4px 10px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      pointer-events: none;
+      z-index: 100;
+      animation: popupFloat 1.8s ease-out forwards;
+    }
+    @keyframes popupFloat {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      70% { opacity: 1; transform: translateY(-25px) scale(1.1); }
+      100% { opacity: 0; transform: translateY(-40px) scale(0.9); }
+    }
+
+    /* スピード・ズーム表示 */
+    .map-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .map-control-btn {
+      width: 32px;
+      height: 32px;
+      background: #fff;
+      border: none;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .map-control-btn:hover { background: #f5f5f5; }
+
+    .speed-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.95);
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #333;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+
+    /* コントロールパネル */
+    .control-panel {
+      background: #f8f9fa;
+      padding: 12px 16px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+    .stat-box {
+      flex: 1;
+      text-align: center;
+      background: #fff;
+      padding: 10px 8px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .stat-icon { font-size: 20px; margin-bottom: 4px; }
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .action-btn {
+      padding: 12px 8px;
+      border: none;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .action-btn:hover { transform: translateY(-2px); }
+    .action-btn:active { transform: translateY(0); }
+    .action-btn .icon { font-size: 22px; }
+
+    .btn-hire {
+      background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(30,136,229,0.4);
+    }
+    .btn-sales {
+      background: linear-gradient(135deg, #ffb74d 0%, #fb8c00 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(251,140,0,0.4);
+    }
+    .btn-speed {
+      background: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(142,36,170,0.4);
+    }
+    .btn-next {
+      background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(67,160,71,0.4);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ログエリア */
+    .log-area {
+      background: #fff;
+      padding: 10px 16px;
+      max-height: 70px;
+      overflow-y: auto;
+      font-size: 11px;
+      color: #555;
+      border-top: 1px solid #e0e0e0;
+    }
+    .log-item {
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-time {
+      font-size: 9px;
+      color: #999;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+    .log-money { color: #43a047; font-weight: 600; }
+    .log-good { color: #1e88e5; }
+    .log-bad { color: #e53935; }
+
+    /* モーダル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(26,26,46,0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      width: 90%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #1a1a2e;
+    }
+    .modal-content { margin-bottom: 16px; }
+
+    .hire-option {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 2px solid transparent;
+    }
+    .hire-option:hover {
+      background: #e3f2fd;
+      border-color: #42a5f5;
+    }
+    .hire-avatar {
+      width: 48px;
+      height: 48px;
+      background: #e8e8e8;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .hire-info { flex: 1; }
+    .hire-name { font-weight: 700; font-size: 15px; color: #1a1a2e; }
+    .hire-detail { font-size: 12px; color: #666; margin-top: 2px; }
+    .hire-cost { text-align: right; }
+    .hire-salary {
+      font-size: 14px;
+      color: #1e88e5;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+
+    .modal-close {
+      width: 100%;
+      padding: 14px;
+      background: #f0f0f0;
+      border: none;
+      border-radius: 10px;
+      color: #666;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .modal-close:hover { background: #e0e0e0; }
+
+    /* 月末モーダル */
+    .month-summary {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    .summary-row.income span:last-child { color: #43a047; font-weight: 600; }
+    .summary-row.expense span:last-child { color: #e53935; font-weight: 600; }
+    .summary-row.total {
+      border-top: 2px solid #e0e0e0;
+      margin-top: 10px;
+      padding-top: 12px;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .summary-row.total.positive span:last-child { color: #43a047; }
+    .summary-row.total.negative span:last-child { color: #e53935; }
+
+    /* ゲームオーバー・クリア */
+    .ending-modal {
+      text-align: center;
+    }
+    .ending-rank {
+      font-size: 64px;
+      margin-bottom: 12px;
+    }
+    .ending-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 20px;
+    }
+    .ending-stats {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 2;
+      color: #333;
+      text-align: left;
+    }
+    .ending-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #ffd700 0%, #f4a100 100%);
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #1a1a2e;
+      box-shadow: 0 4px 12px rgba(244,161,0,0.4);
+    }
+
+    /* 街区ラベル */
+    .area-label {
+      position: absolute;
+      font-size: 10px;
+      color: #78909c;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <div class="game-container">
+      <!-- ヘッダー -->
+      <div class="header">
+        <div class="money-display">
+          <div class="money-icon">💰</div>
+          <div class="money-info">
+            <div class="money-label">BALANCE</div>
+            <div class="money-value" id="moneyDisplay">¥7,500,000</div>
+          </div>
+        </div>
+        <div class="date-display">
+          <div class="date-main" id="dateMain">2026年 1月</div>
+          <div class="date-sub" id="dateSub">1年目 / 第1週</div>
+        </div>
+      </div>
+
+      <!-- ゲームエリア（地図） -->
+      <div class="game-area" id="gameArea">
+        <!-- 速度バッジ -->
+        <div class="speed-badge" id="speedBadge">▶ 通常速度</div>
+
+        <!-- 緑地 -->
+        <div class="park park-1"></div>
+        <div class="park park-2"></div>
+
+        <!-- 道路 -->
+        <div class="road road-h main"></div>
+        <div class="road road-v main"></div>
+        <div class="road road-h top"></div>
+        <div class="road road-h bottom"></div>
+        <div class="road road-v left"></div>
+        <div class="road road-v right"></div>
+
+        <!-- 街区ラベル -->
+        <div class="area-label" style="left: 15px; top: 95px;">北区</div>
+        <div class="area-label" style="right: 15px; top: 95px;">東区</div>
+        <div class="area-label" style="left: 15px; bottom: 70px;">西区</div>
+        <div class="area-label" style="right: 15px; bottom: 70px;">南区</div>
+
+        <!-- ステーション -->
+        <div class="station">
+          <div class="station-marker"></div>
+          <div class="station-building">
+            <div class="station-label">訪問看護ST</div>
+          </div>
+          <div class="station-name">あなたのステーション</div>
+        </div>
+
+        <!-- 家・スタッフは動的に生成 -->
+      </div>
+
+      <!-- コントロールパネル -->
+      <div class="control-panel">
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value" id="patientCount">5</div>
+            <div class="stat-label">利用者</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">🏥</div>
+            <div class="stat-value" id="staffCount">3</div>
+            <div class="stat-label">スタッフ</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value" id="monthRevenue">¥0</div>
+            <div class="stat-label">今月売上</div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="action-btn btn-hire" id="btnHire">
+            <span class="icon">👩‍⚕️</span>
+            <span>採用</span>
+          </button>
+          <button class="action-btn btn-sales" id="btnSales">
+            <span class="icon">🤝</span>
+            <span>営業</span>
+          </button>
+          <button class="action-btn btn-speed" id="btnSpeed">
+            <span class="icon">⏩</span>
+            <span>速度</span>
+          </button>
+          <button class="action-btn btn-next" id="btnNext">
+            <span class="icon">📅</span>
+            <span>次週</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ログ -->
+      <div class="log-area" id="logArea">
+        <div class="log-item">
+          <span class="log-time">00:00</span>
+          <span>🏥 訪問看護ステーションを開業しました！</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 採用モーダル -->
+  <div class="modal-overlay" id="hireModal">
+    <div class="modal">
+      <div class="modal-title">👩‍⚕️ スタッフ採用</div>
+      <div class="modal-content" id="hireList"></div>
+      <button class="modal-close" onclick="closeModal('hireModal')">閉じる</button>
+    </div>
+  </div>
+
+  <!-- 営業モーダル -->
+  <div class="modal-overlay" id="salesModal">
+    <div class="modal">
+      <div class="modal-title">🤝 営業活動</div>
+      <div class="modal-content">
+        <p style="margin-bottom: 16px; font-size: 14px; color: #666; line-height: 1.6;">
+          ケアマネージャーを訪問し、新規利用者の紹介を依頼します。
+        </p>
+        <div class="month-summary">
+          <div class="summary-row expense"><span>営業コスト</span><span>-¥50,000</span></div>
+          <div class="summary-row"><span>成功確率</span><span style="color:#1e88e5;font-weight:600">60%</span></div>
+          <div class="summary-row"><span>獲得見込み</span><span style="color:#43a047;font-weight:600">1〜3名</span></div>
+        </div>
+        <button class="action-btn btn-sales" style="width:100%;padding:16px" id="btnDoSales">
+          <span>営業に行く</span>
+        </button>
+      </div>
+      <button class="modal-close" style="margin-top:12px" onclick="closeModal('salesModal')">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- 月末モーダル -->
+  <div class="modal-overlay" id="monthEndModal">
+    <div class="modal">
+      <div class="modal-title">📊 月次決算レポート</div>
+      <div class="modal-content" id="monthEndContent"></div>
+      <button class="action-btn btn-next" style="width:100%;padding:16px" id="btnNextMonth">
+        <span>来月へ</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 結果モーダル -->
+  <div class="modal-overlay" id="resultModal">
+    <div class="modal">
+      <div class="modal-title" id="resultTitle">結果</div>
+      <div class="modal-content" id="resultContent" style="text-align:center;font-size:15px;color:#333;line-height:1.8"></div>
+      <button class="modal-close" onclick="closeModal('resultModal')">OK</button>
+    </div>
+  </div>
+
+  <!-- エンディング -->
+  <div class="modal-overlay" id="endingModal">
+    <div class="modal ending-modal">
+      <div class="ending-rank" id="endingRank">🏆</div>
+      <div class="ending-title" id="endingTitle">5年間お疲れ様でした！</div>
+      <div class="ending-stats" id="endingStats"></div>
+      <button class="ending-btn" onclick="location.reload()">もう一度プレイ</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== ゲーム状態 ==========
+    const game = {
+      year: 1, month: 1, week: 1,
+      money: 7500000,
+      monthRevenue: 0,
+      totalRevenue: 0,
+      totalExpense: 0,
+      pendingIncome: [0, 0],
+      speed: 1,
+      paused: false,
+      patients: [],
+      staff: [],
+      houses: [],
+      salesDone: false,
+      gameTime: 0 // ゲーム内時間（分）
+    };
+
+    // 初期スタッフ
+    const initialStaff = [
+      { id: 1, name: "山田", avatar: "👩‍⚕️", salary: 350000, type: "manager" },
+      { id: 2, name: "佐藤", avatar: "👩", salary: 280000, type: "nurse" },
+      { id: 3, name: "鈴木", avatar: "👨", salary: 280000, type: "nurse" }
+    ];
+
+    // 初期利用者
+    const initialPatients = [
+      { id: 1, name: "高橋", revenue: 74000 },
+      { id: 2, name: "山本", revenue: 65000 },
+      { id: 3, name: "田中", revenue: 35000 },
+      { id: 4, name: "伊藤", revenue: 65000 },
+      { id: 5, name: "渡辺", revenue: 49000 }
+    ];
+
+    // 家の位置プリセット（地図風に配置）
+    const housePositions = [
+      // 北側
+      { x: 25, y: 25, area: "北区" },
+      { x: 130, y: 30, area: "北区" },
+      { x: 380, y: 25, area: "東区" },
+      { x: 460, y: 35, area: "東区" },
+      // 中央付近
+      { x: 20, y: 125, area: "西区" },
+      { x: 440, y: 120, area: "東区" },
+      // 南側
+      { x: 30, y: 240, area: "西区" },
+      { x: 140, y: 300, area: "西区" },
+      { x: 370, y: 295, area: "南区" },
+      { x: 465, y: 240, area: "南区" },
+      // 追加
+      { x: 25, y: 310, area: "西区" },
+      { x: 475, y: 310, area: "南区" }
+    ];
+
+    // 採用候補
+    const hireCandidates = [
+      { name: "中村", avatar: "👩", salary: 280000, type: "nurse" },
+      { name: "小林", avatar: "👨", salary: 260000, type: "nurse" },
+      { name: "加藤", avatar: "👩", salary: 300000, type: "nurse" },
+      { name: "吉田", avatar: "👨‍⚕️", salary: 320000, type: "senior" }
+    ];
+
+    // ========== 初期化 ==========
+    function init() {
+      game.staff = [...initialStaff];
+      game.patients = [...initialPatients];
+
+      // 家を配置
+      game.patients.forEach((p, i) => {
+        const pos = housePositions[i % housePositions.length];
+        game.houses.push({
+          id: p.id,
+          x: pos.x,
+          y: pos.y,
+          area: pos.area,
+          name: p.name,
+          revenue: p.revenue
+        });
+      });
+
+      renderHouses();
+      renderStaff();
+      updateUI();
+
+      // アニメーションループ開始
+      startSimulation();
+    }
+
+    // ========== 描画 ==========
+    function renderHouses() {
+      document.querySelectorAll('.house').forEach(el => el.remove());
+
+      const area = document.getElementById('gameArea');
+      game.houses.forEach(h => {
+        const house = document.createElement('div');
+        house.className = 'house';
+        house.style.left = h.x + 'px';
+        house.style.top = h.y + 'px';
+        house.innerHTML = `
+          <div class="house-body"></div>
+          <div class="house-label">${h.name}様</div>
+          <div class="house-revenue">¥${Math.floor(h.revenue/1000)}K/月</div>
+        `;
+        house.dataset.id = h.id;
+        house.title = `${h.name}様宅 (${h.area})\n月額報酬: ¥${h.revenue.toLocaleString()}`;
+        area.appendChild(house);
+      });
+    }
+
+    function renderStaff() {
+      document.querySelectorAll('.staff').forEach(el => el.remove());
+
+      const area = document.getElementById('gameArea');
+      const stationX = 270 - 14;
+      const stationY = 180 - 14;
+
+      game.staff.forEach((s, i) => {
+        const staff = document.createElement('div');
+        staff.className = 'staff';
+        staff.id = `staff-${s.id}`;
+        staff.textContent = s.avatar;
+        staff.style.left = (stationX + (i - 1) * 32) + 'px';
+        staff.style.top = stationY + 'px';
+        staff.dataset.state = 'idle';
+        staff.dataset.targetHouse = '';
+        staff.title = `${s.name} (${s.type === 'manager' ? '管理者' : '看護師'})`;
+        area.appendChild(staff);
+      });
+    }
+
+    function updateUI() {
+      const moneyEl = document.getElementById('moneyDisplay');
+      moneyEl.textContent = `¥${game.money.toLocaleString()}`;
+      moneyEl.className = 'money-value' + (game.money < 0 ? ' negative' : '');
+
+      document.getElementById('dateMain').textContent = `${2025 + game.year}年 ${game.month}月`;
+      document.getElementById('dateSub').textContent = `${game.year}年目 / 第${game.week}週`;
+      document.getElementById('patientCount').textContent = game.patients.length;
+      document.getElementById('staffCount').textContent = game.staff.length;
+      document.getElementById('monthRevenue').textContent = `¥${Math.floor(game.monthRevenue / 1000)}K`;
+
+      const speedTexts = ['▶ 通常速度', '▶▶ 2倍速', '▶▶▶ 3倍速'];
+      document.getElementById('speedBadge').textContent = speedTexts[game.speed - 1];
+    }
+
+    function getGameTimeString() {
+      const hours = Math.floor(game.gameTime / 60) % 24;
+      const mins = game.gameTime % 60;
+      return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+    }
+
+    function addLog(text, type = '') {
+      const logArea = document.getElementById('logArea');
+      const item = document.createElement('div');
+      item.className = 'log-item ' + (type ? `log-${type}` : '');
+      item.innerHTML = `<span class="log-time">${getGameTimeString()}</span><span>${text}</span>`;
+      logArea.insertBefore(item, logArea.firstChild);
+
+      while (logArea.children.length > 10) {
+        logArea.removeChild(logArea.lastChild);
+      }
+    }
+
+    function showMoneyPopup(x, y, amount) {
+      const area = document.getElementById('gameArea');
+      const popup = document.createElement('div');
+      popup.className = 'money-popup';
+      popup.textContent = `+¥${amount.toLocaleString()}`;
+      popup.style.left = (x + 10) + 'px';
+      popup.style.top = (y - 10) + 'px';
+      area.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 1800);
+    }
+
+    // ========== シミュレーション ==========
+    function startSimulation() {
+      setInterval(() => {
+        if (game.paused) return;
+
+        game.gameTime += game.speed;
+
+        game.staff.forEach(s => {
+          const el = document.getElementById(`staff-${s.id}`);
+          if (!el) return;
+
+          const state = el.dataset.state;
+
+          if (state === 'idle') {
+            // ランダムに訪問開始
+            if (Math.random() < 0.015 * game.speed && game.houses.length > 0) {
+              const house = game.houses[Math.floor(Math.random() * game.houses.length)];
+              el.dataset.state = 'going';
+              el.dataset.targetHouse = house.id;
+              el.classList.add('moving');
+
+              // 家の位置へ移動
+              el.style.left = (house.x + 5) + 'px';
+              el.style.top = (house.y - 5) + 'px';
+
+              addLog(`${s.name}：${house.name}様宅へ訪問開始`);
+
+              setTimeout(() => {
+                if (el.dataset.state === 'going') {
+                  el.dataset.state = 'visiting';
+                  el.classList.remove('moving');
+
+                  // 訪問完了後、収益発生
+                  setTimeout(() => {
+                    if (el.dataset.state === 'visiting') {
+                      const revenue = Math.floor(house.revenue / 4);
+                      game.monthRevenue += revenue;
+                      game.money += revenue;
+
+                      showMoneyPopup(house.x, house.y, revenue);
+                      addLog(`${s.name}：${house.name}様 訪問完了 (+¥${revenue.toLocaleString()})`, 'money');
+
+                      // ステーションに戻る
+                      el.dataset.state = 'returning';
+                      el.classList.add('moving');
+                      const idx = game.staff.indexOf(s);
+                      el.style.left = (270 - 14 + (idx - 1) * 32) + 'px';
+                      el.style.top = (180 - 14) + 'px';
+
+                      setTimeout(() => {
+                        el.dataset.state = 'idle';
+                        el.classList.remove('moving');
+                      }, 600 / game.speed);
+                    }
+                  }, 1200 / game.speed);
+                }
+              }, 600 / game.speed);
+            }
+          }
+        });
+
+        updateUI();
+      }, 100);
+    }
+
+    // ========== アクション ==========
+    document.getElementById('btnHire').onclick = () => {
+      const list = document.getElementById('hireList');
+      list.innerHTML = '';
+
+      hireCandidates.forEach(c => {
+        const opt = document.createElement('div');
+        opt.className = 'hire-option';
+        opt.innerHTML = `
+          <div class="hire-avatar">${c.avatar}</div>
+          <div class="hire-info">
+            <div class="hire-name">${c.name}</div>
+            <div class="hire-detail">${c.type === 'senior' ? 'ベテラン看護師' : c.type === 'manager' ? '管理者' : '看護師'}</div>
+          </div>
+          <div class="hire-cost">
+            <div class="hire-salary">¥${(c.salary/1000).toFixed(0)}K/月</div>
+          </div>
+        `;
+        opt.onclick = () => hireStaff(c);
+        list.appendChild(opt);
+      });
+
+      openModal('hireModal');
+    };
+
+    function hireStaff(candidate) {
+      if (game.staff.length >= 8) {
+        alert('スタッフは8名までです');
+        return;
+      }
+
+      const newStaff = {
+        id: Date.now(),
+        name: candidate.name,
+        avatar: candidate.avatar,
+        salary: candidate.salary,
+        type: candidate.type
+      };
+      game.staff.push(newStaff);
+
+      const idx = hireCandidates.findIndex(c => c.name === candidate.name);
+      if (idx !== -1) hireCandidates.splice(idx, 1);
+
+      const names = ["木村", "林", "清水", "山崎", "池田", "橋本", "石川", "前田"];
+      const avatars = ["👩", "👨", "👩‍⚕️", "👨‍⚕️"];
+      hireCandidates.push({
+        name: names[Math.floor(Math.random() * names.length)],
+        avatar: avatars[Math.floor(Math.random() * avatars.length)],
+        salary: 250000 + Math.floor(Math.random() * 80000),
+        type: "nurse"
+      });
+
+      renderStaff();
+      addLog(`${newStaff.name}さんが入職しました`, 'good');
+      closeModal('hireModal');
+      updateUI();
+    }
+
+    document.getElementById('btnSales').onclick = () => {
+      if (game.salesDone) {
+        alert('今週はすでに営業済みです');
+        return;
+      }
+      openModal('salesModal');
+    };
+
+    document.getElementById('btnDoSales').onclick = () => {
+      game.money -= 50000;
+      game.salesDone = true;
+      closeModal('salesModal');
+
+      if (Math.random() < 0.6) {
+        const count = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) {
+          addPatient();
+        }
+        showResult('🎉 営業成功！', `ケアマネージャーから${count}名の新規利用者を紹介していただきました！`);
+        addLog(`営業成功！新規${count}名獲得`, 'good');
+      } else {
+        showResult('😅 今回は..', '残念ながら紹介には繋がりませんでした。\n次回に期待しましょう！');
+        addLog('営業：紹介なし', 'bad');
+      }
+
+      updateUI();
+    };
+
+    function addPatient() {
+      const names = ["佐々木", "松本", "井上", "木村", "林", "斎藤", "清水", "山崎", "阿部", "石田"];
+      const revenue = 30000 + Math.floor(Math.random() * 50000);
+      const newPatient = {
+        id: Date.now() + Math.random(),
+        name: names[Math.floor(Math.random() * names.length)],
+        revenue: revenue
+      };
+      game.patients.push(newPatient);
+
+      if (game.houses.length < housePositions.length) {
+        const pos = housePositions[game.houses.length];
+        game.houses.push({
+          id: newPatient.id,
+          x: pos.x,
+          y: pos.y,
+          area: pos.area,
+          name: newPatient.name,
+          revenue: revenue
+        });
+        renderHouses();
+      }
+    }
+
+    document.getElementById('btnSpeed').onclick = () => {
+      game.speed = game.speed % 3 + 1;
+      updateUI();
+    };
+
+    document.getElementById('btnNext').onclick = () => {
+      advanceWeek();
+    };
+
+    function advanceWeek() {
+      game.week++;
+      game.salesDone = false;
+      game.gameTime = 0;
+
+      if (game.week > 4) {
+        game.week = 1;
+        showMonthEnd();
+      } else {
+        addLog(`${game.month}月 第${game.week}週`);
+        updateUI();
+      }
+    }
+
+    function showMonthEnd() {
+      const revenue = game.monthRevenue;
+      const salaries = game.staff.reduce((s, x) => s + x.salary, 0);
+      const overhead = Math.floor(salaries * 0.15) + 260000;
+      const expenses = salaries + overhead;
+      const bonus = (game.month === 6 || game.month === 12) ? Math.floor(salaries * 1.7) : 0;
+      const totalExp = expenses + bonus;
+
+      game.pendingIncome.push(revenue);
+      const cashIn = game.pendingIncome.shift();
+
+      const pl = cashIn - totalExp;
+      game.totalRevenue += revenue;
+      game.totalExpense += totalExp;
+
+      let content = `
+        <div class="month-summary">
+          <div class="summary-row income"><span>📊 売上（発生）</span><span>+¥${revenue.toLocaleString()}</span></div>
+          <div class="summary-row income"><span>💵 入金（2ヶ月前分）</span><span>+¥${cashIn.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>👥 人件費</span><span>-¥${salaries.toLocaleString()}</span></div>
+          <div class="summary-row expense"><span>🏢 諸経費</span><span>-¥${overhead.toLocaleString()}</span></div>
+          ${bonus > 0 ? `<div class="summary-row expense"><span>🎁 賞与</span><span>-¥${bonus.toLocaleString()}</span></div>` : ''}
+          <div class="summary-row total ${pl >= 0 ? 'positive' : 'negative'}">
+            <span>月間収支</span><span>${pl >= 0 ? '+' : ''}¥${pl.toLocaleString()}</span>
+          </div>
+        </div>
+        <p style="font-size:11px;color:#888;text-align:center;">
+          ※訪問看護は国保連経由で2ヶ月後に入金されます
+        </p>
+      `;
+
+      document.getElementById('monthEndContent').innerHTML = content;
+      openModal('monthEndModal');
+
+      game.money = game.money - game.monthRevenue + pl;
+      game.monthRevenue = 0;
+    }
+
+    document.getElementById('btnNextMonth').onclick = () => {
+      closeModal('monthEndModal');
+
+      game.month++;
+      if (game.month > 12) {
+        game.month = 1;
+        game.year++;
+      }
+
+      if (game.money < -3000000) {
+        showEnding('gameover');
+      } else if (game.year > 5) {
+        showEnding('clear');
+      } else {
+        addLog(`${game.month}月になりました`, 'good');
+        updateUI();
+      }
+    };
+
+    function showEnding(type) {
+      const pl = game.totalRevenue - game.totalExpense;
+      let rank, title;
+
+      if (type === 'gameover') {
+        rank = '💀';
+        title = 'GAME OVER';
+      } else {
+        if (pl > 30000000 && game.patients.length >= 15) rank = '🏆 S';
+        else if (pl > 20000000) rank = '🥇 A';
+        else if (pl > 0) rank = '🥈 B';
+        else rank = '🥉 C';
+        title = '5年間お疲れ様でした！';
+      }
+
+      document.getElementById('endingRank').textContent = rank;
+      document.getElementById('endingTitle').textContent = title;
+      document.getElementById('endingStats').innerHTML = `
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span>累計売上</span><span style="color:#43a047;font-weight:700">¥${game.totalRevenue.toLocaleString()}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span>累計支出</span><span style="color:#e53935;font-weight:700">¥${game.totalExpense.toLocaleString()}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding-top:8px;border-top:1px solid #ddd">
+          <span>最終損益</span><span style="font-weight:700;color:${pl >= 0 ? '#43a047' : '#e53935'}">¥${pl.toLocaleString()}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span>最終利用者</span><span style="font-weight:700">${game.patients.length}名</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span>最終スタッフ</span><span style="font-weight:700">${game.staff.length}名</span>
+        </div>
+      `;
+      openModal('endingModal');
+    }
+
+    function showResult(title, content) {
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultContent').innerHTML = content.replace(/\n/g, '<br>');
+      openModal('resultModal');
+    }
+
+    // ========== モーダル ==========
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+      game.paused = true;
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+      game.paused = false;
+    }
+
+    // ========== 開始 ==========
+    init();
+  </script>
+</body>
+</html>

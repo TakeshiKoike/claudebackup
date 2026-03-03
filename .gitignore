@@ -22,3 +22,8 @@ copd_project/*
 !copd_project/scenario_copd.json
 !copd_project/vn_viewer.html
 !copd_project/vn_editor.html
+
+# 訪問看護ステーション経営シミュレーション
+!houmon_nurse_game/
+!houmon_nurse_game/**
+houmon_nurse_game/copd_project_backup_20260107/**
