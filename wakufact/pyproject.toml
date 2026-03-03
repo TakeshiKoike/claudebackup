@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wakufact"
+version = "0.1.0"
+description = "WakuFact - AI雑学ショート動画制作パイプライン"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+dependencies = []
+
+[project.optional-dependencies]
+dev = []
+
+[project.scripts]
+wakufact-produce = "wakufact.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
