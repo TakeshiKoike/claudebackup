@@ -1,0 +1,44 @@
+{
+  "ep": 1,
+  "title_jp": "バナナはベリー、イチゴはベリーじゃない",
+  "version": "v4 (final)",
+  "style": "Professional food photography, deep focus f/16, everything sharp and in focus",
+  "voicevox_sections": [
+    {"key": "hook", "text": "あなたが知ってるフルーツの分類、全部ウソかも。"},
+    {"key": "develop_1", "text": "実はバナナって、植物の世界ではベリーなんです。でもイチゴはベリーじゃない。"},
+    {"key": "develop_2", "text": "ベリーっていうのは、ひとつの花から実ができて、その中に種が入ってる果物のこと。バナナはまさにこの条件にぴったり。"},
+    {"key": "develop_3", "text": "一方イチゴは、表面のツブツブが実は本当の実で、赤い部分はただの土台。つまりイチゴはニセモノの果物なんです。"},
+    {"key": "climax", "text": "ちなみにアボカドもスイカもベリー。ラズベリーはベリーじゃない。"},
+    {"key": "cta", "text": "植物の名前のつけ方、ちょっとおかしいですよね。フォローして次の雑学も見てね。"}
+  ],
+  "image_prompts": [
+    {
+      "label": "01_hook",
+      "prompt": "Professional food photography, split screen: a yellow banana on the left and a red strawberry on the right, both perfectly sharp and in focus, even studio lighting, deep focus f/16, crisp details throughout entire image, clean simple background, high resolution, vertical 9:16 format"
+    },
+    {
+      "label": "02_intro",
+      "prompt": "Professional food photography, a banana cut in half showing cross-section with tiny seeds next to a whole strawberry, both on a clean marble surface, everything perfectly sharp and in focus, deep focus f/16, even bright studio lighting, overhead shot, vertical format"
+    },
+    {
+      "label": "03_develop_1",
+      "prompt": "Professional food photography, a banana cut in half lengthwise on a white ceramic plate, showing tiny dark seeds inside the flesh, placed on a light wooden table with a small knife beside it, shot from above, everything sharp and in focus, deep focus f/16, bright even studio lighting, vertical format"
+    },
+    {
+      "label": "04_develop_2",
+      "prompt": "Professional food photography, top down view of a white marble table with a wooden cutting board, several banana slices showing star-shaped seed pattern arranged neatly, a whole unpeeled banana beside them, a small bowl of mixed berries in the corner, everything perfectly sharp and in focus, deep focus f/16, bright even studio lighting, crisp details, vertical format"
+    },
+    {
+      "label": "05_develop_3",
+      "prompt": "Professional food photography, several strawberries on a white plate, one cut in half showing internal structure, tiny seeds visible on the red exterior, overhead flat lay on marble surface, everything perfectly sharp and in focus, deep focus f/16, bright even studio lighting, crisp details, vertical format"
+    },
+    {
+      "label": "06_climax",
+      "prompt": "Professional food photography, overhead flat lay on white marble surface, a halved avocado and a watermelon slice placed next to a banana and raspberries, all fruits perfectly sharp and in focus, deep focus f/16, even bright studio lighting, clean minimal composition, vibrant natural colors, vertical format"
+    },
+    {
+      "label": "07_cta",
+      "prompt": "Professional food photography, colorful arrangement of various fruits on bright background: banana, avocado half, watermelon slice, grapes, tomato. All perfectly sharp and in focus, deep focus f/16, vibrant colors, bright even studio lighting, overhead flat lay, vertical 9:16 format"
+    }
+  ]
+}
