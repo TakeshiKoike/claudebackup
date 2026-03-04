@@ -124,6 +124,19 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
+        .staff-portrait .placeholder-icon {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
         .staff-portrait .name-tag {
             position: absolute;
             bottom: -5px;
@@ -853,14 +866,25 @@
             const container = document.getElementById('staff-container');
             const list = document.getElementById('staff-list');
 
-            // Portrait display
+            // Role colors for placeholder icons
+            const roleColors = {
+                '管理者': '#8e44ad', '看護師': '#e91e63', '理学療法士': '#2196f3',
+                '作業療法士': '#4caf50', '事務員': '#ff9800'
+            };
+
+            // Portrait display with image fallback
             container.innerHTML = gameState.staff.map(staff => {
                 const expression = staff.state === 'idle' ? 'smile' :
                                    staff.state === 'visiting' ? 'thinking' :
                                    staff.state === 'explaining' ? 'explaining' : 'serious';
+                const imgSrc = staff.expressions[expression] || staff.expressions.smile;
+                const color = roleColors[staff.role] || '#e94560';
+                const initial = staff.name.charAt(0);
                 return `
                     <div class="staff-portrait" data-id="${staff.id}">
-                        <img src="${staff.expressions[expression]}" alt="${staff.name}">
+                        <img src="${imgSrc}" alt="${staff.name}"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div class="placeholder-icon" style="display:none;background:${color};">${initial}</div>
                         <div class="name-tag">${staff.name}</div>
                         <div class="status-badge status-${staff.state}">${getStatusText(staff.state)}</div>
                     </div>
