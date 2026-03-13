@@ -1,0 +1,23 @@
+[Script Info]
+Title: WakuFact EP19
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Hiragino Sans,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,8,40,40,600,1
+Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,40,40,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:03.00,Title,,0,0,0,,ニンジンが\N元々オレンジ色じゃな\Nかった理由が政治的
+Dialogue: 0,0:00:00.00,0:00:03.50,Default,,0,0,0,,ニンジンがオレンジ色なのは、\N王様のせいです。
+Dialogue: 0,0:00:04.30,0:00:08.02,Default,,0,0,0,,元々ニンジンは紫や白、黄色だった。
+Dialogue: 0,0:00:08.52,0:00:18.23,Default,,0,0,0,,17世紀、\Nオランダの農家が\Nオラニエ公ウィリアムに\N敬意を表して、\Nオレンジ色のニンジンを品種改良で\N作った。
+Dialogue: 0,0:00:18.83,0:00:23.59,Default,,0,0,0,,オラニエ（Orange）家の\N象徴カラーに合わせたんです。
+Dialogue: 0,0:00:24.09,0:00:43.83,Default,,0,0,0,,このオレンジニンジンが\Nβカロテン豊富で\N甘くて美味しかったため、\N世界中に広まった。\N政治的な忖度から生まれた品種が、\N偶然に\Nも最も栄養価の高い品種だった。\Nちなみに今で\Nも紫や白のニンジンは存在します。
+Dialogue: 0,0:00:44.83,0:00:50.83,Default,,0,0,0,,でもスーパーで見かけないのは、\N400年前の政治の影響が\Nまだ続いているから。
+Dialogue: 1,0:00:45.83,0:00:50.83,Title,,0,0,0,,食べ物の裏話、\Nまだまだあるよ。\Nフォロー！

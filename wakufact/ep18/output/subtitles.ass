@@ -1,0 +1,23 @@
+[Script Info]
+Title: WakuFact EP18
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Hiragino Sans,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,8,40,40,600,1
+Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,40,40,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:03.00,Title,,0,0,0,,世界初の\Nウェブサイトは\Nまだ生きている
+Dialogue: 0,0:00:00.00,0:00:03.15,Default,,0,0,0,,インターネットの最初のページ、\Nまだ見れるんです。
+Dialogue: 0,0:00:03.95,0:00:19.14,Default,,0,0,0,,1991年8月6日、\Nティム・バーナーズ＝リーが\NCERN（欧州原子核研究機構）で\N世界初のウェブサイトを公開。\N内容は\N「World Wide Webとは\N何か」の説明。
+Dialogue: 0,0:00:19.64,0:00:22.33,Default,,0,0,0,,デザインは文字だけ。画像ゼロ。
+Dialogue: 0,0:00:22.93,0:00:27.85,Default,,0,0,0,,リンクが数個。当時、\N世界のウェブサイト数は\Nこの1つだけ。
+Dialogue: 0,0:00:28.35,0:00:43.25,Default,,0,0,0,,今は約20億サイト。\Nバーナーズ＝リーはWWWの技術を\N特許化せず、無料で公開した。\Nもし彼が特許を取っていたら、\N世界で\N最も裕福な人物になっていたはず。
+Dialogue: 0,0:00:44.25,0:00:48.98,Default,,0,0,0,,でも彼は「インターネットは\N全人類のものであるべき」と考えた。
+Dialogue: 1,0:00:45.25,0:00:48.98,Title,,0,0,0,,インターネットの\N歴史、奥深い。\Nフォローで続きを！

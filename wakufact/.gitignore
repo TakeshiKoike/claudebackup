@@ -1,0 +1,8 @@
+.env
+client_secret.json
+youtube_token.json
+__pycache__/
+*.egg-info/
+.venv/
+*.tmp.mp4
+verify/

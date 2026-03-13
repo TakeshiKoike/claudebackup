@@ -1,0 +1,23 @@
+[Script Info]
+Title: WakuFact EP15
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Hiragino Sans,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,8,40,40,600,1
+Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,40,40,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:03.00,Title,,0,0,0,,クレオパトラは\NピラミッドよりiPh\Noneに近い時代の人
+Dialogue: 0,0:00:00.00,0:00:03.33,Default,,0,0,0,,歴史のタイムラインの感覚、\N完全にバグってます。
+Dialogue: 0,0:00:04.13,0:00:12.90,Default,,0,0,0,,クレオパトラが\N生きていたのは\N紀元前69年〜30年。\N大ピラミッドが\N建てられたのは紀元前2560年頃。
+Dialogue: 0,0:00:13.40,0:00:20.60,Default,,0,0,0,,その差、約2500年。一方、\Nクレオパトラから現代まで\Nは約2050年。
+Dialogue: 0,0:00:21.20,0:00:30.89,Default,,0,0,0,,つまりクレオパトラにとって、\Nピラミッドは「超古代の遺物」。\N私たちがクレオパトラを見るより、\Nクレオパトラからピラミッドの方が\N遠い。
+Dialogue: 0,0:00:31.39,0:00:41.54,Default,,0,0,0,,もっと言うと、\Nティラノサウルスとステゴサウルスの\N時代差は8000万年。\Nティラノサウルスは、\N私たち人間の方が時代的に近い。
+Dialogue: 0,0:00:42.54,0:00:44.81,Default,,0,0,0,,歴史のスケール、おかしすぎる。
+Dialogue: 1,0:00:43.54,0:00:44.81,Title,,0,0,0,,歴史のスケール感、\N壊れるよ。\Nフォローで\N次の衝撃を！

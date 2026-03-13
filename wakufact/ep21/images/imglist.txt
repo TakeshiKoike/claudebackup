@@ -1,0 +1,15 @@
+file '/Users/takeshikoike2025/Projects/ai-content-factory/wakufact/ep21/images/hook.png'
+duration 1.691
+file '/Users/takeshikoike2025/Projects/ai-content-factory/wakufact/ep21/images/intro.png'
+duration 1.691
+file '/Users/takeshikoike2025/Projects/ai-content-factory/wakufact/ep21/images/develop_1.png'
+duration 1.321
+file '/Users/takeshikoike2025/Projects/ai-content-factory/wakufact/ep21/images/develop_2.png'
+duration 4.195
+file '/Users/takeshikoike2025/Projects/ai-content-factory/wakufact/ep21/images/develop_3.png'
+duration 3.497
+file '/Users/takeshikoike2025/Projects/ai-content-factory/wakufact/ep21/images/climax.png'
+duration 25.021
+file '/Users/takeshikoike2025/Projects/ai-content-factory/wakufact/ep21/images/cta.png'
+duration 5.984
+file '/Users/takeshikoike2025/Projects/ai-content-factory/wakufact/ep21/images/cta.png'

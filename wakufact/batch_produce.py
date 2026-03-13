@@ -2,6 +2,9 @@
 """
 WakuFact - バッチ制作スクリプト
 エピソード番号を指定して、画像生成→音声生成→動画合成を一括実行
+
+修正履歴:
+  v2: 2パス合成、wrap_text、話者ID/音声パラメータ対応、バージョン自動インクリメント
 """
 
 import json
@@ -15,7 +18,12 @@ from pathlib import Path
 
 COMFYUI_URL = "http://127.0.0.1:8000"
 VOICEVOX_URL = "http://localhost:50021"
-VOICEVOX_SPEAKER = 3
+
+BASE_DIR = Path(__file__).parent
+
+MAX_TITLE = 10
+MAX_DEFAULT = 17
+
 
 def dur(p):
     r = subprocess.run(
@@ -24,6 +32,34 @@ def dur(p):
         capture_output=True, text=True,
     )
     return float(r.stdout.strip())
+
+
+def wrap_text(text, max_chars):
+    """テキストを max_chars 文字ごとに \\N で改行 (句読点を行頭に残さない)"""
+    lines = text.split("\\N") if "\\N" in text else [text]
+    wrapped = []
+    for line in lines:
+        while len(line) > max_chars:
+            best = -1
+            for sep in ("。", "、", "！", "？"):
+                pos = line.rfind(sep, 0, max_chars)
+                if pos > 0 and pos + len(sep) > best:
+                    best = pos + len(sep)
+            if best > 0:
+                cut = best
+            else:
+                for sep in ("で", "に", "を", "が", "は", "の", "も", "て", "と"):
+                    pos = line.rfind(sep, 0, max_chars)
+                    if pos > 0:
+                        cut = pos + len(sep)
+                        break
+                else:
+                    cut = max_chars
+            wrapped.append(line[:cut])
+            line = line[cut:]
+        if line:
+            wrapped.append(line)
+    return "\\N".join(wrapped)
 
 
 def comfyui_generate(prompt, seed, images_dir, label, idx):
@@ -92,15 +128,18 @@ def comfyui_generate(prompt, seed, images_dir, label, idx):
     return None
 
 
-def voicevox_synth(text, output_path, speed=1.0):
-    """VOICEVOX音声合成"""
-    params = urllib.parse.urlencode({"text": text, "speaker": VOICEVOX_SPEAKER})
+def voicevox_synth(text, output_path, speaker_id=3, speed_scale=1.0,
+                   pitch_scale=0.0, intonation_scale=1.0):
+    """VOICEVOX音声合成（話者ID・全パラメータ対応）"""
+    params = urllib.parse.urlencode({"text": text, "speaker": speaker_id})
     req = urllib.request.Request(f"{VOICEVOX_URL}/audio_query?{params}", method="POST")
     with urllib.request.urlopen(req) as resp:
         query = json.loads(resp.read())
-    query["speedScale"] = speed
+    query["speedScale"] = speed_scale
+    query["pitchScale"] = pitch_scale
+    query["intonationScale"] = intonation_scale
 
-    params = urllib.parse.urlencode({"speaker": VOICEVOX_SPEAKER})
+    params = urllib.parse.urlencode({"speaker": speaker_id})
     req = urllib.request.Request(
         f"{VOICEVOX_URL}/synthesis?{params}",
         data=json.dumps(query).encode("utf-8"),
@@ -129,13 +168,15 @@ def fmt_time(s):
     return f"{h}:{m:02d}:{sec:05.2f}"
 
 
-def produce_episode(ep_num, title, sections_data, image_prompts):
+def produce_episode(ep_num, title, sections_data, image_prompts, speaker_id=3,
+                    cta_text="フォローして次の雑学も見てね！"):
     """
-    sections_data: [{"key": "hook", "text": "...", "pause_ms": 800}, ...]
-    image_prompts: [{"label": "01_hook", "prompt": "..."}, ...] (7枚)
+    sections_data: [{"key": "hook", "text": "...", "pause_ms": 800,
+                     "speed_scale": 1.0, "pitch_scale": 0.0, "intonation_scale": 1.0}, ...]
+    image_prompts: [{"label": "hook", "prompt": "..."}, ...] (7枚)
+    speaker_id: VOICEVOX話者ID
     """
-    base_dir = Path(__file__).parent
-    ep_dir = base_dir / f"ep{ep_num:02d}"
+    ep_dir = BASE_DIR / f"ep{ep_num:02d}"
     audio_dir = ep_dir / "audio"
     images_dir = ep_dir / "images"
     output_dir = ep_dir / "output"
@@ -152,6 +193,10 @@ def produce_episode(ep_num, title, sections_data, image_prompts):
         label = img["label"]
         prompt = img["prompt"]
         seed = ep_num * 10000 + i * 777
+        out_path = images_dir / f"{label}.png"
+        if out_path.exists():
+            print(f"  [{i+1}/{len(image_prompts)}] {label} (cached)")
+            continue
         print(f"  [{i+1}/{len(image_prompts)}] {label}")
         comfyui_generate(prompt, seed, images_dir, label, ep_num)
 
@@ -164,7 +209,13 @@ def produce_episode(ep_num, title, sections_data, image_prompts):
     for i, sec in enumerate(sections_data):
         fname = f"{i+1:02d}_{sec['key']}"
         audio_path = audio_dir / f"{fname}.wav"
-        d = voicevox_synth(sec["text"], audio_path)
+        d = voicevox_synth(
+            sec["text"], audio_path,
+            speaker_id=speaker_id,
+            speed_scale=sec.get("speed_scale", 1.0),
+            pitch_scale=sec.get("pitch_scale", 0.0),
+            intonation_scale=sec.get("intonation_scale", 1.0),
+        )
         print(f"  {sec['key']}: {d:.2f}s")
         timings.append((sec["key"], t, t + d))
         audio_files.append(f"file '{audio_path.resolve()}'")
@@ -193,10 +244,9 @@ def produce_episode(ep_num, title, sections_data, image_prompts):
     n_sections = len(sections_data)
     n_images = len(image_prompts)
 
-    # 画像タイミング: hook音声中にhook+introを表示、残り1:1
     img_timings = []
     if n_images == n_sections + 1:
-        # 7画像6音声パターン
+        # 7画像6音声パターン: hook中にhook+introを表示
         hook_end = timings[0][2] + (sections_data[0].get("pause_ms", 0) / 1000)
         hook_mid = timings[0][1] + (hook_end - timings[0][1]) / 2
         img_timings.append((image_prompts[0]["label"] + ".png", timings[0][1], hook_mid))
@@ -204,11 +254,9 @@ def produce_episode(ep_num, title, sections_data, image_prompts):
         for j in range(1, n_sections):
             sec_end = timings[j][2] + (sections_data[j].get("pause_ms", 0) / 1000)
             img_timings.append((image_prompts[j + 1]["label"] + ".png", img_timings[-1][2], sec_end))
-        # 最後の画像の終了をtotalに合わせる
         last = img_timings[-1]
         img_timings[-1] = (last[0], last[1], total)
     else:
-        # 画像数=音声数の場合は1:1
         for j in range(n_sections):
             sec_end = timings[j][2] + (sections_data[j].get("pause_ms", 0) / 1000)
             start = img_timings[-1][2] if img_timings else 0.0
@@ -224,15 +272,18 @@ def produce_episode(ep_num, title, sections_data, image_prompts):
         img_lines.append(f"duration {end - start:.3f}")
     last_img = (images_dir / img_timings[-1][0]).resolve()
     img_lines.append(f"file '{last_img}'")
-    (images_dir / "imglist.txt").write_text("\n".join(img_lines))
+    imglist = images_dir / "imglist.txt"
+    imglist.write_text("\n".join(img_lines))
 
     for img_name, start, end in img_timings:
         print(f"  {img_name}: {start:.2f}s - {end:.2f}s")
 
-    # === STEP 4: 字幕 + 動画合成 ===
-    print("\n[4/4] Compositing video...")
+    # === STEP 4: 字幕 + 動画合成 (2パス) ===
+    print("\n[4/4] Compositing video (2-pass)...")
 
     # ASS字幕
+    title_wrapped = wrap_text(title.replace("\n", "\\N"), MAX_TITLE)
+
     ass = f"""[Script Info]
 Title: WakuFact EP{ep_num:02d}
 ScriptType: v4.00+
@@ -250,32 +301,62 @@ Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     # タイトル
-    ass += f"Dialogue: 1,{fmt_time(0.0)},{fmt_time(3.0)},Title,,0,0,0,,{title}\n"
+    ass += f"Dialogue: 1,{fmt_time(0.0)},{fmt_time(3.0)},Title,,0,0,0,,{title_wrapped}\n"
 
-    # 字幕
+    # 各セクション字幕
     for sec_data, timing in zip(sections_data, timings):
-        sub_text = sec_data.get("subtitle", sec_data["text"])
+        sub_text = wrap_text(sec_data.get("subtitle", sec_data["text"]), MAX_DEFAULT)
         ass += f"Dialogue: 0,{fmt_time(timing[1])},{fmt_time(timing[2])},Default,,0,0,0,,{sub_text}\n"
 
     # CTA
     cta_start = timings[-1][1] + 1.0
-    ass += f"Dialogue: 1,{fmt_time(cta_start)},{fmt_time(total)},Title,,0,0,0,,フォローして次の雑学も見てね！\n"
+    cta_wrapped = wrap_text(cta_text, MAX_TITLE)
+    ass += f"Dialogue: 1,{fmt_time(cta_start)},{fmt_time(total)},Title,,0,0,0,,{cta_wrapped}\n"
 
     sub_path = output_dir / "subtitles.ass"
     sub_path.write_text(ass)
 
-    # 動画合成
-    output_path = output_dir / f"wakufact_ep{ep_num:02d}_jp_sub_v1.mp4"
-    subprocess.run([
+    # バージョン自動インクリメント
+    existing = sorted(output_dir.glob(f"wakufact_ep{ep_num:02d}_jp_sub_v*.mp4"))
+    if existing:
+        last_ver = int(existing[-1].stem.split("_v")[-1])
+        new_ver = last_ver + 1
+    else:
+        new_ver = 1
+
+    output_path = output_dir / f"wakufact_ep{ep_num:02d}_jp_sub_v{new_ver}.mp4"
+    tmp = output_path.with_suffix(".tmp.mp4")
+
+    print(f"  Output: {output_path.name}")
+
+    # Pass 1: images + audio → video (字幕なし)
+    result = subprocess.run([
         "ffmpeg", "-y",
-        "-f", "concat", "-safe", "0", "-i", str((images_dir / "imglist.txt").resolve()),
+        "-f", "concat", "-safe", "0", "-i", str(imglist.resolve()),
         "-i", str(combined.resolve()),
-        "-vf", f"ass={sub_path.resolve()}",
         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", "30",
         "-c:a", "aac", "-b:a", "192k",
         "-shortest", "-movflags", "+faststart",
+        str(tmp),
+    ], capture_output=True)
+    if result.returncode != 0:
+        print(f"  ERROR Pass1: {result.stderr.decode()[-300:]}")
+        return None
+
+    # Pass 2: 字幕焼き込み
+    result = subprocess.run([
+        "ffmpeg", "-y",
+        "-i", str(tmp),
+        "-vf", f"ass={sub_path.resolve()}",
+        "-c:v", "libx264", "-pix_fmt", "yuv420p",
+        "-c:a", "copy",
+        "-movflags", "+faststart",
         str(output_path),
-    ], capture_output=True, check=True)
+    ], capture_output=True)
+    tmp.unlink(missing_ok=True)
+    if result.returncode != 0:
+        print(f"  ERROR Pass2: {result.stderr.decode()[-300:]}")
+        return None
 
     final_dur = dur(output_path)
     size_mb = output_path.stat().st_size / (1024 * 1024)
@@ -283,3 +364,88 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     print(f"  Duration: {final_dur:.1f}s, Size: {size_mb:.1f}MB")
     print(f"  DONE!")
     return output_path
+
+
+def load_episode_data(ep_num):
+    """JSONファイルからエピソードデータを読み込む"""
+    with open(BASE_DIR / "batch_001_voicevox_scripts.json") as f:
+        vox_data = json.load(f)
+    with open(BASE_DIR / "batch_001_image_prompts.json") as f:
+        img_data = json.load(f)
+
+    # VOICEVOX
+    vox_ep = None
+    for ep in vox_data["episodes"]:
+        if ep["ep"] == ep_num:
+            vox_ep = ep
+            break
+    if not vox_ep:
+        print(f"EP{ep_num:02d} not found in voicevox scripts")
+        return None
+
+    # Image prompts
+    img_ep = None
+    for ep in img_data["episodes"]:
+        if ep["ep"] == ep_num:
+            img_ep = ep
+            break
+    if not img_ep:
+        print(f"EP{ep_num:02d} not found in image prompts")
+        return None
+
+    title = vox_ep["title_jp"]
+    speaker_id = vox_ep["speaker_id"]
+    cta_text = vox_ep.get("cta_text", "フォローして次の雑学も見てね！")
+
+    sections_data = []
+    for sec in vox_ep["sections"]:
+        sections_data.append({
+            "key": sec["section"],
+            "text": sec["text"],
+            "pause_ms": sec.get("pause_after_ms", 0),
+            "speed_scale": sec.get("speed_scale", 1.0),
+            "pitch_scale": sec.get("pitch_scale", 0.0),
+            "intonation_scale": sec.get("intonation_scale", 1.0),
+        })
+
+    image_prompts = img_ep["images"]
+
+    return {
+        "title": title,
+        "speaker_id": speaker_id,
+        "sections_data": sections_data,
+        "image_prompts": image_prompts,
+        "cta_text": cta_text,
+    }
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python3 batch_produce.py <ep_num> [ep_num ...]")
+        print("Example: python3 batch_produce.py 5 6 7 8")
+        sys.exit(1)
+
+    ep_nums = [int(x) for x in sys.argv[1:]]
+    results = {}
+
+    for ep_num in ep_nums:
+        data = load_episode_data(ep_num)
+        if not data:
+            results[ep_num] = None
+            continue
+
+        results[ep_num] = produce_episode(
+            ep_num,
+            data["title"],
+            data["sections_data"],
+            data["image_prompts"],
+            speaker_id=data["speaker_id"],
+            cta_text=data["cta_text"],
+        )
+
+    print(f"\n\n{'='*50}")
+    print("=== 結果 ===")
+    print(f"{'='*50}")
+    for ep, path in results.items():
+        status = f"OK: {path.name}" if path else "FAILED"
+        print(f"  EP{ep:02d}: {status}")

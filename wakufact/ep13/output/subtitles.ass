@@ -1,0 +1,23 @@
+[Script Info]
+Title: WakuFact EP13
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Hiragino Sans,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,8,40,40,600,1
+Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,40,40,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:03.00,Title,,0,0,0,,チョコレートは\N通貨だった
+Dialogue: 0,0:00:00.00,0:00:04.33,Default,,0,0,0,,もしチョコが今もお金だったら、\Nバレンタインは大変なことに。
+Dialogue: 0,0:00:05.13,0:00:14.91,Default,,0,0,0,,古代アステカ文明では、\Nカカオ豆が\N通貨として使われていました。\Nカカオ豆10粒でウサギ1羽、\N100粒で奴隷1人。
+Dialogue: 0,0:00:15.41,0:00:24.00,Default,,0,0,0,,あまりに価値が高かったため、\N偽造カカオ豆まで登場。\N粘土をカカオの皮で\N包んだ精巧な偽物。
+Dialogue: 0,0:00:24.60,0:00:33.01,Default,,0,0,0,,人類初の通貨偽造犯です。\Nスペイン人が侵略するまで、\Nカカオは\N神の食べ物として崇められていた。
+Dialogue: 0,0:00:33.51,0:00:41.08,Default,,0,0,0,,ちなみにチョコレートが甘いお菓子に\Nなったのは19世紀。\Nそれまでは苦い飲み物でした。
+Dialogue: 0,0:00:42.08,0:00:44.72,Default,,0,0,0,,歴史を変えた一粒の豆の話。
+Dialogue: 1,0:00:43.08,0:00:44.72,Title,,0,0,0,,食べ物の歴史、\N意外すぎ。\Nフォローで\N毎日新発見！

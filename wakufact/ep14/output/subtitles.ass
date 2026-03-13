@@ -1,0 +1,23 @@
+[Script Info]
+Title: WakuFact EP14
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Hiragino Sans,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,8,40,40,600,1
+Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,40,40,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:03.00,Title,,0,0,0,,あなたの胃酸は金属を\N溶かすほど強い
+Dialogue: 0,0:00:00.00,0:00:03.89,Default,,0,0,0,,あなたのお腹の中に、\N金属を溶かす液体が入っています。
+Dialogue: 0,0:00:04.69,0:00:09.81,Default,,0,0,0,,胃酸のpHは1.5〜3.5。\Nこれは塩酸とほぼ同じ濃度。
+Dialogue: 0,0:00:10.31,0:00:16.83,Default,,0,0,0,,カミソリの刃を入れると、\N24時間で溶け始める。\Nじゃあなぜ胃自体が溶けないのか？
+Dialogue: 0,0:00:17.43,0:00:28.40,Default,,0,0,0,,胃の内壁は厚い粘液層で\N保護されていて、\N3〜4日ごとに完全に入れ替わる。\N胃は文字通り、\N自分自身を\N溶かしながら再生し続けている。
+Dialogue: 0,0:00:28.90,0:00:37.16,Default,,0,0,0,,もしこの粘液層が壊れると、\N胃潰瘍になる。\Nつまり胃潰瘍とは「胃が自分を\N消化してしまう病気」。
+Dialogue: 0,0:00:38.16,0:00:42.62,Default,,0,0,0,,あなたの体は毎日、\N自己崩壊と再生の戦いをしています。
+Dialogue: 1,0:00:39.16,0:00:42.62,Title,,0,0,0,,人体のヤバい仕組み、\Nもっと聞きたい？\Nフォロー！

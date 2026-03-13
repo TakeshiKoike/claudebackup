@@ -1,0 +1,23 @@
+[Script Info]
+Title: WakuFact EP07
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Hiragino Sans,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,8,40,40,600,1
+Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,40,40,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:03.00,Title,,0,0,0,,世界最短の戦争は\Nたった38分で\N終わった
+Dialogue: 0,0:00:00.00,0:00:02.65,Default,,0,0,0,,昼休みより短い戦争があった。
+Dialogue: 0,0:00:03.45,0:00:15.98,Default,,0,0,0,,1896年、\Nイギリスとザンジバルの間で\N起きた「英ザンジバル戦争」。\N原因はザンジバルの新スルタンが\Nイギリスの承認なしに即位したこと。
+Dialogue: 0,0:00:16.48,0:00:21.34,Default,,0,0,0,,イギリスは最後通牒を出した。\N朝9時、期限切れ。
+Dialogue: 0,0:00:21.94,0:00:29.81,Default,,0,0,0,,イギリス海軍が砲撃開始。\Nザンジバル側の宮殿は炎上、\N唯一の軍艦は沈没。
+Dialogue: 0,0:00:30.31,0:00:43.67,Default,,0,0,0,,9時38分、ザンジバルが降伏。\N38分間の戦争。\N死者はザンジバル側約500名、\Nイギリス側は1名が負傷しただけ。
+Dialogue: 0,0:00:44.67,0:00:50.97,Default,,0,0,0,,世界史上最も一方的で\N最短の戦争として、\Nギネスブックに記録されています。
+Dialogue: 1,0:00:45.67,0:00:50.97,Title,,0,0,0,,歴史のトンデモ事件、\Nまだまだあるよ。\Nフォロー！

@@ -1,0 +1,23 @@
+[Script Info]
+Title: WakuFact EP16
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Hiragino Sans,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,8,40,40,600,1
+Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,40,40,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:03.00,Title,,0,0,0,,雷は太陽の5倍熱い
+Dialogue: 0,0:00:00.00,0:00:04.84,Default,,0,0,0,,太陽より熱いものが、\Nあなたの頭の上で毎日発生している。
+Dialogue: 0,0:00:05.64,0:00:12.33,Default,,0,0,0,,太陽の表面温度は約5500度。\Nつまり雷は太陽の約5倍熱い。
+Dialogue: 0,0:00:12.83,0:00:19.88,Default,,0,0,0,,この超高温が空気を瞬時に膨張させ、\N衝撃波を生む。これが雷の音。
+Dialogue: 0,0:00:20.48,0:00:33.17,Default,,0,0,0,,地球上では毎秒約100回、\N1日約860万回の落雷が発生。\Nこの瞬間も、\Nどこかで\N太陽より熱い稲妻が地面に\N突き刺さっている。
+Dialogue: 0,0:00:33.67,0:00:44.17,Default,,0,0,0,,ちなみに雷に\N打たれて生存する確率は約90%。\N致死率は意外と低い。\Nでも後遺症は深刻。
+Dialogue: 0,0:00:45.17,0:00:48.26,Default,,0,0,0,,自然の電気ショックは、\Nやっぱり怖い。
+Dialogue: 1,0:00:46.17,0:00:48.26,Title,,0,0,0,,自然の力、\Nハンパない。\Nフォローで\N明日も雑学！

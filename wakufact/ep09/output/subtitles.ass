@@ -1,0 +1,23 @@
+[Script Info]
+Title: WakuFact EP09
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Hiragino Sans,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,8,40,40,600,1
+Style: Title,Hiragino Sans,100,&H0000FFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,3,8,40,40,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:00.00,0:00:03.00,Title,,0,0,0,,地球上の全アリの\N重さは\N全人類とほぼ同じ
+Dialogue: 0,0:00:00.00,0:00:03.75,Default,,0,0,0,,あなたの体重と同じ重さのアリ、\N何匹だと思う？
+Dialogue: 0,0:00:04.55,0:00:08.48,Default,,0,0,0,,約60kgの人間なら、\N約4000万匹。
+Dialogue: 0,0:00:08.98,0:00:12.02,Default,,0,0,0,,そして地球に\Nは推定2京匹のアリがいる。
+Dialogue: 0,0:00:12.62,0:00:14.43,Default,,0,0,0,,2の後にゼロが16個。
+Dialogue: 0,0:00:14.93,0:00:41.18,Default,,0,0,0,,全部合わせると約800億kg。\N一方、\N人類80億人の総重量は\N約3500億kg。最新の研究では、\Nアリの総重量は\N人類の約20%とされていますが、\N1万年前なら人類はもっと少なく、\Nアリの方が重かった可能性が高い。\Nアリは1億年以上前から地球に\Nいる大先輩。
+Dialogue: 0,0:00:42.18,0:00:46.47,Default,,0,0,0,,人間なんて、\Nアリの歴史から見ればほんの一瞬の\N新参者です。
+Dialogue: 1,0:00:43.18,0:00:46.47,Title,,0,0,0,,自然界のスケール、\N想像を超えてる。\Nフォローで次回も！
