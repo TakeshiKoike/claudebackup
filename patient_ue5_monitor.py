@@ -36,8 +36,8 @@ VOICEVOX_URL = _sys_config.get("voicevox_url", "http://localhost:50021")
 OLLAMA_URL = _sys_config.get("ollama_url", "http://localhost:11434")
 
 # Voice settings
-PATIENT_SPEAKER_ID = _profile.get("voice_speaker_id", 11)
-NURSE_SPEAKER_ID = 8      # 春日部つむぎ（女性・看護師）
+PATIENT_SPEAKER_ID = _profile.get("voice_speaker_id", 42)  # ちび式じい（高齢男性）
+NURSE_SPEAKER_ID = 20     # もち子さん（普通の女性声）
 PATIENT_VOLUME = 2.0      # 患者音量（1.0が標準、2.0で2倍）
 NURSE_VOLUME = 1.0        # 看護師音量
 
