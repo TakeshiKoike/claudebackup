@@ -5,7 +5,7 @@
 **セッション開始時・再起動時に、必ず以下を実行すること：**
 
 1. `memory/MEMORY.md` を読む（自動読み込みされる）
-2. **`memory/session_handoff_20260315.md` を必ず読む**（最新の引き継ぎ書）
+2. **`memory/session_handoff_latest.md` を必ず読む**（統合版引き継ぎ書・これ1つでOK）
 3. `memory/feedback_blender_mcp_critical.md` を必ず読む（Blender MCP失敗パターン）
 4. `memory/` 配下の関連メモリファイルを確認する（特に手順書テーブルに記載のファイル）
 5. MEMORY.md内の「未完了タスク」セクションを確認する
