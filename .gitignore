@@ -23,6 +23,13 @@ copd_project/*
 !copd_project/vn_viewer.html
 !copd_project/vn_editor.html
 
+# シミュレーションノベル テンプレート（素材設計書）
+!OneDrive/
+!OneDrive/デスクトップ/
+!OneDrive/デスクトップ/シミュレーションノベル_テンプレート/
+!OneDrive/デスクトップ/シミュレーションノベル_テンプレート/*.html
+!OneDrive/デスクトップ/シミュレーションノベル_テンプレート/*.json
+
 # 訪問看護ステーション経営シミュレーション
 !houmon_nurse_game/
 !houmon_nurse_game/**

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>シミュレーションノベル 素材設計書 v0.1</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Meiryo', 'Hiragino Kaku Gothic ProN', sans-serif;
+    background: #f5f5f0; color: #333; line-height: 1.6;
+  }
+  header {
+    background: linear-gradient(135deg, #2d5a27, #4a8c3f);
+    color: white; padding: 20px 40px 20px 220px; position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  header h1 { font-size: 24px; }
+  header p { font-size: 14px; opacity: 0.8; margin-top: 5px; }
+
+  .nav {
+    background: #1a3a15; position: fixed; top: 0; left: 0; bottom: 0; width: 200px;
+    z-index: 200; padding: 15px 12px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 4px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  }
+  .nav .nav-title {
+    color: #8bc34a; font-size: 11px; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 1px; padding: 8px 8px 4px; margin-bottom: 4px;
+    border-bottom: 1px solid #2d5a27;
+  }
+  .nav a {
+    text-decoration: none; color: #c8e6c9; font-size: 13px;
+    padding: 8px 12px; border-radius: 8px;
+    transition: all 0.2s; display: block;
+    border: none;
+  }
+  .nav a:hover { background: #2d5a27; color: white; }
+  .nav a.active { background: #4a8c3f; color: white; font-weight: bold; }
+  .nav a.nav-domain { padding-left: 20px; font-size: 12px; }
+  .nav a.nav-highlight { color: #ffcc02; font-weight: bold; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 100px 40px 30px 240px; }
+
+  /* 概要セクション */
+  .overview {
+    background: white; border-radius: 12px; padding: 30px;
+    margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .overview h2 { color: #2d5a27; border-bottom: 2px solid #2d5a27; padding-bottom: 8px; margin-bottom: 15px; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 20px 0; }
+  .stat-card {
+    background: #f0f7ee; border-radius: 8px; padding: 15px; text-align: center;
+  }
+  .stat-card .number { font-size: 28px; font-weight: bold; color: #2d5a27; }
+  .stat-card .label { font-size: 12px; color: #666; }
+
+  /* 共通素材 */
+  .common-assets {
+    background: #fffde7; border-radius: 12px; padding: 30px;
+    margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-left: 5px solid #f9a825;
+  }
+  .common-assets h2 { color: #f57f17; margin-bottom: 15px; }
+
+  /* 領域カード */
+  .domain {
+    background: white; border-radius: 12px; padding: 30px;
+    margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-left: 5px solid #2d5a27;
+  }
+  .domain h2 {
+    color: #2d5a27; font-size: 20px; display: flex; align-items: center; gap: 10px;
+    margin-bottom: 5px;
+  }
+  .domain h2 .num {
+    background: #2d5a27; color: white; width: 32px; height: 32px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .domain .description { color: #666; font-size: 14px; margin-bottom: 20px; }
+
+  .category { margin-bottom: 20px; }
+  .category h3 {
+    font-size: 15px; color: #555; margin-bottom: 8px;
+    padding-left: 10px; border-left: 3px solid #8bc34a;
+  }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 10px;
+  }
+  th {
+    background: #e8f5e9; color: #2d5a27; padding: 8px 12px;
+    text-align: left; font-size: 13px; white-space: nowrap;
+  }
+  td { padding: 8px 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+  tr:hover td { background: #f9fdf7; }
+
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; margin: 1px 2px;
+  }
+  .tag-bg { background: #e3f2fd; color: #1565c0; }
+  .tag-char { background: #fce4ec; color: #c62828; }
+  .tag-equip { background: #fff3e0; color: #e65100; }
+  .tag-common { background: #e8f5e9; color: #2e7d32; }
+  .tag-new { background: #f3e5f5; color: #7b1fa2; }
+
+  .note {
+    background: #fff8e1; padding: 10px 15px; border-radius: 6px;
+    font-size: 13px; color: #795548; margin-top: 10px;
+  }
+  .note::before { content: "💡 "; }
+
+  .todo {
+    background: #ffebee; padding: 10px 15px; border-radius: 6px;
+    font-size: 13px; color: #c62828; margin-top: 10px;
+  }
+  .todo::before { content: "要確認: "; font-weight: bold; }
+
+  /* 集計 */
+  .summary-table { margin-top: 20px; }
+  .summary-table th { background: #2d5a27; color: white; }
+  .summary-table td { text-align: center; }
+  .summary-table td:first-child { text-align: left; }
+
+  footer {
+    text-align: center; padding: 30px 30px 30px 240px; color: #999; font-size: 12px;
+  }
+
+  @media print {
+    header { position: static; }
+    .nav { display: none; }
+    .domain { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>看護シミュレーションノベル 素材設計書</h1>
+  <p>全10領域 テンプレート素材一覧 — v0.1 ドラフト（2026/3/18）</p>
+</header>
+
+<nav class="nav" id="sidebar">
+  <div class="nav-title">目次</div>
+  <a href="#overview">概要</a>
+  <a href="#common">共通素材</a>
+  <div class="nav-title" style="margin-top:8px;">10領域</div>
+  <a href="#d1" class="nav-domain">1. 基礎看護</a>
+  <a href="#d2" class="nav-domain">2. 成人看護</a>
+  <a href="#d3" class="nav-domain">3. 老年看護</a>
+  <a href="#d4" class="nav-domain">4. 小児看護</a>
+  <a href="#d5" class="nav-domain">5. 母性看護</a>
+  <a href="#d6" class="nav-domain">6. 精神看護</a>
+  <a href="#d7" class="nav-domain nav-highlight">7. 在宅看護</a>
+  <a href="#d8" class="nav-domain">8. 公衆衛生</a>
+  <a href="#d9" class="nav-domain">9. 助産学</a>
+  <a href="#d10" class="nav-domain">10. その他</a>
+  <div class="nav-title" style="margin-top:8px;">まとめ</div>
+  <a href="#totals">集計</a>
+</nav>
+
+<main>
+
+<!-- ===== 概要 ===== -->
+<section class="overview" id="overview">
+  <h2>プロジェクト概要</h2>
+  <p>看護教育10領域それぞれに対応したシミュレーションノベル教材を制作するための<strong>素材設計書</strong>です。<br>
+  COPD在宅事例（v2.32）を見本とし、各領域で必要な背景・人物・機器・シナリオ要素を整理します。</p>
+
+  <div class="stats">
+    <div class="stat-card"><div class="number">10</div><div class="label">看護領域</div></div>
+    <div class="stat-card"><div class="number">?</div><div class="label">背景画像（総数）</div></div>
+    <div class="stat-card"><div class="number">?</div><div class="label">人物キャラ（総数）</div></div>
+    <div class="stat-card"><div class="number">?</div><div class="label">BGM（総数）</div></div>
+    <div class="stat-card"><div class="number">?</div><div class="label">事例シナリオ</div></div>
+  </div>
+
+  <div class="note">「?」は各領域の検討後に集計します。先生と一緒に埋めていきましょう。</div>
+</section>
+
+<!-- ===== 共通素材 ===== -->
+<section class="common-assets" id="common">
+  <h2>全領域共通の素材</h2>
+  <p>どの領域でも使い回せる素材。一度作れば全事例で共有できます。</p>
+
+  <div class="category">
+    <h3>共通 背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th><th>使用領域</th></tr>
+      <tr><td>病棟ナースステーション</td><td>看護師の拠点。申し送り・カンファレンス場面</td><td>ほぼ全領域</td></tr>
+      <tr><td>病室（個室）</td><td>ベッド1台、窓、ナースコール</td><td>基礎・成人・老年・小児・母性</td></tr>
+      <tr><td>病室（多床室）</td><td>4床室、カーテン仕切り</td><td>基礎・成人・老年</td></tr>
+      <tr><td>外来待合室</td><td>受付・椅子・掲示板</td><td>全領域</td></tr>
+      <tr><td>診察室</td><td>医師の机・診察台</td><td>全領域</td></tr>
+      <tr><td>カンファレンスルーム</td><td>多職種カンファレンス、退院支援会議</td><td>全領域</td></tr>
+      <tr><td>廊下</td><td>病棟の廊下、移動場面</td><td>全領域</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>共通 人物（職種）</h3>
+    <table>
+      <tr><th>職種</th><th>表情数</th><th>説明</th></tr>
+      <tr><td>看護師（女性）</td><td>9</td><td>メイン看護師。白衣・ナース服</td></tr>
+      <tr><td>看護師（男性）</td><td>9</td><td>男性看護師</td></tr>
+      <tr><td>医師（男性）</td><td>9</td><td>主治医・担当医</td></tr>
+      <tr><td>医師（女性）</td><td>9</td><td>女性医師</td></tr>
+      <tr><td>薬剤師</td><td>9</td><td>服薬指導場面</td></tr>
+      <tr><td>理学療法士</td><td>9</td><td>リハビリ場面</td></tr>
+      <tr><td>ケアマネジャー</td><td>9</td><td>在宅・介護連携場面</td></tr>
+      <tr><td>医療ソーシャルワーカー</td><td>9</td><td>退院支援・社会資源</td></tr>
+      <tr><td>栄養士</td><td>9</td><td>栄養指導場面</td></tr>
+    </table>
+    <div class="note">表情9種: 笑顔・心配・驚き・考え中・通常・安堵・真剣・困惑・感謝（COPD版準拠）</div>
+  </div>
+
+  <div class="category">
+    <h3>共通 BGM</h3>
+    <table>
+      <tr><th>BGM名</th><th>雰囲気</th><th>使用場面</th></tr>
+      <tr><td>メインテーマ</td><td>穏やか・希望</td><td>タイトル・エンディング</td></tr>
+      <tr><td>日常</td><td>軽やか</td><td>日常生活場面</td></tr>
+      <tr><td>医療</td><td>落ち着き・緊張</td><td>診察・処置場面</td></tr>
+      <tr><td>心温まる</td><td>温かい</td><td>家族との場面</td></tr>
+      <tr><td>緊迫</td><td>緊張・切迫</td><td>急変・救急場面</td></tr>
+      <tr><td>悲しみ</td><td>静か・切ない</td><td>終末期・グリーフ</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>共通 マップ</h3>
+    <table>
+      <tr><th>マップ名</th><th>説明</th></tr>
+      <tr><td>病院全体図</td><td>外観・各階フロア</td></tr>
+      <tr><td>病棟フロア図</td><td>ナースステーション・病室配置</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>共通 ビューア・エンジン</h3>
+    <table>
+      <tr><th>ファイル</th><th>説明</th></tr>
+      <tr><td>vn_viewer.html</td><td>シナリオJSON読込→再生する汎用ビューア</td></tr>
+      <tr><td>vn_editor.html</td><td>シナリオ編集エディタ</td></tr>
+      <tr><td>scenario_template.json</td><td>空のシナリオ雛形</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 1. 基礎看護学 ===== -->
+<section class="domain" id="d1">
+  <h2><span class="num">1</span> 基礎看護学</h2>
+  <p class="description">看護の基本技術・コミュニケーション・フィジカルアセスメント・感染予防など</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-common">共通</span> 病室（個室・多床室）</td><td>バイタルサイン測定、環境整備の場面</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 実習室・演習室</td><td>学内演習、シミュレーション練習</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 処置室</td><td>注射・採血・点滴の場面</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 成人患者（男性・汎用）</td><td>基本的な看護技術の対象。50〜60代</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 成人患者（女性・汎用）</td><td>同上</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 看護学生</td><td>実習場面の主人公</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 実習指導者</td><td>病棟の実習指導看護師</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>主な場面</th><th>学習テーマ</th></tr>
+      <tr><td>初めての受け持ち患者</td><td>病室・ナースステーション</td><td>コミュニケーション、情報収集、報告</td></tr>
+      <tr><td>バイタルサイン異常発見</td><td>病室・ナースステーション</td><td>フィジカルアセスメント、報告（SBAR）</td></tr>
+      <tr><td>感染対策</td><td>病室・廊下</td><td>標準予防策、手指衛生、PPE</td></tr>
+    </table>
+  </div>
+
+  <div class="todo">先生確認: 基礎看護で優先すべき事例はどれですか？</div>
+</section>
+
+<!-- ===== 2. 成人看護学 ===== -->
+<section class="domain" id="d2">
+  <h2><span class="num">2</span> 成人看護学</h2>
+  <p class="description">急性期（周術期）・慢性期・回復期・終末期の成人患者への看護</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 手術室</td><td>周術期看護、術前訪問</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> ICU/HCU</td><td>術後管理、重症患者</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> リハビリ室</td><td>回復期リハ</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 化学療法室</td><td>外来化学療法</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 透析室</td><td>人工透析</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 緩和ケア病室</td><td>終末期、個室、家族の面会</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 周術期患者（男性40-60代）</td><td>手術衣、術後の痛み表情</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> がん患者（女性50-60代）</td><td>化学療法中、脱毛等の外見変化</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 糖尿病患者（男性50代）</td><td>慢性期管理、自己管理指導</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 終末期患者（男性70代）</td><td>緩和ケア、意思決定</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 患者の配偶者</td><td>家族看護、グリーフケア</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>主な場面</th><th>学習テーマ</th></tr>
+      <tr><td>胃がん術後看護</td><td>手術室→ICU→病室</td><td>周術期管理、疼痛管理、早期離床</td></tr>
+      <tr><td>糖尿病教育入院</td><td>病室・栄養指導室</td><td>自己管理支援、患者教育</td></tr>
+      <tr><td>終末期の意思決定支援</td><td>緩和ケア病室</td><td>ACP、家族ケア、多職種連携</td></tr>
+    </table>
+  </div>
+
+  <div class="todo">先生確認: 急性期・慢性期・終末期、どの事例を優先しますか？</div>
+</section>
+
+<!-- ===== 3. 老年看護学 ===== -->
+<section class="domain" id="d3">
+  <h2><span class="num">3</span> 老年看護学</h2>
+  <p class="description">高齢者特有の疾患・老年症候群・認知症・施設ケア・転倒予防など</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 特別養護老人ホーム居室</td><td>施設入所者の生活場面</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 介護老人保健施設</td><td>リハビリ・在宅復帰支援</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> デイサービス</td><td>通所介護、レクリエーション</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 高齢者の自宅（和室）</td><td>独居高齢者、生活環境</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> グループホーム</td><td>認知症共同生活</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 認知症高齢者（女性80代）</td><td>徘徊、BPSD、穏やか〜混乱の表情</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 脳卒中後遺症患者（男性75歳）</td><td>片麻痺、車椅子、リハビリ中</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 大腿骨骨折後高齢者（女性85歳）</td><td>転倒後、歩行器使用</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 介護職員</td><td>施設の介護スタッフ</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 高齢者の家族（息子/娘）</td><td>介護負担、意思決定</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>主な場面</th><th>学習テーマ</th></tr>
+      <tr><td>認知症ケア</td><td>施設居室・共有スペース</td><td>パーソンセンタードケア、BPSD対応</td></tr>
+      <tr><td>転倒予防と対応</td><td>病室・廊下</td><td>転倒リスクアセスメント、環境整備</td></tr>
+      <tr><td>誤嚥性肺炎予防</td><td>病室・食堂</td><td>摂食嚥下評価、口腔ケア</td></tr>
+    </table>
+  </div>
+
+  <div class="todo">先生確認: 施設 vs 病棟、どちらの場面を重視しますか？</div>
+</section>
+
+<!-- ===== 4. 小児看護学 ===== -->
+<section class="domain" id="d4">
+  <h2><span class="num">4</span> 小児看護学</h2>
+  <p class="description">新生児〜思春期の子どもと家族への看護。成長発達、プレパレーション</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 小児病棟（明るい装飾）</td><td>壁に絵、おもちゃ、明るい雰囲気</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> NICU</td><td>新生児集中治療室</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> プレイルーム</td><td>病棟内の遊びスペース</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 小児科外来</td><td>予防接種・健診</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 保育園/幼稚園</td><td>健康観察、感染症対応</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 幼児（3-5歳）</td><td>プレパレーション対象、泣き・笑い</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 学童（8-10歳）</td><td>入院中、勉強・遊び、自己理解あり</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 思春期（中学生）</td><td>慢性疾患の自己管理移行</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 母親</td><td>付き添い、不安、育児相談</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 父親</td><td>面会、家族支援</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 保育士/チャイルドライフスペシャリスト</td><td>遊び支援、プレパレーション</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>主な場面</th><th>学習テーマ</th></tr>
+      <tr><td>気管支喘息の幼児</td><td>小児病棟・自宅</td><td>発作時対応、家族指導、環境整備</td></tr>
+      <tr><td>手術を受ける学童</td><td>小児病棟・手術室前</td><td>プレパレーション、術前術後ケア</td></tr>
+      <tr><td>1型糖尿病の思春期</td><td>外来・学校</td><td>自己管理移行、ピアサポート</td></tr>
+    </table>
+  </div>
+
+  <div class="todo">先生確認: 小児の年齢層（乳児・幼児・学童・思春期）で優先はどれですか？</div>
+</section>
+
+<!-- ===== 5. 母性看護学 ===== -->
+<section class="domain" id="d5">
+  <h2><span class="num">5</span> 母性看護学</h2>
+  <p class="description">妊娠・分娩・産褥期の女性と新生児への看護。マタニティサイクル全体</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 産科病棟（母子同室）</td><td>ベッド+ベビーコット、授乳スペース</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 分娩室/LDR</td><td>分娩台、モニター</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 新生児室</td><td>コット、保育器、沐浴設備</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 産科外来</td><td>妊婦健診、エコー</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 母親学級</td><td>集団指導の教室</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 妊婦（20-30代）</td><td>妊娠各期、お腹の大きさ変化</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 産婦</td><td>分娩進行中</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 褥婦</td><td>産後、授乳中</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 夫/パートナー</td><td>立ち会い、育児参加</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 助産師</td><td>分娩介助、母乳指導</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 産科医</td><td>ハイリスク妊娠管理</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>主な場面</th><th>学習テーマ</th></tr>
+      <tr><td>正常分娩と産褥ケア</td><td>LDR→産科病棟</td><td>分娩経過観察、産褥復古、母乳支援</td></tr>
+      <tr><td>妊娠高血圧症候群</td><td>産科外来→産科病棟</td><td>ハイリスク妊娠、安静管理</td></tr>
+      <tr><td>産後うつの早期発見</td><td>産科病棟→自宅</td><td>EPDS、メンタルヘルス、地域連携</td></tr>
+    </table>
+  </div>
+
+  <div class="todo">先生確認: 母性と助産学（領域9）の境界線はどこで引きますか？</div>
+</section>
+
+<!-- ===== 6. 精神看護学 ===== -->
+<section class="domain" id="d6">
+  <h2><span class="num">6</span> 精神看護学</h2>
+  <p class="description">精神疾患患者への看護。治療的コミュニケーション、地域移行支援</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 精神科病棟（閉鎖）</td><td>施錠、保護室あり</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 精神科病棟（開放）</td><td>自由な出入り、デイルーム</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> デイケア</td><td>精神科デイケア、作業療法</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 相談室</td><td>面談、カウンセリング</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> グループホーム（精神）</td><td>地域生活支援</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 就労支援施設</td><td>B型事業所など</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 統合失調症患者（男性30代）</td><td>幻聴、妄想、回復過程</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> うつ病患者（女性40代）</td><td>気分の変動、意欲低下</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 双極性障害患者</td><td>躁状態・うつ状態</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 精神科医</td><td>薬物療法、治療方針</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 臨床心理士/公認心理師</td><td>心理検査、心理療法</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 精神保健福祉士</td><td>退院支援、地域移行</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>主な場面</th><th>学習テーマ</th></tr>
+      <tr><td>統合失調症の急性期〜回復</td><td>閉鎖病棟→開放病棟→地域</td><td>治療的関係、服薬支援、地域移行</td></tr>
+      <tr><td>うつ病からの回復支援</td><td>病棟→デイケア→自宅</td><td>自殺リスク評価、段階的活動拡大</td></tr>
+      <tr><td>アルコール依存症</td><td>病棟→自助グループ</td><td>動機づけ面接、再発予防</td></tr>
+    </table>
+  </div>
+
+  <div class="todo">先生確認: 精神科特有の表情表現（無表情、不安、興奮等）は別途必要ですか？</div>
+</section>
+
+<!-- ===== 7. 在宅看護学 ===== -->
+<section class="domain" id="d7" style="border-left-color: #e65100;">
+  <h2><span class="num" style="background:#e65100;">7</span> 在宅看護学 <span style="color:#e65100; font-size:14px;">（先生のご専門）</span></h2>
+  <p class="description">訪問看護、在宅療養支援、家族看護、多職種連携、在宅医療機器管理</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th><th>備考</th></tr>
+      <tr><td><span class="tag tag-common">COPD版あり</span> 自宅居間</td><td>ソファ、テレビ、生活感</td><td>bg_home_living.png</td></tr>
+      <tr><td><span class="tag tag-common">COPD版あり</span> 自宅寝室</td><td>介護ベッド、医療機器</td><td>bg_home_bedroom.png</td></tr>
+      <tr><td><span class="tag tag-common">COPD版あり</span> 自宅浴室</td><td>入浴介助</td><td>—</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 自宅玄関</td><td>訪問看護師の訪問場面</td><td></td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 自宅台所</td><td>栄養管理、食事場面</td><td></td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 訪問看護ステーション</td><td>カンファレンス、情報共有</td><td></td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 団地・アパート（独居）</td><td>独居高齢者の住環境</td><td></td></tr>
+      <tr><td><span class="tag tag-common">COPD版あり</span> 薬局</td><td>服薬管理</td><td>bg_pharmacy.png</td></tr>
+      <tr><td><span class="tag tag-common">COPD版あり</span> 診療所</td><td>かかりつけ医</td><td>bg_clinic.png</td></tr>
+      <tr><td><span class="tag tag-common">COPD版あり</span> 町並み（マップ）</td><td>地域全体像</td><td>map_town.png</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th><th>備考</th></tr>
+      <tr><td><span class="tag tag-common">COPD版あり</span> 訪問看護師</td><td>私服+エプロン or 制服</td><td>山田看護師</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 訪問看護師②</td><td>同行訪問、後輩指導</td><td></td></tr>
+      <tr><td><span class="tag tag-new">新規</span> ヘルパー（訪問介護員）</td><td>生活援助、身体介護</td><td></td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 訪問リハビリ（PT/OT）</td><td>在宅リハビリ</td><td></td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 訪問医（在宅医）</td><td>往診場面</td><td></td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 民生委員</td><td>地域の見守り</td><td></td></tr>
+      <tr><td>— 患者・家族は事例ごとに異なる —</td><td></td><td></td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>患者像</th><th>学習テーマ</th></tr>
+      <tr><td><span class="tag tag-common">完成済</span> COPD在宅酸素療法</td><td>78歳男性、妻と二人暮らし</td><td>呼吸管理、急性増悪、多職種連携</td></tr>
+      <tr><td>脳卒中後の在宅復帰</td><td>70代男性、片麻痺</td><td>ADL支援、家族指導、福祉用具</td></tr>
+      <tr><td>在宅看取り（がん終末期）</td><td>60代女性、独居or家族</td><td>疼痛管理、グリーフケア、ACP</td></tr>
+      <tr><td>難病（ALS）在宅療養</td><td>50代男性、人工呼吸器</td><td>医療機器管理、意思決定支援</td></tr>
+      <tr><td>認知症独居高齢者</td><td>80代女性、独居</td><td>生活支援、地域包括、権利擁護</td></tr>
+      <tr><td>小児在宅ケア（医療的ケア児）</td><td>3歳、経管栄養+吸引</td><td>家族支援、レスパイト、就学支援</td></tr>
+    </table>
+  </div>
+
+  <div class="note">COPD事例が完成しているので、在宅領域は最も素材の蓄積があります。他の事例にも展開しやすい領域です。</div>
+  <div class="todo">先生確認: 在宅で次に作るべき事例の優先順位はどうしますか？</div>
+</section>
+
+<!-- ===== 8. 公衆衛生看護学 ===== -->
+<section class="domain" id="d8">
+  <h2><span class="num">8</span> 公衆衛生看護学</h2>
+  <p class="description">保健師活動。地域診断、健康教育、母子保健、精神保健、災害保健</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 保健センター</td><td>市町村の保健活動拠点</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 乳幼児健診会場</td><td>1歳半健診、3歳児健診</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 地域の集会所</td><td>健康教室、介護予防教室</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 避難所</td><td>災害時の避難所運営</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 企業の健康管理室</td><td>産業保健</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 学校の保健室</td><td>学校保健</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 保健師</td><td>市町村保健師、スーツ or 白衣</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 若い母親</td><td>乳幼児健診、育児不安</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 乳児</td><td>健診場面</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 地域住民（高齢者グループ）</td><td>健康教室参加者</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 産業医</td><td>職場の健康管理</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 行政職員</td><td>保健福祉課等</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>主な場面</th><th>学習テーマ</th></tr>
+      <tr><td>虐待リスクのある家庭への支援</td><td>保健センター→家庭訪問</td><td>リスクアセスメント、関係構築、通告</td></tr>
+      <tr><td>特定健診後の保健指導</td><td>保健センター</td><td>動機づけ支援、行動変容</td></tr>
+      <tr><td>災害時の保健活動</td><td>避難所</td><td>トリアージ、DPAT、エコノミー症候群予防</td></tr>
+    </table>
+  </div>
+
+  <div class="todo">先生確認: 公衆衛生は保健師課程の学生が対象ですか？看護学生全体？</div>
+</section>
+
+<!-- ===== 9. 助産学 ===== -->
+<section class="domain" id="d9">
+  <h2><span class="num">9</span> 助産学</h2>
+  <p class="description">助産師の専門性。分娩介助、ハイリスク妊娠、新生児ケア、性教育</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-common">母性と共有</span> 分娩室/LDR</td><td>より専門的な視点</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 助産院</td><td>院内助産、自然分娩</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 母乳外来</td><td>母乳育児支援</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 産後ケア施設</td><td>産後ケア事業</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 高校の教室</td><td>性教育・出前授業</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-common">母性と共有</span> 妊産褥婦</td><td>—</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> ベテラン助産師</td><td>指導者役</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 新生児</td><td>出生直後、沐浴、黄疸</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 高校生（性教育対象）</td><td>男女</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 新生児科医</td><td>NICU、ハイリスク新生児</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>主な場面</th><th>学習テーマ</th></tr>
+      <tr><td>正常分娩の介助</td><td>分娩室</td><td>分娩進行判断、分娩介助技術</td></tr>
+      <tr><td>産後出血への対応</td><td>分娩室→手術室</td><td>異常の早期発見、緊急対応</td></tr>
+      <tr><td>母乳育児支援</td><td>産科病棟→母乳外来</td><td>ラッチオン、トラブル対応</td></tr>
+    </table>
+  </div>
+
+  <div class="todo">先生確認: 母性看護（領域5）との素材共有範囲はどこまでですか？</div>
+</section>
+
+<!-- ===== 10. その他 ===== -->
+<section class="domain" id="d10">
+  <h2><span class="num">10</span> その他（国際看護・養護教諭等）</h2>
+  <p class="description">国際看護、養護教諭、看護管理、災害看護、医療安全など</p>
+
+  <div class="category">
+    <h3>固有の背景</h3>
+    <table>
+      <tr><th>背景名</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 学校の保健室</td><td>養護教諭の活動拠点</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 海外の診療所</td><td>国際看護、途上国の医療</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 看護部長室</td><td>看護管理、人員配置</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 災害現場</td><td>トリアージ、救護所</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>固有の人物</h3>
+    <table>
+      <tr><th>人物</th><th>説明</th></tr>
+      <tr><td><span class="tag tag-new">新規</span> 養護教諭</td><td>学校保健、健康相談</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 児童・生徒</td><td>小学生〜高校生</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 看護管理者</td><td>師長、主任</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 外国人患者</td><td>文化的配慮、通訳</td></tr>
+      <tr><td><span class="tag tag-new">新規</span> 医療通訳</td><td>言語サポート</td></tr>
+    </table>
+  </div>
+
+  <div class="category">
+    <h3>想定シナリオ例</h3>
+    <table>
+      <tr><th>事例</th><th>主な場面</th><th>学習テーマ</th></tr>
+      <tr><td>保健室登校への対応</td><td>保健室・教室</td><td>心身の健康観察、教員連携</td></tr>
+      <tr><td>医療事故発生時の対応</td><td>病棟・会議室</td><td>インシデント報告、RCA、患者説明</td></tr>
+      <tr><td>外国人患者の看護</td><td>病棟・外来</td><td>異文化理解、やさしい日本語</td></tr>
+    </table>
+  </div>
+
+  <div class="todo">先生確認: この「その他」カテゴリの優先度と範囲はどうしますか？</div>
+</section>
+
+<!-- ===== 集計 ===== -->
+<section class="overview" id="totals">
+  <h2>素材集計（概算）</h2>
+
+  <table class="summary-table">
+    <tr>
+      <th>カテゴリ</th>
+      <th>共通</th>
+      <th>1.基礎</th>
+      <th>2.成人</th>
+      <th>3.老年</th>
+      <th>4.小児</th>
+      <th>5.母性</th>
+      <th>6.精神</th>
+      <th>7.在宅</th>
+      <th>8.公衛</th>
+      <th>9.助産</th>
+      <th>10.他</th>
+      <th style="background:#f57f17;">合計</th>
+    </tr>
+    <tr>
+      <td>背景</td>
+      <td>7</td><td>2</td><td>6</td><td>5</td><td>5</td><td>5</td><td>6</td><td>4</td><td>6</td><td>3</td><td>4</td>
+      <td style="font-weight:bold;">53</td>
+    </tr>
+    <tr>
+      <td>人物（種類）</td>
+      <td>9</td><td>4</td><td>5</td><td>5</td><td>6</td><td>6</td><td>6</td><td>5</td><td>6</td><td>4</td><td>5</td>
+      <td style="font-weight:bold;">61</td>
+    </tr>
+    <tr>
+      <td>人物 x 表情</td>
+      <td>81</td><td>36</td><td>45</td><td>45</td><td>54</td><td>54</td><td>54</td><td>45</td><td>54</td><td>36</td><td>45</td>
+      <td style="font-weight:bold;">549</td>
+    </tr>
+    <tr>
+      <td>BGM</td>
+      <td>6</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+      <td style="font-weight:bold;">6</td>
+    </tr>
+    <tr>
+      <td>シナリオ例</td>
+      <td>—</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>6</td><td>3</td><td>3</td><td>3</td>
+      <td style="font-weight:bold;">33</td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <strong>概算:</strong> 背景約53種、人物約61種（表情含め約549枚）、BGM 6曲、シナリオ33事例分<br>
+    ただしこれは叩き台です。先生の修正で大きく変わる可能性があります。
+  </div>
+
+  <div class="todo">
+    先生と確認すべきこと：<br>
+    ・各領域の事例数（3つは多い？少ない？）<br>
+    ・人物の表情パターン（9種で十分？領域固有の表情が必要？）<br>
+    ・背景の重複（共有できるものをもっと増やせる？）<br>
+    ・優先順位（全10領域を同時に進める？段階的に？）<br>
+    ・画像のスタイル（COPD版と同じイラスト調？写実的？）
+  </div>
+</section>
+
+</main>
+
+<footer>
+  看護シミュレーションノベル 素材設計書 v0.1 — 2026/3/18 作成<br>
+  小池先生 × Claude Code 共同設計
+</footer>
+
+<script>
+// スクロール時にサイドバーの現在セクションをハイライト
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav a[href^="#"]');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.remove('active');
+    if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+  });
+});
+// スムーススクロール
+navLinks.forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>

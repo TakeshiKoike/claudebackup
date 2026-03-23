@@ -1,0 +1,371 @@
+{
+  "meta": {
+    "title": "（メインタイトル）",
+    "subtitle": "（サブタイトル — 事例名・患者名など）",
+    "version": "1.0",
+    "domain": "（看護領域：基礎看護学/成人看護学/老年看護学/小児看護学/母性看護学/精神看護学/在宅看護学/公衆衛生看護学/助産学/その他）",
+    "difficulty": "（初級/中級/上級）",
+    "targetGrade": "（対象学年：1年/2年/3年/4年/全学年）",
+    "estimatedTime": "（想定所要時間：例 30分）",
+    "learningObjectives": [
+      "（学習目標1）",
+      "（学習目標2）",
+      "（学習目標3）"
+    ],
+    "titleBackground": "maps/map_main.png",
+    "titleInfo": [
+      "患者：（氏名）さん（年齢）",
+      "疾患：（疾患名）",
+      "治療：（主な治療法）",
+      "全●シーン・●カット・●問のクイズ"
+    ]
+  },
+
+  "characters": {
+    "_comment": "キャラクターID → 表示名・画像フォルダ・デフォルト表情を定義",
+    "patient": {
+      "name": "（患者名）",
+      "folder": "patient_expressions",
+      "defaultExpression": "patient_05_neutral"
+    },
+    "nurse": {
+      "name": "（看護師名）",
+      "folder": "nurse_expressions",
+      "defaultExpression": "nurse_05_neutral"
+    },
+    "family": {
+      "name": "（家族名・続柄）",
+      "folder": "family_expressions",
+      "defaultExpression": "family_05_neutral"
+    },
+    "doctor": {
+      "name": "（医師名・肩書き）",
+      "folder": "doctor_expressions",
+      "defaultExpression": "doctor_05_neutral"
+    }
+  },
+
+  "_expressionGuide": {
+    "_comment": "各キャラクター共通の表情番号。画像ファイル名は {キャラID}_{番号}_{表情名}.png",
+    "expressions": [
+      "01_smile       — 笑顔（喜び・安心）",
+      "02_worried     — 心配・不安",
+      "03_surprised   — 驚き",
+      "04_thinking    — 考え中・疑問",
+      "05_neutral     — 平常・落ち着き",
+      "06_relieved    — 安堵・ほっとした",
+      "07_serious     — 真剣・深刻",
+      "08_sad         — 悲しみ・落胆",
+      "09_grateful    — 感謝"
+    ]
+  },
+
+  "speakerNames": {
+    "_comment": "speaker値 → ダイアログ表示名の対応表",
+    "narration": "ナレーション",
+    "patient": "（患者名）",
+    "nurse": "（看護師名）",
+    "family": "（家族名）",
+    "doctor": "（医師名）"
+  },
+
+  "backgrounds": {
+    "_comment": "背景ID → 画像パスの対応表。事例に必要な場所をすべて定義する",
+    "scene_a": "backgrounds/bg_scene_a.png",
+    "scene_b": "backgrounds/bg_scene_b.png",
+    "scene_c": "backgrounds/bg_scene_c.png"
+  },
+
+  "bgm": {
+    "_comment": "BGM ID → 音声パス。シーンの雰囲気ごとに使い分ける",
+    "main_theme": "bgm/bgm_main_theme.mp3",
+    "daily": "bgm/bgm_daily.mp3",
+    "medical": "bgm/bgm_medical.mp3",
+    "heartwarming": "bgm/bgm_heartwarming.mp3",
+    "tension": "bgm/bgm_tension.mp3"
+  },
+
+  "maps": {
+    "_comment": "メインMAP＋サブMAPの定義。マーカーで場所間の移動を表現する",
+    "town": {
+      "image": "maps/map_main.png",
+      "markers": [
+        {
+          "id": "location_a",
+          "label": "（場所A名）",
+          "icon": "🏥",
+          "colorClass": "hospital",
+          "position": { "left": "30%", "top": "50%" }
+        },
+        {
+          "id": "location_b",
+          "label": "（場所B名）",
+          "icon": "🏠",
+          "colorClass": "home",
+          "position": { "left": "60%", "top": "40%" }
+        }
+      ]
+    },
+    "subMaps": {}
+  },
+
+  "sceneFlow": [
+    { "sceneId": 1, "nextLocation": null },
+    { "sceneId": 2, "nextLocation": "location_b" }
+  ],
+
+  "sceneLocationMap": {
+    "1": null,
+    "2": "location_a"
+  },
+
+  "scenes": [
+    {
+      "_comment": "=== シーン1: イントロ（ナレーションのみ） ===",
+      "id": 1,
+      "title": "イントロ",
+      "background": "scene_a",
+      "bgm": "main_theme",
+      "cuts": [
+        {
+          "id": "s01_01",
+          "speaker": "narration",
+          "text": "（物語の導入。患者の基本情報・背景を説明する）",
+          "expressions": []
+        },
+        {
+          "id": "s01_02",
+          "speaker": "narration",
+          "text": "（疾患・治療の概要を簡潔に紹介する）",
+          "expressions": []
+        },
+        {
+          "id": "s01_03",
+          "speaker": "narration",
+          "text": "（学習者への呼びかけ。「一緒に体験してみましょう」）",
+          "expressions": []
+        }
+      ],
+      "knowledge": {
+        "title": "（疾患名・テーマ）とは",
+        "text": "（疾患やテーマの基礎知識。箇条書きで簡潔に）"
+      }
+    },
+
+    {
+      "_comment": "=== シーン2: 対話シーン（テンプレート） ===",
+      "id": 2,
+      "title": "（シーンタイトル）",
+      "background": "scene_b",
+      "bgm": "medical",
+      "cuts": [
+        {
+          "id": "s02_01",
+          "speaker": "doctor",
+          "text": "（医師のセリフ）",
+          "characters": ["patient", "doctor"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_05_neutral" },
+            { "id": "doctor", "position": "right", "expression": "doctor_05_neutral" }
+          ]
+        },
+        {
+          "id": "s02_02",
+          "speaker": "patient",
+          "type": "thought",
+          "text": "（患者の心の声 — type: thought で内面描写）",
+          "characters": ["patient", "doctor"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_04_thinking" },
+            { "id": "doctor", "position": "right", "expression": "doctor_05_neutral" }
+          ]
+        },
+        {
+          "id": "s02_03",
+          "speaker": "patient",
+          "text": "（患者のセリフ）",
+          "characters": ["patient", "doctor"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_02_worried" },
+            { "id": "doctor", "position": "right", "expression": "doctor_05_neutral" }
+          ]
+        },
+        {
+          "id": "s02_04",
+          "speaker": "doctor",
+          "text": "（医師のセリフ）",
+          "characters": ["patient", "doctor"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_05_neutral" },
+            { "id": "doctor", "position": "right", "expression": "doctor_07_serious" }
+          ]
+        }
+      ],
+      "knowledge": {
+        "title": "（このシーンの学習ポイント）",
+        "text": "（関連する看護知識を箇条書きで記載）"
+      },
+      "quiz": {
+        "question": "（国試レベルの4択問題）",
+        "options": [
+          { "text": "（選択肢1）", "correct": false },
+          { "text": "（正答）", "correct": true },
+          { "text": "（選択肢3）", "correct": false },
+          { "text": "（選択肢4）", "correct": false }
+        ]
+      }
+    },
+
+    {
+      "_comment": "=== シーン3: 看護実践シーン（テンプレート） ===",
+      "id": 3,
+      "title": "（看護ケアのシーンタイトル）",
+      "background": "scene_c",
+      "bgm": "heartwarming",
+      "cuts": [
+        {
+          "id": "s03_01",
+          "speaker": "nurse",
+          "text": "（看護師の挨拶・状態確認）",
+          "characters": ["patient", "nurse"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_05_neutral" },
+            { "id": "nurse", "position": "right", "expression": "nurse_01_smile" }
+          ]
+        },
+        {
+          "id": "s03_02",
+          "speaker": "nurse",
+          "text": "（看護アセスメント・観察）",
+          "characters": ["patient", "nurse"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_05_neutral" },
+            { "id": "nurse", "position": "right", "expression": "nurse_04_thinking" }
+          ]
+        },
+        {
+          "id": "s03_03",
+          "speaker": "patient",
+          "text": "（患者の訴え・反応）",
+          "characters": ["patient", "nurse"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_02_worried" },
+            { "id": "nurse", "position": "right", "expression": "nurse_05_neutral" }
+          ]
+        },
+        {
+          "id": "s03_04",
+          "speaker": "nurse",
+          "text": "（看護介入・指導）",
+          "characters": ["patient", "nurse"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_05_neutral" },
+            { "id": "nurse", "position": "right", "expression": "nurse_07_serious" }
+          ]
+        },
+        {
+          "id": "s03_05",
+          "speaker": "patient",
+          "text": "（患者の理解・感謝）",
+          "characters": ["patient", "nurse"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_09_grateful" },
+            { "id": "nurse", "position": "right", "expression": "nurse_01_smile" }
+          ]
+        }
+      ],
+      "knowledge": {
+        "title": "（看護ケアの学習ポイント）",
+        "text": "（ケアの手順・根拠・注意点を箇条書き）"
+      },
+      "quiz": {
+        "question": "（看護ケアに関する4択問題）",
+        "options": [
+          { "text": "（選択肢1）", "correct": false },
+          { "text": "（選択肢2）", "correct": false },
+          { "text": "（正答）", "correct": true },
+          { "text": "（選択肢4）", "correct": false }
+        ]
+      }
+    },
+
+    {
+      "_comment": "=== 急変シーン（テンプレート） ===",
+      "id": 4,
+      "title": "（急変・状態変化のタイトル）",
+      "background": "scene_c",
+      "bgm": "tension",
+      "cuts": [
+        {
+          "id": "s04_01",
+          "speaker": "family",
+          "text": "（家族が異変に気づく）",
+          "characters": ["patient", "nurse", "family"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_08_sad" },
+            { "id": "family", "position": "right", "expression": "family_02_worried" }
+          ]
+        },
+        {
+          "id": "s04_02",
+          "speaker": "nurse",
+          "text": "（看護師のアセスメント・緊急対応）",
+          "characters": ["patient", "nurse", "family"],
+          "expressions": [
+            { "id": "patient", "position": "left", "expression": "patient_08_sad" },
+            { "id": "nurse", "position": "right", "expression": "nurse_07_serious" }
+          ]
+        }
+      ],
+      "knowledge": {
+        "title": "（急変時の知識）",
+        "text": "（急変の徴候・対応手順を箇条書き）"
+      },
+      "quiz": {
+        "question": "（急変対応に関する問題）",
+        "multipleAnswer": true,
+        "options": [
+          { "text": "（正答1）", "correct": true },
+          { "text": "（誤答1）", "correct": false },
+          { "text": "（誤答2）", "correct": false },
+          { "text": "（正答2）", "correct": true }
+        ]
+      }
+    },
+
+    {
+      "_comment": "=== エンディング ===",
+      "id": 5,
+      "title": "エンディング",
+      "background": "scene_a",
+      "bgm": "main_theme",
+      "cuts": [
+        {
+          "id": "s05_01",
+          "speaker": "narration",
+          "text": "（物語のまとめ・結末）",
+          "expressions": []
+        },
+        {
+          "id": "s05_02",
+          "speaker": "patient",
+          "text": "（患者の感謝・希望の言葉）",
+          "characters": ["patient"],
+          "expressions": [
+            { "id": "patient", "position": "center", "expression": "patient_09_grateful" }
+          ]
+        },
+        {
+          "id": "s05_03",
+          "speaker": "narration",
+          "text": "（学習のまとめ・メッセージ）",
+          "expressions": []
+        }
+      ],
+      "knowledge": {
+        "title": "（全体の学習まとめ）",
+        "text": "（事例全体を通じて学ぶべきポイントの要約）"
+      }
+    }
+  ]
+}
