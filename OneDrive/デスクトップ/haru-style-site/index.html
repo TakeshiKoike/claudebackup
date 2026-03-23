@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Haru Style Site</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f0e2bb;
+      --bg-sub: #e8d5a5;
+      --text: #422612;
+      --text-sub: #6b4c2a;
+      --accent: #f4a000;
+      --accent2: #f1d81f;
+      --card-bg: #faf3e0;
+      --white: #fffdf5;
+      --shadow: rgba(66, 38, 18, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #1a295c;
+      --bg-sub: #152147;
+      --text: #fff;
+      --text-sub: #c8d4ef;
+      --accent: #f4a000;
+      --accent2: #f1d81f;
+      --card-bg: #1e3270;
+      --white: #233a7a;
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.8;
+      transition: background-color 0.5s, color 0.5s;
+    }
+
+    /* ===== Scrollbar ===== */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-sub); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+    /* ===== Header ===== */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 40px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: transparent;
+      transition: background 0.4s, box-shadow 0.4s;
+    }
+
+    header.scrolled {
+      background: var(--bg);
+      box-shadow: 0 2px 20px var(--shadow);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      position: relative;
+      transition: color 0.3s;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    nav a:hover::after { width: 100%; }
+    nav a:hover { color: var(--accent); }
+
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--text);
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ===== Hamburger (mobile) ===== */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 8px;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text);
+      transition: all 0.3s;
+    }
+
+    /* ===== Hero ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 20px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.3s forwards;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      line-height: 1.3;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.5s forwards;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+      position: relative;
+    }
+
+    .hero h1 em::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: var(--accent2);
+      opacity: 0.3;
+      border-radius: 4px;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      color: var(--text-sub);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.7s forwards;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 36px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      transition: all 0.3s;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.9s forwards;
+    }
+
+    .hero-cta:hover {
+      background: var(--text);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+
+    .hero-cta .arrow {
+      transition: transform 0.3s;
+    }
+
+    .hero-cta:hover .arrow {
+      transform: translateX(4px);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 0.8s 1.2s forwards;
+    }
+
+    .scroll-indicator span {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--text-sub);
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: var(--text-sub);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scroll-line::after {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--accent);
+      animation: scrollDown 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollDown {
+      0% { top: -100%; }
+      50% { top: 100%; }
+      100% { top: 100%; }
+    }
+
+    /* ===== Section Common ===== */
+    section {
+      padding: 100px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .section-desc {
+      font-size: 0.95rem;
+      color: var(--text-sub);
+      max-width: 600px;
+      margin-bottom: 60px;
+    }
+
+    /* ===== Fade-in on scroll ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-left {
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .fade-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .fade-in-right {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .fade-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== About ===== */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .about-image {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 20px,
+        rgba(255,255,255,0.05) 20px,
+        rgba(255,255,255,0.05) 40px
+      );
+    }
+
+    .about-image .dots {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      display: grid;
+      grid-template-columns: repeat(5, 8px);
+      gap: 8px;
+    }
+
+    .about-image .dots span {
+      width: 8px;
+      height: 8px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 50%;
+    }
+
+    .about-text h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+
+    .about-text p {
+      font-size: 0.95rem;
+      color: var(--text-sub);
+      margin-bottom: 20px;
+    }
+
+    /* ===== Services / Cards ===== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 40px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.4s, box-shadow 0.4s;
+      cursor: default;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 40px var(--shadow);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s;
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+      color: #fff;
+      transition: transform 0.4s;
+    }
+
+    .card:hover .card-icon {
+      transform: rotate(-8deg) scale(1.1);
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0.06em;
+    }
+
+    .card p {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    .card-num {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      font-size: 3rem;
+      font-weight: 700;
+      opacity: 0.06;
+      letter-spacing: -0.02em;
+    }
+
+    /* ===== Works ===== */
+    .works-list {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .work-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      padding: 40px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      transition: transform 0.4s, box-shadow 0.4s;
+    }
+
+    .work-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px var(--shadow);
+    }
+
+    .work-item:nth-child(even) {
+      direction: rtl;
+    }
+
+    .work-item:nth-child(even) > * {
+      direction: ltr;
+    }
+
+    .work-thumb {
+      width: 100%;
+      aspect-ratio: 16/10;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--bg-sub), var(--accent));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .work-thumb::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1));
+    }
+
+    .work-info .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      font-weight: 500;
+      padding: 4px 12px;
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .work-info h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0.06em;
+    }
+
+    .work-info p {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    /* ===== Numbers / Stats ===== */
+    .stats {
+      padding: 80px 40px;
+      background: var(--card-bg);
+      border-radius: 24px;
+      margin: 0 auto;
+      max-width: 1200px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      text-align: center;
+    }
+
+    .stat-item .stat-num {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-item .stat-num span {
+      font-size: 0.5em;
+      font-weight: 400;
+    }
+
+    .stat-item .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      letter-spacing: 0.1em;
+    }
+
+    /* ===== Team ===== */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+    }
+
+    .team-member {
+      text-align: center;
+    }
+
+    .team-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .team-avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      transition: transform 0.5s;
+    }
+
+    .team-member:hover .team-avatar-inner {
+      transform: scale(1.08);
+    }
+
+    .team-member h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: 0.06em;
+    }
+
+    .team-member .role {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      letter-spacing: 0.1em;
+    }
+
+    /* ===== Contact ===== */
+    .contact {
+      text-align: center;
+    }
+
+    .contact-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 48px;
+      background: var(--text);
+      color: var(--bg);
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      letter-spacing: 0.12em;
+      transition: all 0.3s;
+      border: 2px solid var(--text);
+    }
+
+    .contact-btn:hover {
+      background: transparent;
+      color: var(--text);
+    }
+
+    /* ===== Dot Decoration ===== */
+    .dot-deco {
+      position: relative;
+    }
+
+    .dot-deco::after {
+      content: '';
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      background-image: radial-gradient(var(--accent) 1.5px, transparent 1.5px);
+      background-size: 12px 12px;
+      opacity: 0.15;
+      z-index: 0;
+    }
+
+    /* ===== Parallax BG Shapes ===== */
+    .bg-shape {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.06;
+    }
+
+    .bg-shape-1 {
+      width: 400px;
+      height: 400px;
+      background: var(--accent);
+      top: 20%;
+      right: -100px;
+    }
+
+    .bg-shape-2 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent2);
+      bottom: 30%;
+      left: -80px;
+    }
+
+    .bg-shape-3 {
+      width: 200px;
+      height: 200px;
+      background: var(--accent);
+      top: 60%;
+      right: 20%;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      background: var(--text);
+      color: var(--bg);
+      padding: 60px 40px 30px;
+      margin-top: 60px;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-brand .logo {
+      color: var(--bg);
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+
+    .footer-brand p {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      line-height: 1.7;
+    }
+
+    .footer-col h5 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+
+    .footer-col a {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--bg);
+      text-decoration: none;
+      opacity: 0.5;
+      margin-bottom: 10px;
+      transition: opacity 0.3s;
+    }
+
+    .footer-col a:hover { opacity: 1; }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 24px;
+      border-top: 1px solid rgba(240, 226, 187, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      opacity: 0.4;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 960px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .team-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    }
+
+    @media (max-width: 768px) {
+      header { padding: 0 20px; }
+      nav { display: none; }
+      .hamburger { display: flex; }
+      nav.open {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background: var(--bg);
+        padding: 30px 20px;
+        gap: 20px;
+        box-shadow: 0 8px 20px var(--shadow);
+      }
+      section { padding: 60px 20px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .work-item { grid-template-columns: 1fr; padding: 24px; }
+      .work-item:nth-child(even) { direction: ltr; }
+      .stats { padding: 40px 20px; margin: 0 20px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .team-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+      .footer-inner { grid-template-columns: 1fr; gap: 30px; }
+      footer { padding: 40px 20px 20px; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background shapes (parallax) -->
+  <div class="bg-shape bg-shape-1"></div>
+  <div class="bg-shape bg-shape-2"></div>
+  <div class="bg-shape bg-shape-3"></div>
+
+  <!-- Header -->
+  <header id="header">
+    <a href="#" class="logo">HARU<span>ni</span></a>
+    <nav id="nav">
+      <a href="#about">ABOUT</a>
+      <a href="#services">SERVICES</a>
+      <a href="#works">WORKS</a>
+      <a href="#team">TEAM</a>
+      <a href="#contact">CONTACT</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">&#9790;</button>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="メニュー">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="heroSection">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-label">Creative Studio</div>
+      <h1>つくる<em>よろこび</em>を<br>すべての人に</h1>
+      <p>わたしたちは、テクノロジーとクリエイティビティの力で、人々の暮らしに新しい価値と感動を届けます。</p>
+      <a href="#services" class="hero-cta">
+        VIEW MORE <span class="arrow">&rarr;</span>
+      </a>
+    </div>
+    <div class="scroll-indicator">
+      <span>SCROLL</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about">
+    <div class="fade-in">
+      <div class="section-label">ABOUT US</div>
+      <div class="section-title">わたしたちについて</div>
+      <div class="section-desc">ひとつひとつの仕事に、心をこめて。小さなチームから生まれる、大きなアイデア。</div>
+    </div>
+    <div class="about-grid">
+      <div class="about-image fade-in-left">
+        <div class="dots">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="about-text fade-in-right">
+        <h3>Mission</h3>
+        <p>私たちのミッションは、テクノロジーの力で人々の日常をもっと豊かに、もっと楽しくすること。デザインと技術の両面から、最高のユーザー体験を提供します。</p>
+        <h3>Vision</h3>
+        <p>世界中の人々が「つくること」を楽しめる社会を実現するために、私たちはクリエイティブツールとプラットフォームの開発に取り組んでいます。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section id="services">
+    <div class="fade-in">
+      <div class="section-label">SERVICES</div>
+      <div class="section-title">私たちにできること</div>
+      <div class="section-desc">企画からデザイン、開発、運用まで。ワンストップでサポートします。</div>
+    </div>
+    <div class="cards-grid">
+      <div class="card fade-in" style="transition-delay: 0.1s">
+        <div class="card-num">01</div>
+        <div class="card-icon">&#9998;</div>
+        <h3>UI/UX デザイン</h3>
+        <p>ユーザーの心に響くデザインを。リサーチからプロトタイプ、テストまで一貫して行います。</p>
+      </div>
+      <div class="card fade-in" style="transition-delay: 0.2s">
+        <div class="card-num">02</div>
+        <div class="card-icon">&#128187;</div>
+        <h3>Web 開発</h3>
+        <p>最新技術を活用し、パフォーマンスとアクセシビリティに優れたWebサイト・アプリを構築します。</p>
+      </div>
+      <div class="card fade-in" style="transition-delay: 0.3s">
+        <div class="card-num">03</div>
+        <div class="card-icon">&#127912;</div>
+        <h3>ブランディング</h3>
+        <p>ロゴ、カラー、タイポグラフィ。ブランドの世界観を丁寧に設計し、一貫した体験を構築します。</p>
+      </div>
+      <div class="card fade-in" style="transition-delay: 0.4s">
+        <div class="card-num">04</div>
+        <div class="card-icon">&#128247;</div>
+        <h3>映像制作</h3>
+        <p>企画・撮影・編集まで。プロモーション動画やイベント映像を高品質に仕上げます。</p>
+      </div>
+      <div class="card fade-in" style="transition-delay: 0.5s">
+        <div class="card-num">05</div>
+        <div class="card-icon">&#128640;</div>
+        <h3>アプリ開発</h3>
+        <p>iOS/Android対応のネイティブ・クロスプラットフォームアプリを設計・開発します。</p>
+      </div>
+      <div class="card fade-in" style="transition-delay: 0.6s">
+        <div class="card-num">06</div>
+        <div class="card-icon">&#128300;</div>
+        <h3>AI / データ分析</h3>
+        <p>機械学習やデータ分析で、ビジネスの意思決定をサポート。未来を見据えたソリューションを。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats fade-in">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-num" data-target="150">0<span>+</span></div>
+        <div class="stat-label">PROJECTS</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-target="98">0<span>%</span></div>
+        <div class="stat-label">SATISFACTION</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-target="12">0<span>名</span></div>
+        <div class="stat-label">MEMBERS</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-target="8">0<span>年</span></div>
+        <div class="stat-label">EXPERIENCE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Works -->
+  <section id="works">
+    <div class="fade-in">
+      <div class="section-label">WORKS</div>
+      <div class="section-title">制作実績</div>
+      <div class="section-desc">これまでに手がけたプロジェクトの一部をご紹介します。</div>
+    </div>
+    <div class="works-list">
+      <div class="work-item fade-in">
+        <div class="work-thumb"></div>
+        <div class="work-info">
+          <div class="tag">WEB DESIGN</div>
+          <h3>コーポレートサイト リニューアル</h3>
+          <p>企業の理念やサービスをわかりやすく伝えるため、情報設計から見直し、モダンなデザインに刷新しました。</p>
+        </div>
+      </div>
+      <div class="work-item fade-in">
+        <div class="work-thumb" style="background: linear-gradient(135deg, var(--accent2), var(--accent))"></div>
+        <div class="work-info">
+          <div class="tag">MOBILE APP</div>
+          <h3>ヘルスケアアプリ開発</h3>
+          <p>日々の健康管理をサポートするアプリ。直感的なUIと豊富なデータ可視化で、ユーザーの継続率を向上させました。</p>
+        </div>
+      </div>
+      <div class="work-item fade-in">
+        <div class="work-thumb" style="background: linear-gradient(135deg, var(--text), var(--accent))"></div>
+        <div class="work-info">
+          <div class="tag">BRANDING</div>
+          <h3>新ブランド立ち上げ</h3>
+          <p>ブランドコンセプトの策定からロゴデザイン、ガイドライン制作まで。統一された世界観を構築しました。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section id="team">
+    <div class="fade-in">
+      <div class="section-label">TEAM</div>
+      <div class="section-title">チームメンバー</div>
+      <div class="section-desc">多彩な個性が集まる、少数精鋭のチームです。</div>
+    </div>
+    <div class="team-grid">
+      <div class="team-member fade-in" style="transition-delay: 0.1s">
+        <div class="team-avatar">
+          <div class="team-avatar-inner">&#128104;&#8205;&#128188;</div>
+        </div>
+        <h4>田中 太郎</h4>
+        <div class="role">CEO / Director</div>
+      </div>
+      <div class="team-member fade-in" style="transition-delay: 0.2s">
+        <div class="team-avatar">
+          <div class="team-avatar-inner" style="background: linear-gradient(135deg, #f4a000, #e8724a)">&#128105;&#8205;&#128187;</div>
+        </div>
+        <h4>佐藤 花子</h4>
+        <div class="role">Lead Designer</div>
+      </div>
+      <div class="team-member fade-in" style="transition-delay: 0.3s">
+        <div class="team-avatar">
+          <div class="team-avatar-inner" style="background: linear-gradient(135deg, #f1d81f, #f4a000)">&#128104;&#8205;&#128187;</div>
+        </div>
+        <h4>鈴木 一郎</h4>
+        <div class="role">Lead Engineer</div>
+      </div>
+      <div class="team-member fade-in" style="transition-delay: 0.4s">
+        <div class="team-avatar">
+          <div class="team-avatar-inner" style="background: linear-gradient(135deg, #e8724a, #f1d81f)">&#128105;&#8205;&#127912;</div>
+        </div>
+        <h4>山田 美咲</h4>
+        <div class="role">Art Director</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="contact">
+    <div class="fade-in">
+      <div class="section-label">CONTACT</div>
+      <div class="section-title">お気軽にご相談ください</div>
+      <div class="section-desc" style="margin-left: auto; margin-right: auto;">プロジェクトのご相談、お見積もりなど、お気軽にお問い合わせください。</div>
+      <a href="mailto:hello@example.com" class="contact-btn">
+        お問い合わせ <span>&rarr;</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">HARU<span>ni</span></a>
+        <p>テクノロジーとクリエイティビティの力で、<br>人々の暮らしに新しい価値を届けます。</p>
+      </div>
+      <div class="footer-col">
+        <h5>MENU</h5>
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#works">Works</a>
+        <a href="#team">Team</a>
+      </div>
+      <div class="footer-col">
+        <h5>SOCIAL</h5>
+        <a href="#">Twitter / X</a>
+        <a href="#">Instagram</a>
+        <a href="#">GitHub</a>
+      </div>
+      <div class="footer-col">
+        <h5>CONTACT</h5>
+        <a href="mailto:hello@example.com">hello@example.com</a>
+        <a href="#">03-1234-5678</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 HARUni Inc. All rights reserved.</span>
+      <span>Privacy Policy</span>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Three.js 3D Hero Object =====
+    (function() {
+      const canvas = document.getElementById('hero-canvas');
+      const heroSection = document.getElementById('heroSection');
+
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(heroSection.offsetWidth, heroSection.offsetHeight);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, heroSection.offsetWidth / heroSection.offsetHeight, 0.1, 100);
+      camera.position.z = 6;
+
+      // --- Lights ---
+      const ambientLight = new THREE.AmbientLight(0xf0e2bb, 0.4);
+      scene.add(ambientLight);
+
+      const dirLight1 = new THREE.DirectionalLight(0xf4a000, 0.8);
+      dirLight1.position.set(3, 4, 5);
+      scene.add(dirLight1);
+
+      const dirLight2 = new THREE.DirectionalLight(0xf1d81f, 0.5);
+      dirLight2.position.set(-3, -2, 3);
+      scene.add(dirLight2);
+
+      const pointLight = new THREE.PointLight(0xf4a000, 0.6, 20);
+      pointLight.position.set(0, 0, 4);
+      scene.add(pointLight);
+
+      // --- Main icosahedron (wireframe + solid) ---
+      const icoGeo = new THREE.IcosahedronGeometry(1.4, 1);
+
+      const icoMatSolid = new THREE.MeshPhysicalMaterial({
+        color: 0xf4a000,
+        metalness: 0.2,
+        roughness: 0.3,
+        transparent: true,
+        opacity: 0.15,
+        side: THREE.DoubleSide,
+      });
+      const icoSolid = new THREE.Mesh(icoGeo, icoMatSolid);
+      scene.add(icoSolid);
+
+      const icoMatWire = new THREE.MeshBasicMaterial({
+        color: 0xf4a000,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.5,
+      });
+      const icoWire = new THREE.Mesh(icoGeo, icoMatWire);
+      scene.add(icoWire);
+
+      // --- Inner dodecahedron ---
+      const dodGeo = new THREE.DodecahedronGeometry(0.8, 0);
+      const dodMat = new THREE.MeshPhysicalMaterial({
+        color: 0xf1d81f,
+        metalness: 0.3,
+        roughness: 0.4,
+        transparent: true,
+        opacity: 0.25,
+      });
+      const dodecahedron = new THREE.Mesh(dodGeo, dodMat);
+      scene.add(dodecahedron);
+
+      const dodWireMat = new THREE.MeshBasicMaterial({
+        color: 0xf1d81f,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.35,
+      });
+      const dodWire = new THREE.Mesh(dodGeo, dodWireMat);
+      scene.add(dodWire);
+
+      // --- Orbiting small spheres ---
+      const orbitGroup = new THREE.Group();
+      scene.add(orbitGroup);
+      const orbitSpheres = [];
+      for (let i = 0; i < 8; i++) {
+        const sg = new THREE.SphereGeometry(0.06, 16, 16);
+        const sm = new THREE.MeshPhysicalMaterial({
+          color: i % 2 === 0 ? 0xf4a000 : 0xf1d81f,
+          emissive: i % 2 === 0 ? 0xf4a000 : 0xf1d81f,
+          emissiveIntensity: 0.5,
+          metalness: 0.5,
+          roughness: 0.2,
+        });
+        const sphere = new THREE.Mesh(sg, sm);
+        const angle = (i / 8) * Math.PI * 2;
+        const radius = 2.0 + Math.random() * 0.5;
+        sphere.userData = { angle, radius, speed: 0.3 + Math.random() * 0.3, yOffset: (Math.random() - 0.5) * 1.2 };
+        orbitGroup.add(sphere);
+        orbitSpheres.push(sphere);
+      }
+
+      // --- Floating particles ---
+      const particleCount = 200;
+      const particleGeo = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const sizes = new Float32Array(particleCount);
+      for (let i = 0; i < particleCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 12;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 8;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
+        sizes[i] = Math.random() * 3 + 1;
+      }
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      particleGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const particleMat = new THREE.PointsMaterial({
+        color: 0xf4a000,
+        size: 0.04,
+        transparent: true,
+        opacity: 0.5,
+        sizeAttenuation: true,
+      });
+      const particles = new THREE.Points(particleGeo, particleMat);
+      scene.add(particles);
+
+      // --- Edge glow ring ---
+      const ringGeo = new THREE.TorusGeometry(2.2, 0.015, 16, 100);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0xf4a000,
+        transparent: true,
+        opacity: 0.2,
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI / 2.5;
+      scene.add(ring);
+
+      const ring2Geo = new THREE.TorusGeometry(2.6, 0.01, 16, 100);
+      const ring2Mat = new THREE.MeshBasicMaterial({
+        color: 0xf1d81f,
+        transparent: true,
+        opacity: 0.12,
+      });
+      const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+      ring2.rotation.x = Math.PI / 3;
+      ring2.rotation.y = Math.PI / 6;
+      scene.add(ring2);
+
+      // --- Mouse tracking ---
+      const mouse = { x: 0, y: 0 };
+      const targetRotation = { x: 0, y: 0 };
+      document.addEventListener('mousemove', (e) => {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      });
+
+      // --- Resize ---
+      function onResize() {
+        const w = heroSection.offsetWidth;
+        const h = heroSection.offsetHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      }
+      window.addEventListener('resize', onResize);
+
+      // --- Dark mode detection ---
+      function isDarkMode() {
+        return document.documentElement.getAttribute('data-theme') === 'dark';
+      }
+
+      // --- Animation loop ---
+      const clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+
+        // Mouse-follow rotation (smooth lerp)
+        targetRotation.y = mouse.x * 0.4;
+        targetRotation.x = mouse.y * 0.3;
+
+        // Main icosahedron
+        icoSolid.rotation.x += (targetRotation.x - icoSolid.rotation.x + t * 0.08) * 0.02;
+        icoSolid.rotation.y += (targetRotation.y - icoSolid.rotation.y + t * 0.12) * 0.02;
+        icoWire.rotation.copy(icoSolid.rotation);
+
+        // Inner dodecahedron (counter-rotate)
+        dodecahedron.rotation.x = -t * 0.15 + targetRotation.x * 0.5;
+        dodecahedron.rotation.y = t * 0.2 + targetRotation.y * 0.5;
+        dodWire.rotation.copy(dodecahedron.rotation);
+
+        // Floating motion
+        const floatY = Math.sin(t * 0.8) * 0.15;
+        icoSolid.position.y = floatY;
+        icoWire.position.y = floatY;
+        dodecahedron.position.y = floatY;
+        dodWire.position.y = floatY;
+
+        // Scale breathing
+        const breathe = 1 + Math.sin(t * 1.2) * 0.03;
+        icoSolid.scale.setScalar(breathe);
+        icoWire.scale.setScalar(breathe);
+
+        // Orbiting spheres
+        orbitSpheres.forEach(s => {
+          const d = s.userData;
+          d.angle += d.speed * 0.01;
+          s.position.x = Math.cos(d.angle) * d.radius;
+          s.position.z = Math.sin(d.angle) * d.radius * 0.5;
+          s.position.y = d.yOffset + Math.sin(t * d.speed + d.angle) * 0.3 + floatY;
+        });
+
+        // Ring rotation
+        ring.rotation.z = t * 0.1;
+        ring2.rotation.z = -t * 0.08;
+        ring.position.y = floatY;
+        ring2.position.y = floatY;
+
+        // Particles drift
+        const posArr = particles.geometry.attributes.position.array;
+        for (let i = 0; i < particleCount; i++) {
+          posArr[i * 3 + 1] += Math.sin(t + i) * 0.001;
+          posArr[i * 3] += Math.cos(t * 0.5 + i * 0.5) * 0.0005;
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
+        particles.rotation.y = t * 0.02;
+
+        // Dark mode color adaptation
+        if (isDarkMode()) {
+          icoMatSolid.opacity = 0.2;
+          icoMatWire.opacity = 0.7;
+          particleMat.opacity = 0.7;
+          ringMat.opacity = 0.3;
+        } else {
+          icoMatSolid.opacity = 0.15;
+          icoMatWire.opacity = 0.5;
+          particleMat.opacity = 0.5;
+          ringMat.opacity = 0.2;
+        }
+
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+
+    // ===== Header scroll effect =====
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // ===== Hamburger menu =====
+    const hamburger = document.getElementById('hamburger');
+    const nav = document.getElementById('nav');
+    hamburger.addEventListener('click', () => {
+      nav.classList.toggle('open');
+    });
+
+    // close menu on link click
+    nav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => nav.classList.remove('open'));
+    });
+
+    // ===== Theme toggle =====
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+      themeToggle.innerHTML = isDark ? '&#9790;' : '&#9788;';
+    });
+
+    // ===== Scroll fade-in (IntersectionObserver) =====
+    const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -40px 0px' };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach(el => {
+      observer.observe(el);
+    });
+
+    // ===== Counter animation =====
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const nums = entry.target.querySelectorAll('.stat-num');
+          nums.forEach(num => {
+            const target = parseInt(num.getAttribute('data-target'));
+            const suffix = num.querySelector('span')?.outerHTML || '';
+            let current = 0;
+            const step = Math.ceil(target / 40);
+            const timer = setInterval(() => {
+              current += step;
+              if (current >= target) {
+                current = target;
+                clearInterval(timer);
+              }
+              num.innerHTML = current + suffix;
+            }, 30);
+          });
+          counterObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stats-grid').forEach(el => counterObserver.observe(el));
+
+    // ===== Parallax background shapes =====
+    const shapes = document.querySelectorAll('.bg-shape');
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      shapes.forEach((shape, i) => {
+        const speed = (i + 1) * 0.03;
+        shape.style.transform = `translateY(${scrollY * speed}px)`;
+      });
+    });
+  </script>
+</body>
+</html>

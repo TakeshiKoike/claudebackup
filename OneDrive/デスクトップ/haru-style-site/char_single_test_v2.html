@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>キャラ1体テスト v2 — 隙間修正</title>
+<style>*{margin:0;padding:0}body{background:#e8e0d0;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:14px sans-serif;color:#422612;background:rgba(255,255,255,0.9);padding:10px 16px;border-radius:8px;z-index:10}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">キャラ1体テスト v2 — 隙間修正版<br>Drag:回転 / Scroll:ズーム</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xe8e0d0);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,200);
+camera.position.set(5,8,-10);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(0,1.5,0);
+
+scene.add(new THREE.AmbientLight(0xffffff,1.5));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(10,20,-10);scene.add(sun);
+
+const floorGeo=new THREE.PlaneGeometry(20,20);floorGeo.rotateX(-Math.PI/2);
+scene.add(new THREE.Mesh(floorGeo,new THREE.MeshLambertMaterial({color:0xc8c0b0})));
+scene.add(new THREE.GridHelper(20,20,0x888888,0xcccccc));
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+// ★★★ 修正版 buildCharacter — 全ボクセル1x1x1で隙間なし ★★★
+function buildCharacter(opts={}){
+  const v=[];
+  const D = 7; // 厚み（z=0〜6の7ボクセル）
+  const SK = opts.skin||0xf0c8a0, SD=0xe0b890, E=0x202020;
+  const PKL=0xf8c0d0;
+  const hc=opts.hair||0x3a2a1a, sc=opts.shirt||0xf0f0e8, pc=opts.pants||0x2a3a6a, sh=opts.shoe||0x3a3a3a;
+
+  // ヘルパー: x,yの位置にz=0〜D-1まで色cで埋める（隙間なし）
+  function fill(x,y,c){ for(let z=0;z<D;z++) v.push([x,y,z,c]); }
+  // x範囲をfill
+  function fillRow(x0,x1,y,c){ for(let x=x0;x<=x1;x++) fill(x,y,c); }
+
+  // === 髪 ===
+  fillRow(1,7, 13, hc);      // 頭頂
+  fillRow(0,8, 12, hc);      // 髪2段目
+
+  // === 顔 ===
+  fill(0,11,hc); for(let x=1;x<=7;x++) fill(x,11,SK); fill(8,11,hc);
+  // 目の段
+  fill(0,10,hc); fill(1,10,SK); fill(2,10,E); fill(3,10,SK); fill(4,10,SK); fill(5,10,SK); fill(6,10,E); fill(7,10,SK); fill(8,10,hc);
+  // ほっぺ
+  for(let x=1;x<=7;x++) fill(x,9,SK); fill(2,9,PKL); fill(6,9,PKL);
+  // 口
+  for(let x=1;x<=7;x++) fill(x,8,SK); fill(3,8,SD); fill(4,8,SD); fill(5,8,SD);
+
+  // === 首 ===
+  fill(3,7,SK); fill(4,7,SK); fill(5,7,SK);
+
+  // === 体 ===
+  for(let x=0;x<=8;x++) fill(x,6,sc);
+  for(let x=0;x<=8;x++) fill(x,5,sc);
+  fill(0,4,SK); for(let x=1;x<=7;x++) fill(x,4,sc); fill(8,4,SK); // 手は肌色
+  for(let x=1;x<=7;x++) fill(x,3,sc);
+
+  // === 下半身 ===
+  if(opts.skirt){
+    const skC=opts.skirtC||pc;
+    for(let x=1;x<=7;x++) fill(x,2,skC);
+    for(let x=0;x<=8;x++) fill(x,1,skC); // 裾広め
+    // 靴
+    fill(2,0,sh); fill(3,0,sh); fill(5,0,sh); fill(6,0,sh);
+  } else {
+    // ズボン
+    fill(2,2,pc); fill(3,2,pc); fill(5,2,pc); fill(6,2,pc);
+    fill(2,1,pc); fill(3,1,pc); fill(5,1,pc); fill(6,1,pc);
+    // 靴
+    fill(1,0,sh); fill(2,0,sh); fill(3,0,sh); fill(5,0,sh); fill(6,0,sh); fill(7,0,sh);
+  }
+
+  // === アクセサリ（全て本体に接触） ===
+
+  // 帽子（y=14-15、頭と同幅、z=0〜D-1で隙間なし）
+  if(opts.hat){
+    const hatC=opts.hatC||0xe05040;
+    for(let x=0;x<=8;x++) fill(x,14,hatC);
+    for(let x=1;x<=7;x++) fill(x,15,hatC);
+  }
+
+  // メガネ（目の段の色を変えるだけ、突出なし）
+  if(opts.glasses){
+    const GC=0x2a2a2a;
+    // 前面z=0のみ色替え（フレーム）
+    v.push([1,10,0,GC]);v.push([3,10,0,GC]);v.push([4,10,0,GC]);v.push([5,10,0,GC]);v.push([7,10,0,GC]);
+  }
+
+  // ロングヘア（サイドと背面、本体に接触）
+  if(opts.longHair){
+    // サイドの垂れ髪（x=-1とx=9、本体x=0,8に接触）
+    for(let y=6;y<=11;y++) for(let z=1;z<D-1;z++){v.push([-1,y,z,hc]);v.push([9,y,z,hc]);}
+    // 背面ロング（z=D、本体z=D-1に接触）
+    for(let x=2;x<=6;x++) for(let y=4;y<=11;y++) v.push([x,y,D,hc]);
+  }
+
+  // ポニーテール（背面z=Dから伸びる）
+  if(opts.ponytail){
+    for(let y=10;y<=13;y++) v.push([4,y,D,hc]);
+    v.push([4,12,D+1,hc]);v.push([4,11,D+1,hc]);v.push([4,10,D+2,hc]);
+  }
+
+  // リュック（背面z=Dに接触、小さめ）
+  if(opts.bag){
+    const bagC=opts.bagC||0x8a6040;
+    for(let x=3;x<=5;x++) for(let y=4;y<=6;y++){v.push([x,y,D,bagC]);v.push([x,y,D+1,bagC]);}
+    // ストラップ
+    v.push([3,7,D,0x555555]);v.push([5,7,D,0x555555]);
+  }
+
+  return v;
+}
+
+// テスト1: フル装備（帽子+メガネ+リュック）
+const test1 = bm(buildCharacter({
+  shirt:0xe05040, pants:0x2a3a6a, hair:0xd4a040,
+  hat:true, hatC:0x306898, glasses:true, bag:true, bagC:0x4090c8
+}));
+test1.scale.set(0.22,0.22,0.22);
+test1.position.set(0,0.01,0);
+scene.add(test1);
+
+// テスト2: ロングヘア+スカート+ポニテ
+const test2 = bm(buildCharacter({
+  shirt:0xf0a0b0, pants:0xf0a0b0, hair:0x6a4a2a,
+  longHair:true, ponytail:true, skirt:true, skirtC:0x2a3a6a
+}));
+test2.scale.set(0.22,0.22,0.22);
+test2.position.set(3,0.01,0);
+scene.add(test2);
+
+// テスト3: シンプル（アクセサリなし）
+const test3 = bm(buildCharacter({
+  shirt:0x4090c8, pants:0x404040, hair:0x1a1a1a
+}));
+test3.scale.set(0.22,0.22,0.22);
+test3.position.set(-3,0.01,0);
+scene.add(test3);
+
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>

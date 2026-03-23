@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>キャラ v8 — バランス修正+歩行アニメ</title>
+<style>*{margin:0;padding:0}body{background:#e8e0d0;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:14px sans-serif;color:#422612;background:rgba(255,255,255,0.9);padding:10px 16px;border-radius:8px;z-index:10}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">キャラ v8 — バランス修正+歩行アニメ<br>Drag:回転 / Scroll:ズーム</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xe8e0d0);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,200);
+camera.position.set(3,4,-6);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(0,1.2,0);
+
+scene.add(new THREE.AmbientLight(0xffffff,1.5));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(10,20,-10);scene.add(sun);
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(20,20).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:0xc8c0b0})));
+scene.add(new THREE.GridHelper(20,20,0x888888,0xcccccc));
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+// ★★★ v8: 5頭身バランス + パーツ分割で歩行アニメ ★★★
+// 頭10 + 首2 + 胴14 + 脚20 + 靴4 = 50px (5頭身)
+// 頭幅10, 肩幅14, 腰幅10, 腕2幅, 脚3幅, 体厚6, 頭厚8
+function buildWalkableChar(opts={}){
+  const S=0.25;
+  const DH=8, DB=6;
+  const SK=opts.skin||0xf0c8a0, SKD=0xe0b890;
+  const E=0x202020, PKL=0xf8c0d0, MO=0xd8a080;
+  const hc=opts.hair||0x3a2a1a;
+  const sc=opts.shirt||0xf0f0e8, scD=opts.shirtD||0xe0e0d0;
+  const pc=opts.pants||0x2a3a6a;
+  const sh=opts.shoe||0x3a3a3a;
+
+  function mkP(arr,d){
+    const v=[];
+    const pp=(x,y,z,c)=>v.push([x*S,y*S,z*S,c,S,S,S]);
+    const fillD=(x,y,c,dd)=>{for(let z=0;z<dd;z++)pp(x,y,z,c);};
+    const fmbD=(x,y,cf,cm,cb,dd)=>{pp(x,y,0,cf);for(let z=1;z<dd-1;z++)pp(x,y,z,cm);pp(x,y,dd-1,cb);};
+    arr(pp,fillD,fmbD);
+    return bm(v);
+  }
+
+  const group=new THREE.Group();
+
+  // ===== 頭+首+胴体（一体） =====
+  const body=mkP((pp,fillD,fmbD)=>{
+    const fillH=(x,y,c)=>fillD(x,y,c,DH);
+    const fillB=(x,y,c)=>fillD(x,y,c,DB);
+    const fmbH=(x,y,cf,cm,cb)=>fmbD(x,y,cf,cm,cb,DH);
+    const fmbB=(x,y,cf,cm,cb)=>fmbD(x,y,cf,cm,cb,DB);
+
+    // 頭 y=40〜49 (10px) 幅10 x=2〜11
+    for(let x=4;x<=9;x++) fillH(x,49,hc);
+    for(let x=3;x<=10;x++) fillH(x,48,hc);
+    for(let x=2;x<=11;x++) fillH(x,47,hc);
+    for(let x=2;x<=11;x++) fillH(x,46,hc);
+    for(let x=2;x<=11;x++) fmbH(x,45,SK,SK,hc);
+    for(let x=2;x<=11;x++) fmbH(x,44,SK,SK,hc);
+    // 目
+    for(let x=2;x<=11;x++) fmbH(x,43,SK,SK,hc);
+    pp(4,43,0,E); pp(9,43,0,E);
+    // ほっぺ
+    for(let x=2;x<=11;x++) fmbH(x,42,SK,SK,hc);
+    pp(3,42,0,PKL); pp(10,42,0,PKL);
+    // 口
+    for(let x=2;x<=11;x++) fmbH(x,41,SK,SK,hc);
+    pp(6,41,0,MO); pp(7,41,0,MO);
+    // 顎
+    for(let x=3;x<=10;x++) fmbH(x,40,SK,SK,hc);
+
+    // 帽子
+    if(opts.hat){
+      const hatC=opts.hatC||0xe05040;
+      for(let x=2;x<=11;x++) fillH(x,50,hatC);
+      for(let x=3;x<=10;x++) fillH(x,51,hatC);
+    }
+
+    // ロングヘア
+    if(opts.longHair){
+      for(let y=26;y<=46;y++){for(let z=1;z<DH-1;z++){pp(1,y,z,hc);pp(12,y,z,hc);}}
+      for(let x=3;x<=10;x++) for(let y=20;y<=46;y++) pp(x,y,DH,hc);
+    }
+    // ポニーテール
+    if(opts.ponytail){
+      for(let y=40;y<=49;y++){pp(6,y,DH,hc);pp(7,y,DH,hc);}
+      pp(6,44,DH+1,hc);pp(7,44,DH+1,hc);
+      pp(6,40,DH+1,hc);pp(7,40,DH+1,hc);
+    }
+
+    // 首 y=38〜39 幅4
+    for(let y=38;y<=39;y++) for(let x=5;x<=8;x++) fmbB(x,y,SK,SK,SK);
+
+    // 胴 y=24〜37 (14px)
+    // 肩 y=36〜37 幅14
+    for(let x=0;x<=13;x++) fillB(x,37,sc);
+    for(let x=0;x<=13;x++) fillB(x,36,sc);
+    pp(5,37,0,scD);pp(6,37,0,scD);pp(7,37,0,scD);pp(8,37,0,scD);
+    // 胸 y=32〜35 幅12
+    for(let y=32;y<=35;y++) for(let x=1;x<=12;x++) fillB(x,y,sc);
+    // 腰 y=28〜31 幅10
+    for(let y=28;y<=31;y++) for(let x=2;x<=11;x++) fillB(x,y,sc);
+    // ベルト
+    for(let x=2;x<=11;x++) fillB(x,27,scD);
+    // 腰下
+    for(let y=24;y<=26;y++) for(let x=2;x<=11;x++) fillB(x,y,sc);
+
+    // リュック
+    if(opts.bag){
+      const bagC=opts.bagC||0x8a6040;
+      for(let x=4;x<=9;x++) for(let y=28;y<=35;y++){pp(x,y,DB,bagC);pp(x,y,DB+1,bagC);}
+      for(let y=35;y<=38;y++){pp(4,y,DB-1,0x555555);pp(9,y,DB-1,0x555555);}
+    }
+  });
+  group.add(body);
+
+  // ===== 左腕 ===== (ピボット: 肩y=37)
+  const lArmPivot=new THREE.Group();
+  lArmPivot.position.set(-2*S, 37*S, DB/2*S);
+  const lArm=mkP((pp,fillD,fmbD)=>{
+    const fmbB=(x,y,cf,cm,cb)=>fmbD(x,y,cf,cm,cb,DB);
+    // 腕 y=0〜-10 (肩からぶら下がる)
+    for(let y=-1;y>=-8;y--){fillD(0,y,0,sc,DB);fillD(1,y,0,sc,DB);}
+    // 手
+    for(let y=-9;y>=-10;y--){fmbB(0,y,SK,SK,SK);fmbB(1,y,SK,SK,SK);}
+  });
+  lArm.position.set(0,-37*S,-DB/2*S);
+  lArmPivot.add(lArm);
+  group.add(lArmPivot);
+
+  // ===== 右腕 =====
+  const rArmPivot=new THREE.Group();
+  rArmPivot.position.set(14*S, 37*S, DB/2*S);
+  const rArm=mkP((pp,fillD,fmbD)=>{
+    const fmbB=(x,y,cf,cm,cb)=>fmbD(x,y,cf,cm,cb,DB);
+    for(let y=-1;y>=-8;y--){fillD(0,y,0,sc,DB);fillD(1,y,0,sc,DB);}
+    for(let y=-9;y>=-10;y--){fmbB(0,y,SK,SK,SK);fmbB(1,y,SK,SK,SK);}
+  });
+  rArm.position.set(0,-37*S,-DB/2*S);
+  rArmPivot.add(rArm);
+  group.add(rArmPivot);
+
+  // ===== 左脚 ===== (ピボット: 股y=24)
+  const lLegPivot=new THREE.Group();
+  lLegPivot.position.set(3*S, 24*S, DB/2*S);
+  const lLeg=mkP((pp,fillD,fmbD)=>{
+    if(opts.skirt){
+      const skC=opts.skirtC||pc;
+      // スカート部分は体側で描画するので脚だけ
+      for(let y=-1;y>=-16;y--) for(let x=0;x<=2;x++) fmbD(x,y,0,SK,SK,SK,DB);
+      for(let y=-17;y>=-20;y--) for(let x=-1;x<=3;x++) fillD(x,y,0,sh,DB);
+    } else {
+      for(let y=-1;y>=-16;y--) for(let x=0;x<=2;x++) fillD(x,y,0,pc,DB);
+      for(let y=-17;y>=-20;y--) for(let x=-1;x<=3;x++) fillD(x,y,0,sh,DB);
+    }
+  });
+  lLeg.position.set(0,-24*S,-DB/2*S);
+  lLegPivot.add(lLeg);
+  group.add(lLegPivot);
+
+  // ===== 右脚 =====
+  const rLegPivot=new THREE.Group();
+  rLegPivot.position.set(8*S, 24*S, DB/2*S);
+  const rLeg=mkP((pp,fillD,fmbD)=>{
+    if(opts.skirt){
+      const skC=opts.skirtC||pc;
+      for(let y=-1;y>=-16;y--) for(let x=0;x<=2;x++) fmbD(x,y,0,SK,SK,SK,DB);
+      for(let y=-17;y>=-20;y--) for(let x=-1;x<=3;x++) fillD(x,y,0,sh,DB);
+    } else {
+      for(let y=-1;y>=-16;y--) for(let x=0;x<=2;x++) fillD(x,y,0,pc,DB);
+      for(let y=-17;y>=-20;y--) for(let x=-1;x<=3;x++) fillD(x,y,0,sh,DB);
+    }
+  });
+  rLeg.position.set(0,-24*S,-DB/2*S);
+  rLegPivot.add(rLeg);
+  group.add(rLegPivot);
+
+  // スカート（体側に付ける）
+  if(opts.skirt){
+    const skC=opts.skirtC||pc;
+    const skirt=mkP((pp,fillD,fmbD)=>{
+      for(let y=20;y<=23;y++) for(let x=2;x<=11;x++) fillD(x,y,0,skC,DB);
+      for(let y=16;y<=19;y++) for(let x=1;x<=12;x++) fillD(x,y,0,skC,DB);
+      for(let y=12;y<=15;y++) for(let x=0;x<=13;x++) fillD(x,y,0,skC,DB);
+    });
+    group.add(skirt);
+  }
+
+  return {group, lArmPivot, rArmPivot, lLegPivot, rLegPivot};
+}
+
+// 5体生成
+const chars=[];
+const configs=[
+  {shirt:0xe05040,shirtD:0xc03828,pants:0x2a3a6a,hair:0xd4a040,hat:true,hatC:0x306898,bag:true,bagC:0x4090c8},
+  {shirt:0xf0a0b0,shirtD:0xd88898,hair:0x6a4a2a,longHair:true,ponytail:true,skirt:true,skirtC:0x2a3a6a},
+  {shirt:0x4090c8,shirtD:0x3078a8,pants:0x404040,hair:0x1a1a1a},
+  {shirt:0xf0f0e8,shirtD:0xd8d8c8,pants:0x2a3a6a,hair:0xa0a0a0},
+  {shirt:0x50a050,shirtD:0x388838,pants:0x8a6040,hair:0xf0d848,hat:true,hatC:0xe05040},
+];
+const SC=0.055;
+configs.forEach((cfg,i)=>{
+  const ch=buildWalkableChar(cfg);
+  ch.group.scale.set(SC,SC,SC);
+  ch.group.position.set((i-2)*2, 0.01, 0);
+  scene.add(ch.group);
+  chars.push(ch);
+});
+
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+
+  // 歩行アニメーション
+  chars.forEach((ch,i)=>{
+    const speed=1.5+i*0.3;
+    const swing=0.4; // 振り幅（ラジアン）
+    const phase=t*speed+i*1.5;
+    // 腕: 脚と逆位相で振る
+    ch.lArmPivot.rotation.x = Math.sin(phase)*swing;
+    ch.rArmPivot.rotation.x = -Math.sin(phase)*swing;
+    // 脚
+    ch.lLegPivot.rotation.x = -Math.sin(phase)*swing;
+    ch.rLegPivot.rotation.x = Math.sin(phase)*swing;
+  });
+
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>

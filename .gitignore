@@ -30,6 +30,10 @@ copd_project/*
 !OneDrive/デスクトップ/シミュレーションノベル_テンプレート/*.html
 !OneDrive/デスクトップ/シミュレーションノベル_テンプレート/*.json
 
+# ピクセルジオラマ（haru-style-site）
+!OneDrive/デスクトップ/haru-style-site/
+!OneDrive/デスクトップ/haru-style-site/*.html
+
 # 訪問看護ステーション経営シミュレーション
 !houmon_nurse_game/
 !houmon_nurse_game/**

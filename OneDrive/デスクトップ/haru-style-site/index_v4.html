@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Island - 医療離島ジオラマ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #e0c67b;
+      --bg-sub: #d4b86a;
+      --text: #422612;
+      --text-sub: #6b4c2a;
+      --accent: #f4a000;
+      --accent2: #f1d81f;
+      --card-bg: #fffdf5;
+      --shadow: rgba(66, 38, 18, 0.15);
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.8;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-sub); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+    /* Header */
+    header {
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+      padding: 0 40px; height: 70px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: transparent; transition: background 0.4s, box-shadow 0.4s;
+    }
+    header.scrolled { background: rgba(224,198,123,0.95); box-shadow: 0 2px 20px var(--shadow); }
+
+    .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.15em; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--accent); }
+
+    nav { display: flex; align-items: center; gap: 28px; }
+    nav a {
+      color: var(--text); text-decoration: none; font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.1em; padding: 6px 14px; border-radius: 20px; transition: all 0.3s;
+    }
+    nav a:hover { background: var(--accent); color: #fff; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 8px; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); transition: all 0.3s; }
+
+    /* Hero with 3D Canvas */
+    .hero {
+      position: relative; width: 100%; height: 100vh; overflow: hidden;
+      display: flex; align-items: flex-start;
+    }
+
+    #hero-canvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1; cursor: grab; filter: saturate(1.1) contrast(1.05);
+    }
+    #hero-canvas:active { cursor: grabbing; }
+
+    /* Card overlay */
+    .hero-card {
+      position: absolute; z-index: 10; top: 50%; left: 40px;
+      transform: translateY(-50%);
+      background: var(--card-bg); border-radius: 16px; padding: 36px;
+      max-width: 360px; box-shadow: 0 8px 40px var(--shadow);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+
+    .hero-card .card-label {
+      font-size: 0.7rem; letter-spacing: 0.2em; color: var(--accent);
+      font-weight: 700; margin-bottom: 12px;
+    }
+
+    .hero-card h2 {
+      font-size: 1.3rem; font-weight: 700; margin-bottom: 12px;
+      letter-spacing: 0.06em; line-height: 1.5;
+    }
+
+    .hero-card p {
+      font-size: 0.82rem; color: var(--text-sub); margin-bottom: 20px; line-height: 1.8;
+    }
+
+    .hero-card .card-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 28px; background: var(--accent); color: #fff;
+      text-decoration: none; border-radius: 50px; font-weight: 500;
+      font-size: 0.8rem; letter-spacing: 0.1em; transition: all 0.3s; border: none; cursor: pointer;
+    }
+    .hero-card .card-btn:hover { background: var(--text); transform: translateY(-2px); }
+
+    /* Card navigation dots */
+    .card-dots {
+      position: absolute; z-index: 10; bottom: 40px; left: 50%;
+      transform: translateX(-50%); display: flex; gap: 10px;
+    }
+    .card-dots button {
+      width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--text);
+      background: transparent; cursor: pointer; transition: all 0.3s; padding: 0;
+    }
+    .card-dots button.active { background: var(--accent); border-color: var(--accent); transform: scale(1.3); }
+
+    /* Sections below hero */
+    section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+
+    .section-label { font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 12px; }
+    .section-title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: 0.06em; margin-bottom: 16px; line-height: 1.4; }
+    .section-desc { font-size: 0.95rem; color: var(--text-sub); max-width: 600px; margin-bottom: 60px; }
+
+    .fade-in { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+
+    .card {
+      background: var(--card-bg); border-radius: 16px; padding: 40px 28px;
+      position: relative; overflow: hidden; transition: transform 0.4s, box-shadow 0.4s; cursor: default;
+    }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px var(--shadow); }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transform: scaleX(0); transform-origin: left; transition: transform 0.4s;
+    }
+    .card:hover::before { transform: scaleX(1); }
+
+    .card-icon {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 24px; color: #fff; transition: transform 0.4s;
+    }
+    .card:hover .card-icon { transform: rotate(-8deg) scale(1.1); }
+    .card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.06em; }
+    .card p { font-size: 0.85rem; color: var(--text-sub); line-height: 1.7; }
+    .card-num { position: absolute; top: 20px; right: 24px; font-size: 3rem; font-weight: 700; opacity: 0.06; }
+
+    footer {
+      background: var(--text); color: var(--bg); padding: 60px 40px 30px; margin-top: 60px;
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px;
+    }
+    .footer-brand .logo { color: var(--bg); display: inline-block; margin-bottom: 16px; }
+    .footer-brand p { font-size: 0.8rem; opacity: 0.6; line-height: 1.7; }
+    .footer-col h5 { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.15em; margin-bottom: 16px; opacity: 0.8; }
+    .footer-col a { display: block; font-size: 0.8rem; color: var(--bg); text-decoration: none; opacity: 0.5; margin-bottom: 10px; transition: opacity 0.3s; }
+    .footer-col a:hover { opacity: 1; }
+    .footer-bottom {
+      max-width: 1200px; margin: 0 auto; padding-top: 24px;
+      border-top: 1px solid rgba(224,198,123,0.1);
+      display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; opacity: 0.4;
+    }
+
+    @media (max-width: 960px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      header { padding: 0 20px; }
+      nav { display: none; }
+      .hamburger { display: flex; }
+      nav.open { display: flex; flex-direction: column; position: fixed; top: 70px; left: 0; width: 100%; background: rgba(224,198,123,0.98); padding: 30px 20px; gap: 16px; box-shadow: 0 8px 20px var(--shadow); }
+      section { padding: 60px 20px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .hero-card { left: 20px; right: 20px; max-width: none; padding: 24px; }
+      .footer-inner { grid-template-columns: 1fr; gap: 30px; }
+      footer { padding: 40px 20px 20px; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header id="header">
+    <a href="#" class="logo">Medical<span>Island</span></a>
+    <nav id="nav">
+      <a href="#about">ABOUT</a>
+      <a href="#services">SERVICES</a>
+      <a href="#facilities">FACILITIES</a>
+      <a href="#contact">CONTACT</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- Hero with 3D Medical Island -->
+  <div class="hero" id="heroSection">
+    <canvas id="hero-canvas"></canvas>
+
+    <div class="hero-card" id="heroCard">
+      <div class="card-label" id="cardLabel">ABOUT</div>
+      <h2 id="cardTitle">医療の未来を<br>離島から届ける</h2>
+      <p id="cardDesc">テクノロジーとケアの心を融合させ、離島医療の新しいカタチを創造するメディカルアイランド・プロジェクトです。</p>
+      <button class="card-btn" id="cardBtn">MORE &rarr;</button>
+    </div>
+
+    <div class="card-dots" id="cardDots">
+      <button class="active" data-index="0"></button>
+      <button data-index="1"></button>
+      <button data-index="2"></button>
+      <button data-index="3"></button>
+      <button data-index="4"></button>
+      <button data-index="5"></button>
+    </div>
+  </div>
+
+  <!-- Services Section -->
+  <section id="services">
+    <div class="fade-in">
+      <div class="section-label">SERVICES</div>
+      <div class="section-title">私たちにできること</div>
+      <div class="section-desc">最先端のテクノロジーで看護教育と離島医療を支えます。</div>
+    </div>
+    <div class="cards-grid">
+      <div class="card fade-in" style="transition-delay:0.1s">
+        <div class="card-num">01</div>
+        <div class="card-icon">&#129657;</div>
+        <h3>Digital Patient</h3>
+        <p>リップシンク付きデジタル模擬患者で、リアルな看護シミュレーションを実現。対話型AIが学びを深めます。</p>
+      </div>
+      <div class="card fade-in" style="transition-delay:0.2s">
+        <div class="card-num">02</div>
+        <div class="card-icon">&#127916;</div>
+        <h3>VR/3D Learning</h3>
+        <p>3Dジオラマやビジュアルノベルで医療知識を楽しく学習。没入型コンテンツが理解を加速させます。</p>
+      </div>
+      <div class="card fade-in" style="transition-delay:0.3s">
+        <div class="card-num">03</div>
+        <div class="card-icon">&#128483;</div>
+        <h3>AI-Powered TTS</h3>
+        <p>VOICEVOXとボイスクローニング技術で、自然な日本語音声を生成。教育コンテンツに命を吹き込みます。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">Medical<span>Island</span></a>
+        <p>テクノロジーとケアの心で、<br>離島医療の未来を創造します。</p>
+      </div>
+      <div class="footer-col">
+        <h5>MENU</h5>
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#facilities">Facilities</a>
+      </div>
+      <div class="footer-col">
+        <h5>PROJECT</h5>
+        <a href="#">Digital Patient</a>
+        <a href="#">Nursing VR</a>
+      </div>
+      <div class="footer-col">
+        <h5>CONTACT</h5>
+        <a href="mailto:hello@example.com">hello@example.com</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 MedicalIsland Project. All rights reserved.</span>
+      <span>Privacy Policy</span>
+    </div>
+  </footer>
+
+  <script>
+  // ============================================================
+  //  Three.js Procedural Medical Island Diorama — haru-ni.net style
+  // ============================================================
+  (function() {
+    const canvas = document.getElementById('hero-canvas');
+    const hero = document.getElementById('heroSection');
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(hero.offsetWidth, hero.offsetHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setClearColor(0xe0c67b, 1);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0xe0c67b, 40, 100);
+
+    const camera = new THREE.PerspectiveCamera(40, hero.offsetWidth / hero.offsetHeight, 0.1, 200);
+    camera.position.set(24, 16, 24);
+    camera.lookAt(0, 2, 0);
+
+    // === Lights ===
+    const ambientLight = new THREE.AmbientLight(0xfff5e0, 0.6);
+    scene.add(ambientLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xffeebb, 0x8d7748, 0.5);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff0d0, 1.0);
+    sunLight.position.set(15, 25, 15);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(2048, 2048);
+    sunLight.shadow.camera.near = 1;
+    sunLight.shadow.camera.far = 60;
+    sunLight.shadow.camera.left = -25;
+    sunLight.shadow.camera.right = 25;
+    sunLight.shadow.camera.top = 25;
+    sunLight.shadow.camera.bottom = -25;
+    scene.add(sunLight);
+
+    const fillLight = new THREE.DirectionalLight(0xffe0a0, 0.3);
+    fillLight.position.set(-10, 10, -5);
+    scene.add(fillLight);
+
+    // === Color palette (haru-ni style) ===
+    const C = {
+      pink:      0xf5a0b0,
+      hotPink:   0xe8628a,
+      salmon:    0xf4977a,
+      yellow:    0xf5d44b,
+      orange:    0xf4a000,
+      cyan:      0x6dd5d5,
+      lightCyan: 0xb0e8e8,
+      teal:      0x4db8a4,
+      green:     0x7bc67e,
+      darkGreen: 0x4a8a4a,
+      lime:      0xc5e35b,
+      red:       0xe85050,
+      blue:      0x5599dd,
+      purple:    0xb577d4,
+      white:     0xfffef5,
+      cream:     0xfff5e0,
+      brown:     0x8b6040,
+      darkBrown: 0x5a3a20,
+      gray:      0xaaaaaa,
+      darkGray:  0x777777,
+      ground:    0x8bc06a,
+      road:      0xddd4bb,
+    };
+
+    function mat(color, opts = {}) {
+      return new THREE.MeshStandardMaterial({
+        color, roughness: opts.roughness || 0.7, metalness: opts.metalness || 0.05, ...opts
+      });
+    }
+
+    function box(w, h, d, color, x, y, z, opts = {}) {
+      const g = new THREE.BoxGeometry(w, h, d);
+      const m = new THREE.Mesh(g, mat(color, opts));
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      if (opts.ry) m.rotation.y = opts.ry;
+      if (opts.rx) m.rotation.x = opts.rx;
+      if (opts.rz) m.rotation.z = opts.rz;
+      return m;
+    }
+
+    function cyl(rTop, rBot, h, segs, color, x, y, z, opts = {}) {
+      const g = new THREE.CylinderGeometry(rTop, rBot, h, segs);
+      const m = new THREE.Mesh(g, mat(color, opts));
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      return m;
+    }
+
+    function sphere(r, wSeg, hSeg, color, x, y, z, opts = {}) {
+      const g = new THREE.SphereGeometry(r, wSeg, hSeg);
+      const m = new THREE.Mesh(g, mat(color, opts));
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      return m;
+    }
+
+    function cone(r, h, segs, color, x, y, z) {
+      const g = new THREE.ConeGeometry(r, h, segs);
+      const m = new THREE.Mesh(g, mat(color));
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      return m;
+    }
+
+    // === Island group ===
+    const island = new THREE.Group();
+    scene.add(island);
+
+    // =====================================================
+    //  GOURD / PEANUT-SHAPED FLOATING ISLAND
+    // =====================================================
+
+    // Main island (large) - positioned at origin offset
+    const mainX = -3, mainZ = 0;
+    // Top ground
+    island.add(box(26, 1, 26, C.ground, mainX, -0.5, mainZ));
+    // Island sides
+    island.add(box(24, 3, 24, C.brown, mainX, -2.5, mainZ));
+    island.add(box(20, 2, 20, C.darkBrown, mainX, -4.5, mainZ));
+    island.add(box(16, 2, 16, C.darkBrown, mainX, -6, mainZ));
+
+    // Small island (lighthouse island)
+    const subX = 16, subZ = 0;
+    island.add(box(10, 1, 10, C.ground, subX, -0.5, subZ));
+    island.add(box(9, 3, 9, C.brown, subX, -2.5, subZ));
+    island.add(box(7, 2, 7, C.darkBrown, subX, -4.5, subZ));
+    island.add(box(5, 2, 5, C.darkBrown, subX, -6, subZ));
+
+    // Land bridge connecting the two islands
+    island.add(box(10, 1, 5, C.ground, 7, -0.5, 0));
+    island.add(box(9, 2.5, 4, C.brown, 7, -2.25, 0));
+    island.add(box(7, 2, 3, C.darkBrown, 7, -4, 0));
+
+    // =====================================================
+    //  ROADS / PATHS on main island
+    // =====================================================
+    // Main horizontal road
+    island.add(box(26, 0.06, 2.5, C.road, mainX, 0.03, mainZ + 2));
+    // Vertical road
+    island.add(box(2.5, 0.06, 18, C.road, mainX + 3, 0.03, mainZ - 2));
+    // Path to bridge
+    island.add(box(14, 0.06, 2.5, C.road, 5, 0.03, 0));
+    // Path on small island
+    island.add(box(8, 0.06, 2, C.road, subX, 0.03, subZ));
+
+    // Road markings
+    for (let i = -15; i < 12; i += 3) {
+      island.add(box(1.2, 0.07, 0.2, C.white, mainX + i, 0.07, mainZ + 2));
+    }
+    for (let i = -10; i < 8; i += 3) {
+      island.add(box(0.2, 0.07, 1.2, C.white, mainX + 3, 0.07, mainZ + i));
+    }
+
+    // =====================================================
+    //  HOSPITAL (pink/white, 2-story, red cross, green roof)
+    // =====================================================
+    function buildHospital(x, z) {
+      const g = new THREE.Group();
+      // Main building - 2 story
+      g.add(box(7, 6, 5, C.pink, 0, 3, 0));
+      // White accent strip
+      g.add(box(7.1, 0.3, 5.1, C.white, 0, 3.15, 0));
+      g.add(box(7.1, 0.3, 5.1, C.white, 0, 6.15, 0));
+      // Green roof
+      g.add(box(7.4, 0.5, 5.4, C.green, 0, 6.3, 0));
+      g.add(box(6.6, 0.5, 4.6, C.darkGreen, 0, 6.8, 0));
+
+      // Red cross on front - vertical bar
+      g.add(box(0.5, 2, 0.15, C.red, 0, 5, 2.53));
+      // Red cross on front - horizontal bar
+      g.add(box(2, 0.5, 0.15, C.red, 0, 5, 2.53));
+
+      // Entrance
+      g.add(box(2, 2.5, 0.15, C.white, 0, 1.25, 2.53));
+      g.add(box(1.6, 2.2, 0.1, C.lightCyan, 0, 1.35, 2.58));
+      // Door frame top
+      g.add(box(2.2, 0.2, 0.2, C.white, 0, 2.55, 2.58));
+
+      // Entrance awning
+      g.add(box(3, 0.15, 1.5, C.green, 0, 2.8, 3.2));
+      // Awning support pillars
+      g.add(cyl(0.1, 0.1, 2.8, 6, C.white, -1.3, 1.4, 3.8));
+      g.add(cyl(0.1, 0.1, 2.8, 6, C.white, 1.3, 1.4, 3.8));
+
+      // Windows - 1st floor
+      for (let wx = -2.5; wx <= 2.5; wx += 1.5) {
+        if (Math.abs(wx) < 0.5) continue; // skip door area
+        g.add(box(0.8, 1, 0.1, C.cream, wx, 1.8, 2.53));
+        g.add(box(0.85, 0.08, 0.12, C.white, wx, 2.32, 2.55)); // window sill top
+      }
+      // Windows - 2nd floor
+      for (let wx = -2.5; wx <= 2.5; wx += 1.3) {
+        g.add(box(0.7, 0.9, 0.1, C.lightCyan, wx, 4.5, 2.53, { roughness: 0.3 }));
+        g.add(box(0.75, 0.08, 0.12, C.white, wx, 4.98, 2.55));
+      }
+      // Side windows
+      for (let wz = -1.5; wz <= 1.5; wz += 1.5) {
+        g.add(box(0.1, 0.9, 0.7, C.lightCyan, 3.53, 4.5, wz, { roughness: 0.3 }));
+        g.add(box(0.1, 0.9, 0.7, C.lightCyan, -3.53, 4.5, wz, { roughness: 0.3 }));
+        g.add(box(0.1, 1, 0.8, C.cream, 3.53, 1.8, wz));
+        g.add(box(0.1, 1, 0.8, C.cream, -3.53, 1.8, wz));
+      }
+
+      // Sign board
+      g.add(box(4, 0.8, 0.15, C.white, 0, 7.5, 1.8));
+      g.add(box(3.6, 0.5, 0.1, C.pink, 0, 7.5, 1.88));
+
+      g.position.set(x, 0, z);
+      return g;
+    }
+    island.add(buildHospital(mainX - 5, mainZ - 5));
+
+    // =====================================================
+    //  NURSING SCHOOL (yellow, clock tower, orange roof)
+    // =====================================================
+    function buildNursingSchool(x, z) {
+      const g = new THREE.Group();
+      // Main building
+      g.add(box(6, 5, 5, C.yellow, 0, 2.5, 0));
+      // Orange roof
+      g.add(box(6.4, 0.4, 5.4, C.orange, 0, 5.2, 0));
+      g.add(box(5.6, 0.4, 4.6, C.orange, 0, 5.6, 0));
+
+      // Clock tower (center extension going up)
+      g.add(box(2, 3, 2, C.yellow, 0, 6.7, 0));
+      g.add(box(2.2, 0.3, 2.2, C.orange, 0, 8.35, 0));
+      // Clock face (front)
+      g.add(cyl(0.6, 0.6, 0.12, 16, C.white, 0, 7.2, 1.05));
+      // Clock hands
+      g.add(box(0.06, 0.45, 0.06, C.darkBrown, 0, 7.35, 1.12)); // minute hand
+      g.add(box(0.06, 0.3, 0.06, C.darkBrown, 0.12, 7.25, 1.12, { rz: -0.5 })); // hour hand
+      // Clock face (back)
+      g.add(cyl(0.6, 0.6, 0.12, 16, C.white, 0, 7.2, -1.05));
+
+      // Pointy tower top
+      g.add(cone(0.8, 1.5, 4, C.orange, 0, 9.1, 0));
+
+      // Entrance door
+      g.add(box(1.4, 2.2, 0.1, C.brown, 0, 1.1, 2.53));
+      g.add(box(1.6, 0.2, 0.15, C.orange, 0, 2.3, 2.55));
+
+      // Windows - grid pattern
+      for (let wx = -2; wx <= 2; wx += 1.3) {
+        g.add(box(0.7, 1, 0.1, C.cream, wx, 1.5, 2.53));
+        g.add(box(0.7, 0.8, 0.1, C.lightCyan, wx, 3.8, 2.53, { roughness: 0.3 }));
+      }
+      // Side windows
+      for (let wz = -1.5; wz <= 1.5; wz += 1.5) {
+        g.add(box(0.1, 0.8, 0.6, C.cream, 3.03, 1.5, wz));
+        g.add(box(0.1, 0.8, 0.6, C.lightCyan, 3.03, 3.8, wz, { roughness: 0.3 }));
+        g.add(box(0.1, 0.8, 0.6, C.cream, -3.03, 1.5, wz));
+        g.add(box(0.1, 0.8, 0.6, C.lightCyan, -3.03, 3.8, wz, { roughness: 0.3 }));
+      }
+
+      // Steps at entrance
+      g.add(box(2.5, 0.2, 0.6, C.white, 0, 0.1, 3));
+      g.add(box(2.2, 0.2, 0.4, C.white, 0, 0.3, 3.3));
+
+      g.position.set(x, 0, z);
+      return g;
+    }
+    island.add(buildNursingSchool(mainX + 5, mainZ - 6));
+
+    // =====================================================
+    //  CLINIC (light blue, small, red cross)
+    // =====================================================
+    function buildClinic(x, z) {
+      const g = new THREE.Group();
+      // Main body
+      g.add(box(3.5, 3, 3, C.lightCyan, 0, 1.5, 0));
+      // Roof
+      g.add(box(3.8, 0.3, 3.3, C.cyan, 0, 3.15, 0));
+      g.add(box(3, 0.3, 2.5, C.teal, 0, 3.45, 0));
+
+      // Red cross
+      g.add(box(0.3, 1, 0.1, C.red, 0, 2.5, 1.53));
+      g.add(box(1, 0.3, 0.1, C.red, 0, 2.5, 1.53));
+
+      // Door
+      g.add(box(0.8, 1.6, 0.1, C.brown, 0, 0.8, 1.53));
+      // Window
+      g.add(box(0.6, 0.6, 0.1, C.cream, -1, 1.8, 1.53));
+      g.add(box(0.6, 0.6, 0.1, C.cream, 1, 1.8, 1.53));
+
+      // Awning
+      g.add(box(3.8, 0.1, 0.8, C.cyan, 0, 2.4, 2));
+
+      // Sign
+      g.add(box(2, 0.5, 0.1, C.white, 0, 3.9, 0.8));
+
+      g.position.set(x, 0, z);
+      return g;
+    }
+    island.add(buildClinic(mainX - 7, mainZ + 6));
+
+    // =====================================================
+    //  HELIPAD (gray circle with yellow H)
+    // =====================================================
+    function buildHelipad(x, z) {
+      const g = new THREE.Group();
+      // Circular pad
+      g.add(cyl(3, 3, 0.15, 32, C.gray, 0, 0.08, 0));
+      // Inner circle
+      g.add(cyl(2.5, 2.5, 0.05, 32, C.darkGray, 0, 0.16, 0));
+      // H mark - two vertical bars + cross bar
+      g.add(box(0.3, 0.06, 1.8, C.yellow, -0.5, 0.2, 0));
+      g.add(box(0.3, 0.06, 1.8, C.yellow, 0.5, 0.2, 0));
+      g.add(box(1.3, 0.06, 0.3, C.yellow, 0, 0.2, 0));
+      // Perimeter markings
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+        const mx = Math.cos(a) * 2.7;
+        const mz = Math.sin(a) * 2.7;
+        g.add(box(0.3, 0.07, 0.1, C.yellow, mx, 0.2, mz, { ry: a }));
+      }
+      // Corner lights
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 2) {
+        const lx = Math.cos(a) * 3.2;
+        const lz = Math.sin(a) * 3.2;
+        g.add(cyl(0.08, 0.08, 0.5, 6, C.darkBrown, lx, 0.25, lz));
+        g.add(sphere(0.12, 8, 6, C.yellow, lx, 0.55, lz, { roughness: 0.3 }));
+      }
+      g.position.set(x, 0, z);
+      return g;
+    }
+    island.add(buildHelipad(mainX + 5, mainZ + 6));
+
+    // =====================================================
+    //  LIGHTHOUSE (white with red stripes, glowing top)
+    // =====================================================
+    function buildLighthouse(x, z) {
+      const g = new THREE.Group();
+      // Base
+      g.add(cyl(1.5, 1.8, 1, 12, C.white, 0, 0.5, 0));
+      // Tower body - alternating white/red stripes
+      g.add(cyl(1.2, 1.5, 2, 12, C.white, 0, 2, 0));
+      g.add(cyl(1.0, 1.2, 1.5, 12, C.red, 0, 3.75, 0));
+      g.add(cyl(0.85, 1.0, 1.5, 12, C.white, 0, 5.25, 0));
+      g.add(cyl(0.7, 0.85, 1.5, 12, C.red, 0, 6.75, 0));
+      // Gallery platform
+      g.add(cyl(1.2, 1.2, 0.2, 12, C.darkBrown, 0, 7.6, 0));
+      // Railing posts
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+        const rx = Math.cos(a) * 1.1;
+        const rz = Math.sin(a) * 1.1;
+        g.add(cyl(0.03, 0.03, 0.5, 4, C.darkBrown, rx, 7.95, rz));
+      }
+      // Lantern room
+      g.add(cyl(0.6, 0.7, 0.8, 12, C.cream, 0, 8.1, 0, { roughness: 0.2 }));
+      // Glowing light
+      g.add(sphere(0.35, 8, 8, C.yellow, 0, 8.3, 0, { roughness: 0.1, emissive: 0xffee88, emissiveIntensity: 0.8 }));
+      // Dome top
+      g.add(cyl(0, 0.6, 0.6, 12, C.red, 0, 8.8, 0));
+
+      // Point light for glow effect
+      const glowLight = new THREE.PointLight(0xffdd66, 1.5, 10);
+      glowLight.position.set(0, 8.3, 0);
+      g.add(glowLight);
+
+      // Door
+      g.add(box(0.6, 1.2, 0.1, C.brown, 0, 0.6, 1.8));
+
+      g.position.set(x, 0, z);
+      return g;
+    }
+    island.add(buildLighthouse(subX, subZ));
+
+    // =====================================================
+    //  HELICOPTER (red, rounded body, rotating propellers)
+    // =====================================================
+    const heliGroup = new THREE.Group();
+    heliGroup.position.set(mainX + 3, 12, mainZ + 3);
+    island.add(heliGroup);
+
+    // Body (elongated sphere approximation with boxes)
+    const heliBody = new THREE.Group();
+    heliGroup.add(heliBody);
+    // Main fuselage
+    heliBody.add(box(1.5, 1.2, 2.5, C.red, 0, 0, 0));
+    // Rounded front
+    heliBody.add(sphere(0.7, 8, 6, C.red, 0, 0, 1.3));
+    // Cockpit window
+    heliBody.add(box(1, 0.6, 0.1, C.lightCyan, 0, 0.15, 1.76, { roughness: 0.2 }));
+    // Tail boom
+    heliBody.add(box(0.4, 0.4, 2.5, C.red, 0, 0.2, -2.3));
+    // Tail fin vertical
+    heliBody.add(box(0.1, 0.8, 0.6, C.red, 0, 0.6, -3.4));
+    // Tail fin horizontal
+    heliBody.add(box(1, 0.1, 0.4, C.white, 0, 0.7, -3.4));
+    // White cross on side
+    heliBody.add(box(0.12, 0.6, 0.1, C.white, 0.76, 0, 0));
+    heliBody.add(box(0.12, 0.1, 0.6, C.white, 0.76, 0, 0));
+    heliBody.add(box(0.12, 0.6, 0.1, C.white, -0.76, 0, 0));
+    heliBody.add(box(0.12, 0.1, 0.6, C.white, -0.76, 0, 0));
+    // Skids (landing gear)
+    heliBody.add(cyl(0.04, 0.04, 2.2, 6, C.darkGray, -0.5, -0.85, 0));
+    heliBody.add(cyl(0.04, 0.04, 2.2, 6, C.darkGray, 0.5, -0.85, 0));
+    // Skid struts
+    heliBody.add(box(0.06, 0.3, 0.06, C.darkGray, -0.5, -0.55, 0.5));
+    heliBody.add(box(0.06, 0.3, 0.06, C.darkGray, -0.5, -0.55, -0.5));
+    heliBody.add(box(0.06, 0.3, 0.06, C.darkGray, 0.5, -0.55, 0.5));
+    heliBody.add(box(0.06, 0.3, 0.06, C.darkGray, 0.5, -0.55, -0.5));
+    // Skid rails (horizontal)
+    heliBody.add(box(0.06, 0.06, 2.2, C.darkGray, -0.5, -1, 0));
+    heliBody.add(box(0.06, 0.06, 2.2, C.darkGray, 0.5, -1, 0));
+
+    // Main rotor hub
+    const mainRotor = new THREE.Group();
+    mainRotor.position.set(0, 0.75, 0);
+    heliBody.add(mainRotor);
+    // Rotor mast
+    mainRotor.add(cyl(0.08, 0.08, 0.3, 6, C.darkGray, 0, 0, 0));
+    // Rotor blades (4 blades)
+    for (let i = 0; i < 4; i++) {
+      const blade = box(3, 0.05, 0.2, C.white, 1.5, 0.15, 0, { roughness: 0.3 });
+      blade.rotation.y = (i / 4) * Math.PI * 2;
+      // Need to create individual blade positioned along its local axis
+      const bladeGroup = new THREE.Group();
+      bladeGroup.add(box(3, 0.05, 0.18, C.white, 1.5, 0, 0, { roughness: 0.3 }));
+      bladeGroup.rotation.y = (i / 4) * Math.PI * 2;
+      mainRotor.add(bladeGroup);
+    }
+
+    // Tail rotor
+    const tailRotor = new THREE.Group();
+    tailRotor.position.set(0.1, 0.7, -3.4);
+    heliBody.add(tailRotor);
+    for (let i = 0; i < 3; i++) {
+      const tBladeGroup = new THREE.Group();
+      tBladeGroup.add(box(0.05, 0.7, 0.1, C.white, 0, 0.35, 0, { roughness: 0.3 }));
+      tBladeGroup.rotation.z = (i / 3) * Math.PI * 2;
+      tailRotor.add(tBladeGroup);
+    }
+
+    // =====================================================
+    //  SEAGULLS (5 V-shaped birds)
+    // =====================================================
+    const seagulls = [];
+    function makeSeagull(x, y, z) {
+      const g = new THREE.Group();
+      // Body
+      g.add(box(0.12, 0.1, 0.4, C.white, 0, 0, 0));
+      // Left wing
+      const lWing = box(0.8, 0.04, 0.25, C.white, -0.45, 0.05, 0);
+      lWing.rotation.z = 0.3;
+      g.add(lWing);
+      // Right wing
+      const rWing = box(0.8, 0.04, 0.25, C.white, 0.45, 0.05, 0);
+      rWing.rotation.z = -0.3;
+      g.add(rWing);
+      // Head
+      g.add(sphere(0.06, 6, 4, C.white, 0, 0.04, 0.22));
+      g.position.set(x, y, z);
+      g.userData = {
+        baseY: y,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.3 + Math.random() * 0.3,
+        radius: 8 + Math.random() * 6,
+        angleOffset: Math.random() * Math.PI * 2,
+        lWing, rWing
+      };
+      return g;
+    }
+
+    const seagullPositions = [
+      [5, 15, -5], [-8, 17, 4], [10, 14, 8], [-3, 18, -10], [14, 16, 5]
+    ];
+    seagullPositions.forEach(([sx, sy, sz]) => {
+      const s = makeSeagull(sx, sy, sz);
+      island.add(s);
+      seagulls.push(s);
+    });
+
+    // =====================================================
+    //  HOT AIR BALLOON
+    // =====================================================
+    const balloonGroup = new THREE.Group();
+    balloonGroup.position.set(mainX - 4, 14, mainZ - 9);
+    island.add(balloonGroup);
+
+    // Envelope
+    const balloonGeo = new THREE.SphereGeometry(1.4, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.75);
+    const balloonMesh = new THREE.Mesh(balloonGeo, mat(C.red));
+    balloonMesh.castShadow = true;
+    balloonGroup.add(balloonMesh);
+    // Stripes
+    const stripeGeo1 = new THREE.SphereGeometry(1.42, 16, 12, Math.PI * 0.3, Math.PI * 0.35, 0, Math.PI * 0.75);
+    balloonGroup.add(new THREE.Mesh(stripeGeo1, mat(C.white)));
+    const stripeGeo2 = new THREE.SphereGeometry(1.42, 16, 12, Math.PI * 1.0, Math.PI * 0.35, 0, Math.PI * 0.75);
+    balloonGroup.add(new THREE.Mesh(stripeGeo2, mat(C.yellow)));
+    // Basket
+    balloonGroup.add(box(0.7, 0.5, 0.7, C.brown, 0, -1.8, 0));
+    // Ropes
+    [[-0.3, -0.3], [0.3, -0.3], [-0.3, 0.3], [0.3, 0.3]].forEach(([rx, rz]) => {
+      balloonGroup.add(cyl(0.02, 0.02, 1.4, 4, C.darkBrown, rx, -1.1, rz));
+    });
+
+    // =====================================================
+    //  CHERRY BLOSSOM TREES (pink crown + brown trunk)
+    // =====================================================
+    function makeSakuraTree(x, z, scale) {
+      const s = scale || 1;
+      const g = new THREE.Group();
+      g.add(cyl(0.1 * s, 0.14 * s, 1.8 * s, 6, C.brown, 0, 0.9 * s, 0));
+      const crownGeo = new THREE.SphereGeometry(1.1 * s, 10, 8);
+      const crown = new THREE.Mesh(crownGeo, mat(C.pink, { roughness: 0.9 }));
+      crown.position.y = 2.2 * s;
+      crown.scale.y = 0.75;
+      crown.castShadow = true;
+      g.add(crown);
+      // Extra smaller crown spheres for fullness
+      const crown2 = new THREE.Mesh(new THREE.SphereGeometry(0.7 * s, 8, 6), mat(C.hotPink, { roughness: 0.9 }));
+      crown2.position.set(0.5 * s, 2.5 * s, 0.3 * s);
+      crown2.castShadow = true;
+      g.add(crown2);
+      g.position.set(x, 0, z);
+      return g;
+    }
+
+    island.add(makeSakuraTree(mainX - 11, mainZ - 8, 1));
+    island.add(makeSakuraTree(mainX + 10, mainZ - 3, 0.9));
+    island.add(makeSakuraTree(mainX - 2, mainZ + 10, 1.1));
+    island.add(makeSakuraTree(mainX + 8, mainZ + 10, 0.8));
+    island.add(makeSakuraTree(subX - 3, subZ + 3, 0.7));
+    island.add(makeSakuraTree(mainX - 10, mainZ + 3, 0.95));
+
+    // =====================================================
+    //  PINE TREES (cone shape)
+    // =====================================================
+    function makePineTree(x, z, h) {
+      const g = new THREE.Group();
+      const height = h || 2.5;
+      g.add(cyl(0.1, 0.13, height * 0.4, 6, C.brown, 0, height * 0.2, 0));
+      // Layered cones
+      g.add(cone(height * 0.35, height * 0.5, 8, C.green, 0, height * 0.55, 0));
+      g.add(cone(height * 0.28, height * 0.45, 8, C.darkGreen, 0, height * 0.8, 0));
+      g.add(cone(height * 0.2, height * 0.35, 8, C.green, 0, height * 1.0, 0));
+      g.position.set(x, 0, z);
+      return g;
+    }
+
+    island.add(makePineTree(mainX - 12, mainZ - 2, 2.8));
+    island.add(makePineTree(mainX - 12, mainZ + 8, 2.2));
+    island.add(makePineTree(mainX + 11, mainZ - 8, 2.5));
+    island.add(makePineTree(mainX + 12, mainZ + 5, 3));
+    island.add(makePineTree(subX + 3, subZ - 3, 2));
+    island.add(makePineTree(subX + 4, subZ + 3, 2.3));
+    island.add(makePineTree(subX - 4, subZ - 2, 1.8));
+    island.add(makePineTree(mainX - 5, mainZ + 11, 2.6));
+
+    // =====================================================
+    //  SMALL PEOPLE FIGURES
+    // =====================================================
+    function makePerson(x, z, bodyColor) {
+      const g = new THREE.Group();
+      g.add(box(0.25, 0.45, 0.2, bodyColor, 0, 0.35, 0));
+      const headGeo = new THREE.SphereGeometry(0.14, 8, 6);
+      const head = new THREE.Mesh(headGeo, mat(C.cream));
+      head.position.set(0, 0.72, 0);
+      head.castShadow = true;
+      g.add(head);
+      g.position.set(x, 0, z);
+      return g;
+    }
+
+    const personColors = [C.red, C.blue, C.yellow, C.pink, C.cyan, C.purple, C.orange, C.green, C.white, C.salmon];
+    const personPositions = [
+      // Near hospital
+      [mainX - 4, mainZ - 2], [mainX - 7, mainZ - 3],
+      // Near nursing school
+      [mainX + 4, mainZ - 3], [mainX + 7, mainZ - 4],
+      // On roads
+      [mainX + 1, mainZ + 2], [mainX - 2, mainZ + 2],
+      // Near clinic
+      [mainX - 6, mainZ + 4], [mainX - 8, mainZ + 7],
+      // Near helipad
+      [mainX + 6, mainZ + 4],
+      // On bridge
+      [6, 0.5], [8, -0.5],
+      // Near lighthouse
+      [subX - 2, subZ + 1], [subX + 2, subZ - 1],
+    ];
+    personPositions.forEach(([px, pz], i) => {
+      island.add(makePerson(px, pz, personColors[i % personColors.length]));
+    });
+
+    // =====================================================
+    //  LAMP POSTS
+    // =====================================================
+    function makeLamp(x, z) {
+      const g = new THREE.Group();
+      g.add(cyl(0.05, 0.07, 2.2, 6, C.darkBrown, 0, 1.1, 0));
+      g.add(box(0.35, 0.3, 0.35, C.yellow, 0, 2.35, 0, { roughness: 0.3, emissive: 0xffee66, emissiveIntensity: 0.3 }));
+      g.add(box(0.45, 0.08, 0.45, C.darkBrown, 0, 2.55, 0));
+      g.position.set(x, 0, z);
+      return g;
+    }
+    island.add(makeLamp(mainX - 2, mainZ + 4));
+    island.add(makeLamp(mainX + 6, mainZ + 2));
+    island.add(makeLamp(mainX - 6, mainZ + 2));
+    island.add(makeLamp(mainX + 3, mainZ - 3));
+    island.add(makeLamp(mainX - 3, mainZ - 2));
+    island.add(makeLamp(subX - 2, subZ));
+
+    // =====================================================
+    //  BENCHES
+    // =====================================================
+    function makeBench(x, z, ry) {
+      const g = new THREE.Group();
+      g.add(box(1.1, 0.08, 0.4, C.brown, 0, 0.45, 0));
+      g.add(box(0.08, 0.45, 0.08, C.darkBrown, -0.45, 0.22, 0.14));
+      g.add(box(0.08, 0.45, 0.08, C.darkBrown, 0.45, 0.22, 0.14));
+      g.add(box(0.08, 0.45, 0.08, C.darkBrown, -0.45, 0.22, -0.14));
+      g.add(box(0.08, 0.45, 0.08, C.darkBrown, 0.45, 0.22, -0.14));
+      g.add(box(1.1, 0.5, 0.06, C.brown, 0, 0.6, -0.2));
+      g.position.set(x, 0, z);
+      g.rotation.y = ry || 0;
+      return g;
+    }
+    island.add(makeBench(mainX + 0, mainZ + 5, 0));
+    island.add(makeBench(mainX - 9, mainZ - 1, Math.PI / 2));
+    island.add(makeBench(mainX + 10, mainZ + 1, -Math.PI / 2));
+    island.add(makeBench(subX + 2, subZ + 2, Math.PI / 4));
+
+    // =====================================================
+    //  ADDITIONAL DETAILS: Flower beds, fences
+    // =====================================================
+    // Small flower patches near hospital
+    function makeFlowerBed(x, z, color) {
+      const g = new THREE.Group();
+      g.add(box(1.5, 0.15, 0.8, C.brown, 0, 0.08, 0));
+      for (let fx = -0.5; fx <= 0.5; fx += 0.25) {
+        for (let fz = -0.2; fz <= 0.2; fz += 0.2) {
+          g.add(sphere(0.08, 6, 4, color, fx, 0.25, fz));
+        }
+      }
+      g.position.set(x, 0, z);
+      return g;
+    }
+    island.add(makeFlowerBed(mainX - 3, mainZ - 8, C.pink));
+    island.add(makeFlowerBed(mainX + 2, mainZ - 8, C.yellow));
+    island.add(makeFlowerBed(mainX - 8, mainZ + 9, C.red));
+    island.add(makeFlowerBed(mainX + 9, mainZ - 10, C.salmon));
+
+    // Small ambulance near hospital
+    function makeAmbulance(x, z) {
+      const g = new THREE.Group();
+      g.add(box(1.2, 0.8, 0.7, C.white, 0, 0.5, 0));
+      g.add(box(0.6, 0.5, 0.7, C.white, -0.9, 0.45, 0));
+      // Windshield
+      g.add(box(0.05, 0.35, 0.55, C.lightCyan, -1.22, 0.5, 0, { roughness: 0.2 }));
+      // Red cross on side
+      g.add(box(0.1, 0.3, 0.08, C.red, 0, 0.6, 0.36));
+      g.add(box(0.1, 0.08, 0.3, C.red, 0, 0.6, 0.36));
+      // Red stripe
+      g.add(box(1.2, 0.1, 0.72, C.red, 0, 0.3, 0));
+      // Wheels
+      g.add(cyl(0.15, 0.15, 0.1, 8, C.darkBrown, -0.4, 0.15, 0.4));
+      g.add(cyl(0.15, 0.15, 0.1, 8, C.darkBrown, 0.4, 0.15, 0.4));
+      g.add(cyl(0.15, 0.15, 0.1, 8, C.darkBrown, -0.4, 0.15, -0.4));
+      g.add(cyl(0.15, 0.15, 0.1, 8, C.darkBrown, 0.4, 0.15, -0.4));
+      // Siren light
+      g.add(box(0.3, 0.12, 0.15, C.red, 0.2, 0.95, 0, { emissive: 0xff0000, emissiveIntensity: 0.4 }));
+      g.position.set(x, 0, z);
+      return g;
+    }
+    island.add(makeAmbulance(mainX - 3, mainZ - 3));
+
+    // =====================================================
+    //  SAKURA PETALS (particles)
+    // =====================================================
+    const petalCount = 200;
+    const petalGeo = new THREE.BufferGeometry();
+    const petalPos = new Float32Array(petalCount * 3);
+    const petalVel = [];
+    for (let i = 0; i < petalCount; i++) {
+      petalPos[i * 3] = (Math.random() - 0.5) * 40;
+      petalPos[i * 3 + 1] = Math.random() * 22 + 2;
+      petalPos[i * 3 + 2] = (Math.random() - 0.5) * 40;
+      petalVel.push({
+        x: (Math.random() - 0.5) * 0.01,
+        y: -0.01 - Math.random() * 0.02,
+        z: (Math.random() - 0.5) * 0.01,
+      });
+    }
+    petalGeo.setAttribute('position', new THREE.BufferAttribute(petalPos, 3));
+    const petalMat = new THREE.PointsMaterial({
+      color: 0xffb0c0, size: 0.18, transparent: true, opacity: 0.8, sizeAttenuation: true,
+    });
+    const petals = new THREE.Points(petalGeo, petalMat);
+    scene.add(petals);
+
+    // =====================================================
+    //  CAMERA ORBIT (drag + zoom + touch)
+    // =====================================================
+    let isDragging = false;
+    let prevMouseX = 0;
+    let orbitAngle = Math.PI / 4;
+    let targetOrbitAngle = orbitAngle;
+    let autoRotate = true;
+    let orbitRadius = 30;
+    let targetOrbitRadius = orbitRadius;
+    const orbitHeight = 16;
+    const minRadius = 12;
+    const maxRadius = 50;
+
+    canvas.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      prevMouseX = e.clientX;
+      autoRotate = false;
+      canvas.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - prevMouseX;
+      targetOrbitAngle += dx * 0.005;
+      prevMouseX = e.clientX;
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDragging = false;
+      canvas.style.cursor = 'grab';
+      setTimeout(() => { if (!isDragging) autoRotate = true; }, 3000);
+    });
+
+    // Mouse wheel zoom
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      targetOrbitRadius += e.deltaY * 0.02;
+      targetOrbitRadius = Math.max(minRadius, Math.min(maxRadius, targetOrbitRadius));
+    }, { passive: false });
+
+    // Touch support
+    let lastTouchDist = 0;
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        prevMouseX = e.touches[0].clientX;
+        autoRotate = false;
+      } else if (e.touches.length === 2) {
+        // Pinch start
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        lastTouchDist = Math.sqrt(dx * dx + dy * dy);
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1 && isDragging) {
+        const dx = e.touches[0].clientX - prevMouseX;
+        targetOrbitAngle += dx * 0.005;
+        prevMouseX = e.touches[0].clientX;
+      } else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const delta = lastTouchDist - dist;
+        targetOrbitRadius += delta * 0.1;
+        targetOrbitRadius = Math.max(minRadius, Math.min(maxRadius, targetOrbitRadius));
+        lastTouchDist = dist;
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', () => {
+      isDragging = false;
+      setTimeout(() => { if (!isDragging) autoRotate = true; }, 3000);
+    });
+
+    // =====================================================
+    //  CARD DATA (medical theme, 6 cards)
+    // =====================================================
+    const cardData = [
+      { label: 'ABOUT', title: '医療の未来を<br>離島から届ける', desc: 'テクノロジーとケアの心を融合させ、離島医療の新しいカタチを創造するメディカルアイランド・プロジェクトです。' },
+      { label: 'HOSPITAL', title: '離島病院<br>総合医療センター', desc: '島民の命を守る中核施設。デジタル模擬患者システムで次世代の医療教育を実践しています。' },
+      { label: 'NURSING SCHOOL', title: '看護学校<br>次世代ナース育成', desc: 'VR・3Dシミュレーションを活用した革新的カリキュラムで、離島医療を担う看護師を育てます。' },
+      { label: 'CLINIC', title: '地域診療所<br>島民の健康を守る', desc: 'AIトリアージとオンライン診療で、いつでも安心の医療アクセスを提供します。' },
+      { label: 'HELIPORT', title: '救急ヘリポート<br>命をつなぐ空の架け橋', desc: '緊急搬送と遠隔医療を組み合わせた、離島ならではの救急医療体制を構築しています。' },
+      { label: 'LIGHTHOUSE', title: '灯台<br>離島のシンボル', desc: '島のランドマーク。夜間も海上の安全を守り続ける、島民の心の拠り所です。' },
+    ];
+
+    let currentCard = 0;
+    const cardLabel = document.getElementById('cardLabel');
+    const cardTitle = document.getElementById('cardTitle');
+    const cardDesc = document.getElementById('cardDesc');
+    const dots = document.querySelectorAll('#cardDots button');
+
+    function updateCard(idx) {
+      currentCard = idx;
+      const data = cardData[idx];
+      const heroCard = document.getElementById('heroCard');
+      heroCard.style.opacity = '0';
+      heroCard.style.transform = 'translateY(-45%)';
+      setTimeout(() => {
+        cardLabel.textContent = data.label;
+        cardTitle.innerHTML = data.title;
+        cardDesc.textContent = data.desc;
+        heroCard.style.opacity = '1';
+        heroCard.style.transform = 'translateY(-50%)';
+      }, 250);
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+
+    dots.forEach(d => {
+      d.addEventListener('click', () => {
+        const idx = parseInt(d.dataset.index);
+        updateCard(idx);
+        targetOrbitAngle = (idx / cardData.length) * Math.PI * 2 + Math.PI / 4;
+        autoRotate = false;
+        setTimeout(() => { if (!isDragging) autoRotate = true; }, 5000);
+      });
+    });
+
+    // =====================================================
+    //  RESIZE
+    // =====================================================
+    function onResize() {
+      const w = hero.offsetWidth;
+      const h = hero.offsetHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+
+    // =====================================================
+    //  ANIMATION LOOP
+    // =====================================================
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      // Auto-rotate
+      if (autoRotate) {
+        targetOrbitAngle += 0.002;
+      }
+
+      // Smooth orbit angle
+      orbitAngle += (targetOrbitAngle - orbitAngle) * 0.05;
+      // Smooth zoom
+      orbitRadius += (targetOrbitRadius - orbitRadius) * 0.08;
+
+      // Camera position
+      camera.position.x = Math.cos(orbitAngle) * orbitRadius;
+      camera.position.z = Math.sin(orbitAngle) * orbitRadius;
+      camera.position.y = orbitHeight + Math.sin(t * 0.3) * 0.5;
+      camera.lookAt(2, 2, 0);
+
+      // Island gentle float (subtle Y bobbing)
+      island.position.y = Math.sin(t * 0.4) * 0.15;
+
+      // Helicopter propeller rotation (CONTINUOUS)
+      mainRotor.rotation.y = t * 12;
+      tailRotor.rotation.x = t * 18;
+
+      // Helicopter gentle movement
+      heliGroup.position.y = 12 + Math.sin(t * 0.6) * 0.5;
+      heliGroup.position.x = mainX + 3 + Math.sin(t * 0.3) * 2;
+      heliGroup.rotation.y = Math.sin(t * 0.2) * 0.15;
+
+      // Hot air balloon float
+      balloonGroup.position.y = 14 + Math.sin(t * 0.5) * 1.0;
+      balloonGroup.rotation.y = Math.sin(t * 0.2) * 0.1;
+
+      // Seagulls circular flight + wing flap
+      seagulls.forEach(sg => {
+        const d = sg.userData;
+        const angle = t * d.speed + d.angleOffset;
+        sg.position.x = Math.cos(angle) * d.radius;
+        sg.position.z = Math.sin(angle) * d.radius;
+        sg.position.y = d.baseY + Math.sin(t * 1.5 + d.phase) * 0.8;
+        // Face direction of movement
+        sg.rotation.y = -angle + Math.PI / 2;
+        // Wing flap
+        const flapAngle = Math.sin(t * 4 + d.phase) * 0.4;
+        d.lWing.rotation.z = 0.3 + flapAngle;
+        d.rWing.rotation.z = -0.3 - flapAngle;
+      });
+
+      // Sakura petals
+      const pArr = petals.geometry.attributes.position.array;
+      for (let i = 0; i < petalCount; i++) {
+        const v = petalVel[i];
+        pArr[i * 3] += v.x + Math.sin(t + i) * 0.004;
+        pArr[i * 3 + 1] += v.y;
+        pArr[i * 3 + 2] += v.z + Math.cos(t + i * 0.7) * 0.004;
+        if (pArr[i * 3 + 1] < -2) {
+          pArr[i * 3] = (Math.random() - 0.5) * 40;
+          pArr[i * 3 + 1] = 20 + Math.random() * 5;
+          pArr[i * 3 + 2] = (Math.random() - 0.5) * 40;
+        }
+      }
+      petals.geometry.attributes.position.needsUpdate = true;
+
+      // Update card based on orbit angle
+      const normalizedAngle = ((orbitAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const newCard = Math.floor((normalizedAngle / (Math.PI * 2)) * cardData.length) % cardData.length;
+      if (newCard !== currentCard) {
+        updateCard(newCard);
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+  })();
+
+  // ===== Header scroll =====
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // ===== Hamburger =====
+  const hamburger = document.getElementById('hamburger');
+  const nav = document.getElementById('nav');
+  hamburger.addEventListener('click', () => nav.classList.toggle('open'));
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+
+  // ===== Scroll fade-in =====
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

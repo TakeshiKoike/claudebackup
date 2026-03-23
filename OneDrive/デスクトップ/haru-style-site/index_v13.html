@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>医療の街ジオラマ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-daytime: #f0e2bb;
+      --bg-night: #1a295c;
+      --text-daytime: #422612;
+      --text-night: #c8d8f0;
+      --accent: #f4a000;
+      --scene-bg-day-r: 0.878;
+      --scene-bg-day-g: 0.776;
+      --scene-bg-day-b: 0.482;
+      --scene-bg-night-r: 0.1;
+      --scene-bg-night-g: 0.16;
+      --scene-bg-night-b: 0.36;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--text-daytime);
+      background-color: var(--bg-daytime);
+      transition: background-color 0.8s, color 0.8s;
+    }
+
+    body.is-night {
+      background-color: var(--bg-night);
+      color: var(--text-night);
+    }
+
+    /* Canvas */
+    .canvas-view {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1;
+      cursor: grab;
+    }
+    .canvas-view:active { cursor: grabbing; }
+    .canvas-view canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: saturate(1.1) contrast(1.1);
+    }
+
+    /* Loading */
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg-daytime);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s;
+    }
+    .loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loading-text {
+      font-size: 14px;
+      color: var(--text-daytime);
+      margin-top: 20px;
+    }
+    .loading-bar {
+      width: 200px;
+      height: 3px;
+      background: rgba(66,38,18,0.15);
+      margin-top: 12px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .loading-bar-inner {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    /* UI Overlay */
+    .ui-overlay {
+      position: fixed;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .ui-overlay > * { pointer-events: auto; }
+
+    /* Card — left side like original */
+    .card-container {
+      position: fixed;
+      top: 50%;
+      left: 60px;
+      transform: translateY(-50%) translateX(-20px);
+      z-index: 10;
+      width: 400px;
+      max-width: 40vw;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 32px 36px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .card-container.show {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+    body.is-night .card-container {
+      background: rgba(30,40,80,0.92);
+    }
+    .card-title-en {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .card-title {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .card-description {
+      font-size: 12px;
+      line-height: 1.8;
+      opacity: 0.6;
+      margin-top: 12px;
+    }
+    .card-subtitle {
+      font-size: 14px;
+      line-height: 1.7;
+      opacity: 0.8;
+      white-space: pre-line;
+    }
+
+    /* Spot dots */
+    .card-dots {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(66,38,18,0.2);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .card-dot.active {
+      background: var(--accent);
+      transform: scale(1.3);
+    }
+    body.is-night .card-dot {
+      background: rgba(200,216,240,0.25);
+    }
+    body.is-night .card-dot.active {
+      background: var(--accent);
+    }
+
+    /* Appearance toggle (day/night) */
+    .appearance-toggle {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 20;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    .appearance-toggle:hover {
+      background: rgba(255,255,255,0.9);
+    }
+    body.is-night .appearance-toggle {
+      background: rgba(30,40,80,0.7);
+    }
+    body.is-night .appearance-toggle:hover {
+      background: rgba(30,40,80,0.9);
+    }
+    .appearance-toggle img {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Noise overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url('images/common/noise.png');
+      background-repeat: repeat;
+    }
+
+    /* Top nav */
+    .top-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      padding: 16px 24px;
+      gap: 32px;
+    }
+    .top-nav-logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .top-nav-links {
+      display: flex;
+      gap: 24px;
+      margin-left: auto;
+      align-items: center;
+    }
+    .top-nav-links a {
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: inherit;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .top-nav-links a:hover { opacity: 1; }
+
+    @media (max-width: 768px) {
+      .card-container {
+        top: auto;
+        bottom: 24px;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        max-width: none;
+        transform: translateY(20px);
+        padding: 24px;
+      }
+      .card-container.show {
+        transform: translateY(0);
+      }
+      .card-title { font-size: 20px; }
+      .top-nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-text">Loading...</div>
+    <div class="loading-bar"><div class="loading-bar-inner" id="loading-bar"></div></div>
+  </div>
+
+  <!-- Noise overlay -->
+  <div class="noise-overlay"></div>
+
+  <!-- Canvas -->
+  <div class="canvas-view" id="canvas-view">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <!-- Day/Night toggle -->
+  <button class="appearance-toggle" id="appearance-toggle">
+    <img src="images/common/icon_night.png" alt="toggle" id="appearance-icon">
+  </button>
+
+  <!-- Top Nav -->
+  <nav class="top-nav">
+    <div class="top-nav-logo">医療の街</div>
+    <div class="top-nav-links">
+      <a href="#">総合病院</a>
+      <a href="#">ヘリポート</a>
+      <a href="#">訪問看護</a>
+      <a href="#">薬局</a>
+      <a href="#">研修センター</a>
+      <a href="#">お問い合わせ</a>
+    </div>
+  </nav>
+
+  <!-- Card -->
+  <div class="card-container" id="card">
+    <div class="card-title-en" id="card-title-en"></div>
+    <div class="card-title" id="card-title"></div>
+    <div class="card-subtitle" id="card-subtitle"></div>
+    <div class="card-description" id="card-description"></div>
+    <div class="card-dots" id="card-dots"></div>
+  </div>
+
+  <!-- GSAP -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+
+  <!-- Three.js ES Modules -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    // ============================================================
+    // 医療の街ジオラマ v13 — 細かいボクセル、大きい街、ズーム対応
+    // ============================================================
+
+    const CARDS = [
+      { title: "総合病院", titleEn: "Hospital",
+        subtitle: "地域医療の中核\n24時間救急対応",
+        description: "内科・外科・小児科・産婦人科を備えた総合病院。最新の遠隔診療システムも導入。",
+        birdRadianFrom: 0.8 },
+      { title: "ヘリポート", titleEn: "Heliport",
+        subtitle: "緊急搬送の命綱\nドクターヘリ発着場",
+        description: "重症患者を高度医療機関へ搬送する緊急ヘリポート。24時間離着陸可能。",
+        birdRadianFrom: 1.8 },
+      { title: "訪問看護ステーション", titleEn: "Home Nursing",
+        subtitle: "地域に寄り添う\n在宅ケアの拠点",
+        description: "訪問看護師が地域を巡回し、在宅療養中の患者さんのケアを行っています。",
+        birdRadianFrom: 3.0 },
+      { title: "薬局", titleEn: "Pharmacy",
+        subtitle: "くすりと健康の\nよろず相談所",
+        description: "処方薬の調剤から健康相談まで。お薬手帳の電子化にも対応。",
+        birdRadianFrom: 4.0 },
+      { title: "研修センター", titleEn: "Training Center",
+        subtitle: "次世代の医療人を\n育てる学びの場",
+        description: "看護学生・医学生の実習受け入れ、シミュレーション教育を行っています。",
+        birdRadianFrom: 5.2 },
+      { title: "お問い合わせ", titleEn: "Contact",
+        subtitle: "医療の街に興味のある方\nお気軽にご連絡ください",
+        description: "見学・研修プログラムへの参加をお待ちしています。",
+        birdRadianFrom: 6.0 },
+    ];
+
+    // State
+    let scene, camera, renderer;
+    let mainGroup;
+    let isDaytime = true;
+    let currentCardIndex = 0;
+
+    // Bird camera orbit
+    let birdRadian = 0.8;
+    let birdRadianTarget = 0.8;
+    let birdAutoRotate = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragCurrent = 0;
+    let dragTarget = 0;
+    let zoomRadius = 85;
+    let zoomRadiusTarget = 85;
+
+    const clock = new THREE.Clock();
+
+    // ============================================================
+    // Merged voxel builder (single draw call, vertex colors)
+    // ============================================================
+    const VS = 0.5; // voxel size — fine pixels
+
+    function mergedVoxels(data) {
+      const pos=[], nrm=[], col=[];
+      const c = new THREE.Color();
+      const b = new THREE.BoxGeometry(1,1,1);
+      const bp=b.attributes.position, bn=b.attributes.normal, bi=b.index;
+      for (const [x,y,z,cc,sx=1,sy=1,sz=1] of data) {
+        c.set(cc);
+        for (let i=0;i<bi.count;i++) {
+          const vi=bi.getX(i);
+          pos.push(bp.getX(vi)*sx+x, bp.getY(vi)*sy+y, bp.getZ(vi)*sz+z);
+          nrm.push(bn.getX(vi), bn.getY(vi), bn.getZ(vi));
+          col.push(c.r, c.g, c.b);
+        }
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+      g.setAttribute('normal', new THREE.Float32BufferAttribute(nrm,3));
+      g.setAttribute('color', new THREE.Float32BufferAttribute(col,3));
+      const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({vertexColors:true}));
+      m.castShadow=true; m.receiveShadow=true;
+      return m;
+    }
+
+    // ============================================================
+    // Build city — dense voxel city, haru-ni.net scale
+    // ============================================================
+    function buildCity() {
+      const group = new THREE.Group();
+      const v = [];
+      const P = { // palette
+        grass1:0x5a9e4b, grass2:0x4a8e3b, grass3:0x6ab85a,
+        dirt:0x8b6b4a, rock:0x7a7a7a, rockDark:0x5a5a5a,
+        white:0xf0f0f0, cream:0xf0e8d0, wall:0xe8e8e0,
+        roofRed:0xc85030, roofBlue:0x4070a0, roofGreen:0x408060, roofOrange:0xe08030,
+        red:0xe04030, pink:0xf0a0b0, blue:0x4080d0, green:0x40a050,
+        glass:0xa0d8e8, metal:0x808890, concrete:0xb0b0a8, asphalt:0x606060,
+        yellow:0xf0d040, heliYellow:0xf0d000,
+        wood:0x9a7a50, trunk:0x6a4a2a,
+        leaves1:0x3a8a3a, leaves2:0x50a050, leaves3:0x2a7a2a,
+        flower1:0xf06080, flower2:0xf0e040, flower3:0xa060d0,
+        orange:0xf09030, skin:0xf0c8a0, nurse:0xf8f8f8, doctor:0x5090c0,
+      };
+
+      // Helper: fill box with fine voxels (0.5 unit each)
+      function box(bx,by,bz,w,h,d,c) {
+        for(let x=0;x<w;x+=VS) for(let y=0;y<h;y+=VS) for(let z=0;z<d;z+=VS)
+          v.push([bx+x, by+y, bz+z, c, VS,VS,VS]);
+      }
+
+      // === Ground (elliptical, fine voxels) ===
+      for(let x=-30;x<=30;x+=VS) for(let z=-25;z<=25;z+=VS) {
+        if((x*x)/(30*30)+(z*z)/(25*25)<1) {
+          v.push([x, 0, z, Math.random()>0.4?P.grass1:(Math.random()>0.5?P.grass2:P.grass3), VS,VS,VS]);
+        }
+      }
+      // Underground (use larger blocks for perf)
+      for(let layer=-1;layer>=-5;layer--) {
+        const r=30+layer*2, rz=25+layer*1.5;
+        for(let x=-35;x<=35;x++) for(let z=-30;z<=30;z++) {
+          if((x*x)/(r*r)+(z*z)/(rz*rz)<1)
+            v.push([x, layer, z, layer>-3?P.dirt:(Math.random()>0.3?P.rock:P.rockDark)]);
+        }
+      }
+
+      // === Roads ===
+      for(let x=-28;x<=28;x+=VS) { v.push([x,0.5,0,P.asphalt,VS,0.1,3]); v.push([x,0.5,12,P.asphalt,VS,0.1,3]); }
+      for(let z=-22;z<=22;z+=VS) { v.push([0,0.5,z,P.asphalt,3,0.1,VS]); v.push([-14,0.5,z,P.asphalt,3,0.1,VS]); }
+
+      // === 1. Hospital (big, right side) ===
+      box(5,1,-10, 12,10,10, P.white);
+      box(4,11,-11, 14,1,12, P.roofBlue); // roof
+      // Second floor extension
+      box(5,1,-1, 8,7,6, P.white);
+      box(4,8,-2, 10,1,8, P.roofBlue);
+      // Red cross
+      for(let dy=3;dy<=8;dy++) v.push([4.9,dy,-5,P.red]);
+      for(let dz=-7;dz<=-3;dz++) v.push([4.9,6,dz,P.red]);
+      // Windows
+      for(let y=2;y<=9;y+=2) for(let z=-9;z<=-2;z+=2) {
+        v.push([17.1,y,z,P.glass]); v.push([4.9,y,z,P.glass]);
+      }
+      // Entrance
+      box(4.9,1,-6, 1,3,2, P.glass);
+      // Rooftop (AC units etc)
+      box(8,12,-8, 3,2,3, P.metal); box(13,12,-5, 2,2,2, P.metal);
+
+      // === 2. Heliport (on hospital roof) ===
+      box(6,12,-10, 8,1,8, P.concrete);
+      // H marking
+      for(let i=0;i<5;i++) { v.push([8,12.1,-9+i,P.heliYellow]); v.push([12,12.1,-9+i,P.heliYellow]); }
+      for(let i=8;i<=12;i++) v.push([i,12.1,-7,P.heliYellow]);
+      // Helicopter
+      box(9,13,-8, 4,2,2, P.red);
+      v.push([13,13.5,-7,P.metal,2,1,1]); // tail
+      v.push([10,15,-7,P.metal,0.3,0.3,5]); // rotor
+
+      // === 3. Nursing station (left) ===
+      box(-22,1,5, 8,5,7, P.cream);
+      box(-23,6,4, 10,1,9, P.roofGreen);
+      // Pink cross
+      for(let dy=2;dy<=4;dy++) v.push([-14.1,dy,8,P.pink]);
+      for(let dz=6;dz<=10;dz++) v.push([-14.1,3,dz,P.pink]);
+      // Windows
+      for(let z=6;z<=10;z+=2) v.push([-14.1,3,z,P.glass]);
+      // Nursing car
+      box(-13,1,6, 2,2,1, P.white); v.push([-13,3,6,P.pink,2,0.3,1]);
+
+      // === 4. Pharmacy (near hospital) ===
+      box(20,1,-4, 6,5,6, P.white);
+      box(19,6,-5, 8,1,8, P.roofRed);
+      // Green cross
+      for(let dy=2;dy<=4;dy++) v.push([19.9,dy,-1,P.green]);
+      for(let dz=-3;dz<=1;dz++) v.push([19.9,3,dz,P.green]);
+
+      // === 5. Training center (back) ===
+      box(-10,1,-18, 10,8,8, P.white);
+      box(-11,9,-19, 12,1,10, P.roofBlue);
+      // Clock tower
+      box(-7,9,-16, 3,5,3, P.cream);
+      box(-8,14,-17, 5,1,5, P.roofBlue);
+      // Windows
+      for(let y=2;y<=7;y+=2) for(let z=-17;z<=-12;z+=2) v.push([-10.1,y,z,P.glass]);
+
+      // === Dense small buildings (fill the city) ===
+      const smalls = [
+        [-6,-6, 5,4,5, P.cream, P.roofRed],
+        [20,6, 5,6,5, P.wall, P.roofGreen],
+        [-22,-8, 6,5,5, P.white, P.roofBlue],
+        [-8,14, 7,4,6, P.cream, P.roofOrange],
+        [10,8, 5,5,5, P.wall, P.roofRed],
+        [18,14, 6,4,5, P.cream, P.roofGreen],
+        [-18,14, 5,5,5, P.white, P.roofBlue],
+        [4,16, 6,3,6, P.cream, P.roofRed],
+        [-24,-14, 5,4,5, P.wall, P.roofOrange],
+        [22,-12, 5,5,5, P.cream, P.roofGreen],
+        [-4,6, 4,6,4, P.white, P.roofBlue],
+        [14,16, 5,3,5, P.wall, P.roofRed],
+        [-14,-20, 5,4,5, P.cream, P.roofGreen],
+        [8,-16, 4,5,4, P.white, P.roofOrange],
+        [-26,6, 4,4,4, P.cream, P.roofRed],
+        [26,0, 4,5,4, P.wall, P.roofBlue],
+      ];
+      for(const [bx,bz,bw,bh,bd,wc,rc] of smalls) {
+        box(bx,1,bz, bw,bh,bd, wc);
+        box(bx-1,1+bh,bz-1, bw+2,1,bd+2, rc);
+        for(let wy=2;wy<bh;wy+=2) for(let wz=1;wz<bd-1;wz+=2)
+          v.push([bx+bw+0.1, 1+wy, bz+wz, P.glass]);
+      }
+
+      // === Trees (scattered, fine voxels) ===
+      for(let i=0;i<60;i++) {
+        const tx=Math.floor(Math.random()*54-27), tz=Math.floor(Math.random()*44-22);
+        if((tx*tx)/(28*28)+(tz*tz)/(23*23)>0.85) continue;
+        const h=2+Math.floor(Math.random()*3);
+        for(let y=1;y<h;y+=VS) v.push([tx,y,tz,P.trunk,VS,VS,VS]);
+        const lc=[P.leaves1,P.leaves2,P.leaves3][Math.floor(Math.random()*3)];
+        for(let dx=-1;dx<=1;dx+=VS) for(let dz=-1;dz<=1;dz+=VS) for(let dy=0;dy<=1;dy+=VS)
+          if(Math.abs(dx)+Math.abs(dz)+dy<2.5) v.push([tx+dx,h+dy,tz+dz,lc,VS,VS,VS]);
+      }
+
+      // === Flowers ===
+      for(let i=0;i<100;i++) {
+        const fx=(Math.random()*50-25), fz=(Math.random()*40-20);
+        if((fx*fx)/(28*28)+(fz*fz)/(22*22)<0.8) {
+          const fc=[P.flower1,P.flower2,P.flower3,P.pink][Math.floor(Math.random()*4)];
+          v.push([fx,1,fz,fc, VS*0.6,VS*0.8,VS*0.6]);
+        }
+      }
+
+      // === People (voxel figures, more detail) ===
+      [[7,0,-12,P.doctor],[9,0,-12,P.nurse],[11,0,-12,P.nurse],
+       [-20,0,8,P.nurse],[-18,0,9,P.pink],[3,0,3,P.skin],
+       [22,0,-2,P.green],[0,0,2,P.orange],[-6,0,-4,P.doctor],
+       [12,0,10,P.nurse],[-16,0,16,P.skin],[15,0,-2,P.nurse],
+       [-10,0,12,P.doctor],[6,0,18,P.skin],[-4,0,-16,P.nurse],
+      ].forEach(([px2,py2,pz2,pc])=>{
+        // legs
+        v.push([px2-VS*0.5,1+py2,pz2,P.blue,VS,VS*1.2,VS]);
+        v.push([px2+VS*0.5,1+py2,pz2,P.blue,VS,VS*1.2,VS]);
+        // body
+        v.push([px2,1+py2+VS*1.2,pz2,pc,VS*2,VS*1.5,VS]);
+        // head
+        v.push([px2,1+py2+VS*2.7,pz2,P.skin,VS,VS,VS]);
+      });
+
+      // === Ambulance ===
+      box(3,1,-12, 3,2,2, P.white);
+      v.push([3,3,-12,P.red,3,0.3,2]);
+
+      // === Street lamps ===
+      for(let lx=-24;lx<=24;lx+=8) {
+        for(let y=1;y<=5;y++) v.push([lx,y,-2,P.metal,0.3,1,0.3]);
+        v.push([lx,6,-2,P.yellow,0.6,0.5,0.6]);
+      }
+
+      // Build
+      group.add(mergedVoxels(v));
+
+      // Floor (circular fade)
+      const floorGeo = new THREE.PlaneGeometry(120,120);
+      const floorMat = new THREE.MeshLambertMaterial({color:0xe0c67b, transparent:true, opacity:0.4});
+      floorMat.onBeforeCompile = (s) => {
+        s.vertexShader='varying vec3 vWP;\n'+s.vertexShader;
+        s.vertexShader=s.vertexShader.replace('void main() {','void main() {\nvWP=(modelMatrix*vec4(position,1.0)).xyz;');
+        s.fragmentShader='varying vec3 vWP;\n'+s.fragmentShader;
+        s.fragmentShader=s.fragmentShader.replace('#include <dithering_fragment>',
+          '#include <dithering_fragment>\ngl_FragColor.a*=max(0.0,1.0-(vWP.x*vWP.x+vWP.z*vWP.z)/3600.0);');
+      };
+      const floor=new THREE.Mesh(floorGeo,floorMat);
+      floor.rotation.x=-Math.PI/2; floor.position.y=-5.5; floor.receiveShadow=true;
+      group.add(floor);
+
+      return group;
+    }
+
+    // ============================================================
+    // Init
+    // ============================================================
+    async function init() {
+      const canvas = document.getElementById('canvas');
+      renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0.878, 0.776, 0.482);
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 3, 300);
+
+      // Lighting (same as haru-ni.net)
+      const ambient = new THREE.AmbientLight(0xffffff, 1.5);
+      ambient.name = 'ambientLight';
+      scene.add(ambient);
+
+      const sun = new THREE.DirectionalLight(0xfff5e0, 2.0);
+      sun.position.set(40, 60, 30);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048);
+      const s = 60;
+      sun.shadow.camera.left=-s; sun.shadow.camera.right=s;
+      sun.shadow.camera.top=s; sun.shadow.camera.bottom=-s;
+      sun.shadow.camera.near=10; sun.shadow.camera.far=150;
+      scene.add(sun);
+
+      const fill = new THREE.DirectionalLight(0xc0d8f0, 0.5);
+      fill.position.set(-30, 20, -20);
+      scene.add(fill);
+
+      // Build city
+      mainGroup = buildCity();
+      scene.add(mainGroup);
+
+      onResize();
+      window.addEventListener('resize', onResize);
+
+      document.getElementById('loading').classList.add('hidden');
+      setTimeout(() => {
+        document.getElementById('card').classList.add('show');
+        updateCard(0);
+      }, 600);
+
+      setupDots();
+      setupEvents();
+      animate();
+    }
+
+    // ============================================================
+    // Load Models — not used, kept for compatibility
+    // ============================================================
+    async function loadModels() {}
+
+    // ============================================================
+    // Card system
+    // ============================================================
+    function updateCard(index) {
+      currentCardIndex = index;
+      const card = CARDS[index];
+      document.getElementById('card-title-en').textContent = card.titleEn;
+      document.getElementById('card-title').textContent = card.title;
+      document.getElementById('card-subtitle').textContent = card.subtitle;
+      document.getElementById('card-description').textContent = card.description;
+
+      // Update dots
+      document.querySelectorAll('.card-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+
+      // Animate bird to face this card
+      birdRadianTarget = card.birdRadianFrom;
+    }
+
+    function setupDots() {
+      const dotsContainer = document.getElementById('card-dots');
+      CARDS.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'card-dot' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', () => updateCard(i));
+        dotsContainer.appendChild(dot);
+      });
+    }
+
+    // ============================================================
+    // Day / Night
+    // ============================================================
+    function toggleAppearance() {
+      isDaytime = !isDaytime;
+      document.body.classList.toggle('is-night', !isDaytime);
+
+      const icon = document.getElementById('appearance-icon');
+      icon.src = isDaytime ? 'images/common/icon_night.png' : 'images/common/icon_daytime.png';
+
+      // Animate scene background
+      const targetColor = isDaytime
+        ? { r: 0.878, g: 0.776, b: 0.482 }
+        : { r: 0.1, g: 0.16, b: 0.36 };
+
+      const currentBg = { r: scene.background.r, g: scene.background.g, b: scene.background.b };
+      gsap.to(currentBg, {
+        r: targetColor.r, g: targetColor.g, b: targetColor.b,
+        duration: 0.8,
+        onUpdate: () => scene.background.setRGB(currentBg.r, currentBg.g, currentBg.b),
+      });
+
+      // Animate light intensity
+      scene.traverse((child) => {
+        if (child.isAmbientLight) {
+          gsap.to(child, { intensity: isDaytime ? 1.5 : 0.4, duration: 0.8 });
+        }
+        if (child.isDirectionalLight) {
+          gsap.to(child, { intensity: isDaytime ? child.userData.originalIntensity || 1 : 0.2, duration: 0.8 });
+        }
+      });
+    }
+
+    // ============================================================
+    // Events
+    // ============================================================
+    function setupEvents() {
+      const view = document.getElementById('canvas-view');
+
+      // Drag to rotate
+      view.addEventListener('mousedown', onDragStart);
+      view.addEventListener('mousemove', onDragMove);
+      view.addEventListener('mouseup', onDragEnd);
+      view.addEventListener('mouseleave', onDragEnd);
+      view.addEventListener('touchstart', (e) => onDragStart(e), { passive: true });
+      view.addEventListener('touchmove', (e) => onDragMove(e), { passive: true });
+      view.addEventListener('touchend', onDragEnd);
+
+      // Wheel → card switch
+      document.body.addEventListener('wheel', onWheel, { passive: false });
+
+      // Appearance toggle
+      document.getElementById('appearance-toggle').addEventListener('click', toggleAppearance);
+    }
+
+    function getClientX(e) {
+      return e.touches ? e.touches[0].clientX : e.clientX;
+    }
+
+    function onDragStart(e) {
+      isDragging = true;
+      dragStartX = getClientX(e);
+    }
+
+    function onDragMove(e) {
+      if (!isDragging) return;
+      const x = getClientX(e);
+      const dx = (x - dragStartX) / 3000;
+      dragTarget += dx;
+      dragStartX = x;
+    }
+
+    function onDragEnd() {
+      isDragging = false;
+    }
+
+    function onWheel(e) {
+      e.preventDefault();
+      // Zoom in/out
+      zoomRadiusTarget = Math.max(30, Math.min(150, zoomRadiusTarget + e.deltaY * 0.05));
+    }
+
+    function onResize() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+
+    // ============================================================
+    // Camera update (bird mode orbit)
+    // ============================================================
+    function updateBirdCamera(dt) {
+      dragCurrent += (dragTarget - dragCurrent) * Math.min(0.004 * dt, 1);
+      birdAutoRotate += dt / 15000; // slow auto-rotate like haru-ni.net
+      birdRadian += (birdRadianTarget - birdRadian) * 0.03;
+      zoomRadius += (zoomRadiusTarget - zoomRadius) * 0.08;
+
+      const totalRadian = birdRadian + birdAutoRotate + dragCurrent;
+      const height = zoomRadius * 0.53;
+
+      camera.position.set(
+        zoomRadius * Math.sin(totalRadian) - 5,
+        height,
+        -zoomRadius * Math.cos(totalRadian) - 5.8
+      );
+      camera.rotation.order = 'YXZ';
+      camera.rotation.set(-0.4, -totalRadian + Math.PI, 0);
+      camera.setFocalLength(16);
+    }
+
+    // ============================================================
+    // Render loop
+    // ============================================================
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const dt = clock.getDelta() * 1000; // ms
+
+      // Camera
+      updateBirdCamera(dt);
+
+      camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+    }
+
+    // ============================================================
+    // Start
+    // ============================================================
+    init().catch(console.error);
+  </script>
+</body>
+</html>

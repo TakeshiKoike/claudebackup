@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>キャラ1体テスト</title>
+<style>*{margin:0;padding:0}body{background:#e8e0d0;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:14px sans-serif;color:#422612;background:rgba(255,255,255,0.9);padding:10px 16px;border-radius:8px;z-index:10}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">キャラ1体テスト — 全方向から確認用</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xe8e0d0);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,200);
+camera.position.set(5,8,-10);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(0,1.5,0);
+
+scene.add(new THREE.AmbientLight(0xffffff,1.5));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(10,20,-10);scene.add(sun);
+
+// 床
+const floorGeo=new THREE.PlaneGeometry(20,20);floorGeo.rotateX(-Math.PI/2);
+scene.add(new THREE.Mesh(floorGeo,new THREE.MeshLambertMaterial({color:0xc8c0b0})));
+
+// グリッド
+scene.add(new THREE.GridHelper(20,20,0x888888,0xcccccc));
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+// ★修正版 buildCharacter — 全パーツが本体に接続、分離なし
+function buildCharacter(opts={}){
+  const v=[];
+  const D = 7;
+  const SK = opts.skin||0xf0c8a0, SD=0xe0b890, E=0x202020;
+  const PKL=0xf8c0d0;
+  const hc=opts.hair||0x3a2a1a, sc=opts.shirt||0xf0f0e8, pc=opts.pants||0x2a3a6a, sh=opts.shoe||0x3a3a3a;
+
+  // === 髪（頭頂） ===
+  for(let x=1;x<=7;x++) v.push([x,13,0,hc,1,1,D]);
+  for(let x=0;x<=8;x++) v.push([x,12,0,hc,1,1,D]);
+  // 後頭部
+  for(let x=1;x<=7;x++) for(let y=10;y<=13;y++) v.push([x,y,D,hc,1,1,1]);
+
+  // ロングヘア（サイドに垂れる、背面も長い）— 全て本体に接触
+  if(opts.longHair){
+    // サイドの垂れ髪（本体x=0, x=8に接触）
+    for(let y=6;y<=11;y++){v.push([0,y,1,hc,1,1,D-2]);v.push([8,y,1,hc,1,1,D-2]);}
+    // 背面の長い髪（z=Dに接触）
+    for(let x=2;x<=6;x++) for(let y=5;y<=11;y++) v.push([x,y,D,hc,1,1,1]);
+  }
+
+  // ポニーテール（背面z=Dから伸びる、接触）
+  if(opts.ponytail){
+    for(let y=10;y<=13;y++) v.push([4,y,D+1,hc,1,1,1]);
+    v.push([4,12,D+2,hc,1,1,1]);v.push([4,11,D+2,hc,1,1,1]);
+    v.push([4,10,D+3,hc,1,1,1]);
+  }
+
+  // === 帽子（頭に乗る、分離なし） ===
+  if(opts.hat){
+    const hatC=opts.hatC||0xe05040;
+    // 帽子本体（y=13の髪の上に乗る）
+    for(let x=0;x<=8;x++) v.push([x,14,0,hatC,1,1,D]);
+    for(let x=1;x<=7;x++) v.push([x,15,0,hatC,1,1,D]);
+    // つば（y=14の前面z=0に接触、z=-1ではなく前面を厚くする）
+    for(let x=0;x<=8;x++) v.push([x,14,0,hatC,1,2,1]); // 前面を2段に
+  }
+
+  // === 顔 ===
+  v.push([0,11,0,hc,1,1,D]); for(let x=1;x<=7;x++) v.push([x,11,0,SK,1,1,D]); v.push([8,11,0,hc,1,1,D]);
+  v.push([0,10,0,hc,1,1,D]); v.push([1,10,0,SK,1,1,D]); v.push([2,10,0,E,1,1,D]);
+  v.push([3,10,0,SK,1,1,D]); v.push([4,10,0,SK,1,1,D]); v.push([5,10,0,SK,1,1,D]);
+  v.push([6,10,0,E,1,1,D]); v.push([7,10,0,SK,1,1,D]); v.push([8,10,0,hc,1,1,D]);
+  // 顔の側面
+  for(let y=8;y<=11;y++){v.push([0,y,D,SK,1,1,1]);v.push([8,y,D,SK,1,1,1]);}
+  // ほっぺ
+  for(let x=1;x<=7;x++) v.push([x,9,0,SK,1,1,D]); v.push([2,9,0,PKL,1,1,D]); v.push([6,9,0,PKL,1,1,D]);
+  // 口
+  for(let x=1;x<=7;x++) v.push([x,8,0,SK,1,1,D]); v.push([3,8,0,SD,1,1,D]); v.push([4,8,0,SD,1,1,D]); v.push([5,8,0,SD,1,1,D]);
+
+  // メガネ（顔表面z=0に色を変えるだけ、分離なし）
+  if(opts.glasses){
+    const GC=0x2a2a2a;
+    // 目の周りの枠を黒にする（z=0の顔面上に上書き）
+    v.push([1,10,0,GC,1,1,1]);v.push([3,10,0,GC,1,1,1]);
+    v.push([4,10,0,GC,1,1,1]); // ブリッジ
+    v.push([5,10,0,GC,1,1,1]);v.push([7,10,0,GC,1,1,1]);
+    // つるの部分（側面、耳の位置）
+    v.push([0,10,0,GC,1,1,D]);v.push([8,10,0,GC,1,1,D]);
+  }
+
+  // === 首 ===
+  v.push([3,7,0,SK,1,1,D]); v.push([4,7,0,SK,1,1,D]); v.push([5,7,0,SK,1,1,D]);
+
+  // === 体 ===
+  for(let x=0;x<=8;x++) v.push([x,6,0,sc,1,1,D]);
+  for(let x=0;x<=8;x++) v.push([x,5,0,sc,1,1,D]);
+  // 手（x=0, x=8は肌色で腕）
+  v.push([0,4,0,SK,1,1,D]); for(let x=1;x<=7;x++) v.push([x,4,0,sc,1,1,D]); v.push([8,4,0,SK,1,1,D]);
+  for(let x=1;x<=7;x++) v.push([x,3,0,sc,1,1,D]);
+  // 体の背面
+  for(let x=1;x<=7;x++) for(let y=3;y<=6;y++) v.push([x,y,D,sc,1,1,1]);
+
+  // === 下半身 ===
+  if(opts.skirt){
+    const skC=opts.skirtC||pc;
+    for(let x=1;x<=7;x++) v.push([x,2,0,skC,1,1,D]);
+    for(let x=0;x<=8;x++) v.push([x,1,0,skC,1,1,D]);
+    for(let x=1;x<=7;x++) v.push([x,2,D,skC,1,1,1]);
+    for(let x=0;x<=8;x++) v.push([x,1,D,skC,1,1,1]);
+    v.push([2,0,0,sh,1,1,D]); v.push([3,0,0,sh,1,1,D]);
+    v.push([5,0,0,sh,1,1,D]); v.push([6,0,0,sh,1,1,D]);
+    for(const x of[2,3,5,6]) v.push([x,0,D,sh,1,1,1]);
+  } else {
+    v.push([2,2,0,pc,1,1,D]); v.push([3,2,0,pc,1,1,D]); v.push([5,2,0,pc,1,1,D]); v.push([6,2,0,pc,1,1,D]);
+    v.push([2,1,0,pc,1,1,D]); v.push([3,1,0,pc,1,1,D]); v.push([5,1,0,pc,1,1,D]); v.push([6,1,0,pc,1,1,D]);
+    for(const x of[2,3,5,6]) for(let y=1;y<=2;y++) v.push([x,y,D,pc,1,1,1]);
+    v.push([1,0,0,sh,1,1,D]); v.push([2,0,0,sh,1,1,D]); v.push([3,0,0,sh,1,1,D]);
+    v.push([5,0,0,sh,1,1,D]); v.push([6,0,0,sh,1,1,D]); v.push([7,0,0,sh,1,1,D]);
+    for(const x of[1,2,3,5,6,7]) v.push([x,0,D,sh,1,1,1]);
+  }
+
+  // === リュック（背中z=Dに密着、小さめ3x3x2） ===
+  if(opts.bag){
+    const bagC=opts.bagC||0x8a6040;
+    for(let x=3;x<=5;x++) for(let y=4;y<=6;y++) v.push([x,y,D+1,bagC,1,1,1]);
+    for(let x=3;x<=5;x++) for(let y=4;y<=6;y++) v.push([x,y,D+2,bagC,1,1,1]);
+    // ストラップ（肩に接触）
+    v.push([3,7,D,0x555555,1,1,1]);v.push([5,7,D,0x555555,1,1,1]);
+  }
+
+  return v;
+}
+
+// テスト: フル装備キャラ（帽子+メガネ+リュック）
+const test1 = bm(buildCharacter({
+  shirt:0xe05040, pants:0x2a3a6a, hair:0xd4a040,
+  hat:true, hatC:0x306898, glasses:true, bag:true, bagC:0x4090c8
+}));
+test1.scale.set(0.22,0.22,0.22);
+test1.position.set(0,0.01,0);
+scene.add(test1);
+
+// テスト2: ロングヘア+スカート+ポニテ
+const test2 = bm(buildCharacter({
+  shirt:0xf0a0b0, pants:0xf0a0b0, hair:0x6a4a2a,
+  longHair:true, ponytail:true, skirt:true, skirtC:0x2a3a6a
+}));
+test2.scale.set(0.22,0.22,0.22);
+test2.position.set(3,0.01,0);
+scene.add(test2);
+
+// テスト3: シンプル（アクセサリなし）
+const test3 = bm(buildCharacter({
+  shirt:0x4090c8, pants:0x404040, hair:0x1a1a1a
+}));
+test3.scale.set(0.22,0.22,0.22);
+test3.position.set(-3,0.01,0);
+scene.add(test3);
+
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>

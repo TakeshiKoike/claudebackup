@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>バス v3</title>
+<style>*{margin:0;padding:0}body{background:#f0e2bb;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:13px sans-serif;color:#422612;background:rgba(255,255,255,0.8);padding:8px 14px;border-radius:8px}</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">バス v3 — 窓枠アーチ・チェッカーガラス・丸い前面</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xf0e2bb);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,500);
+camera.position.set(18,10,14);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(9,4,3);
+scene.add(new THREE.AmbientLight(0xffffff,1.3));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(15,25,10);
+sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+function buildBus(){
+  const v=[];
+
+  const YL=0xe0c848, YLD=0xc8a828;
+  const CR=0xf0e8d0, CRD=0xe0d0b8;
+  const OR=0xd8a030;
+  const BRN=0x8a6a40, BRND=0x5a3a20;
+  const GL=0xa8d0e8, GLD=0x90b8d0;
+  const BK=0x303030;
+  const MT=0x707070;
+  const RD=0xc83828;
+  const WH=0xf0f0e0;
+  const ORS=0xf09030;
+  const SKN=0xf0c8a0;
+  const BL=0x4090c8;
+
+  // バス 18L(x) x 8H(y) x 7W(z)
+  // ピクセル単位で壁を置く。窓位置は壁を置かない。
+
+  // === 床 ===
+  for(let x=0;x<18;x++) for(let z=0;z<7;z++) v.push([x,1,z,BRND]);
+
+  // === 車体下部フレーム ===
+  for(let x=0;x<18;x++){ v.push([x,0,0,BRND]); v.push([x,0,6,BRND]); }
+  for(let z=0;z<7;z++){ v.push([0,0,z,BRND]); v.push([17,0,z,BRND]); }
+
+  // === タイヤ ===
+  for(const[tx,tz] of [[3,-1],[3,7],[13,-1],[13,7]]){
+    v.push([tx,0,tz,BK,2,2,1]);
+    v.push([tx+0.5,0.5,tz<0?tz-0.1:tz+0.9,MT,1,1,0.15]);
+  }
+
+  // === 壁をピクセル単位で構築 ===
+  // 窓: y4-6, 各窓3幅、位置x=[2-4,6-8,10-12,14-16]
+  // ドア: x=8-9, y=2-6
+
+  function isWindowL(x,y){
+    if(y<4||y>6) return false;
+    return (x>=2&&x<=4)||(x>=6&&x<=8)||(x>=10&&x<=12)||(x>=14&&x<=16);
+  }
+  function isDoorL(x,y){ return x>=8&&x<=9&&y>=2&&y<=6; }
+
+  // 左壁 z=0
+  for(let x=0;x<18;x++) for(let y=2;y<=7;y++){
+    if(isDoorL(x,y)){
+      // ドアガラス
+      if(y>=3) v.push([x,y,-0.1,GLD]);
+      else v.push([x,y,0,CR]);
+    } else if(isWindowL(x,y)){
+      // チェッカーガラス
+      const checker = ((x+y)%2===0) ? GL : GLD;
+      v.push([x,y,-0.1,checker]);
+    } else {
+      const wc = y<=2?CR : y===3?OR : YL;
+      v.push([x,y,0,wc]);
+    }
+  }
+
+  // 右壁 z=6
+  for(let x=0;x<18;x++) for(let y=2;y<=7;y++){
+    if(isWindowL(x,y)){
+      const checker = ((x+y)%2===0) ? GL : GLD;
+      v.push([x,y,6.1,checker]);
+    } else {
+      const wc = y<=2?CR : y===3?OR : YL;
+      v.push([x,y,6,wc]);
+    }
+  }
+
+  // === 窓枠（茶色、太め、アーチ付き）左右両面 ===
+  for(const zOff of [-0.15, 6.15]){
+    for(const wx of [2,6,10,14]){
+      // 左枠
+      v.push([wx-1,3,zOff,BRN,1,5,0.15]);
+      // 右枠
+      v.push([wx+3,3,zOff,BRN,1,5,0.15]);
+      // 下枠
+      v.push([wx-1,3,zOff,BRN,5,1,0.15]);
+      // 上枠（直線部分）
+      v.push([wx-1,7,zOff,BRN,5,1,0.15]);
+      // アーチ（上部中央が1段高い）
+      v.push([wx,7.5,zOff,BRN,3,0.5,0.15]);
+      v.push([wx+0.5,7.8,zOff,BRN,2,0.3,0.15]);
+    }
+    // ドア枠
+    v.push([7,2,zOff,BRN,1,6,0.15]);
+    v.push([10,2,zOff,BRN,1,6,0.15]);
+    v.push([7,7.5,zOff,BRN,4,0.5,0.15]);
+  }
+
+  // === 前壁 (x=0) — 角を削って丸みを出す ===
+  for(let z=1;z<6;z++) for(let y=2;y<=7;y++){
+    const isFrontGlass = (y>=4&&y<=6)&&(z>=1&&z<=5);
+    if(isFrontGlass){
+      const checker=((z+y)%2===0)?GL:GLD;
+      v.push([-0.1,y,z,checker]);
+    } else {
+      const wc=y<=2?CR:y===3?OR:YL;
+      v.push([0,y,z,wc]);
+    }
+  }
+  // 前面の角を丸める（z=0,z=6の上部を削る）
+  for(let y=2;y<=5;y++){ v.push([0,y,0,YL]); v.push([0,y,6,YL]); }
+  // 上の角は置かない（丸み）
+
+  // フロント窓枠
+  v.push([-0.2,3,0.5,BRN,0.2,5,0.5]);
+  v.push([-0.2,3,5.5,BRN,0.2,5,0.5]);
+  v.push([-0.2,7,0.5,BRN,0.2,1,6]);
+
+  // === 後壁 ===
+  for(let z=1;z<6;z++) for(let y=2;y<=7;y++){
+    const isRear=(y>=4&&y<=6)&&(z>=2&&z<=4);
+    if(isRear){v.push([17.1,y,z,GL]);}
+    else{const wc=y<=2?CR:y===3?OR:YL;v.push([17,y,z,wc]);}
+  }
+  for(let y=2;y<=5;y++){v.push([17,y,0,YL]);v.push([17,y,6,YL]);}
+
+  // === ヘッドライト（丸い感じ） ===
+  v.push([-0.3,2,1,WH,0.3,1,1]);
+  v.push([-0.3,2,5,WH,0.3,1,1]);
+  v.push([-0.3,1,1.2,ORS,0.3,0.7,0.7]); // ウインカー
+  v.push([-0.3,1,5,ORS,0.3,0.7,0.7]);
+
+  // === テールライト ===
+  v.push([17.3,2,1,RD,0.3,1.5,1.5]);
+  v.push([17.3,2,4.5,RD,0.3,1.5,1.5]);
+
+  // === サイドミラー ===
+  v.push([-0.8,5,-0.5,BRN,0.5,0.5,0.8]);
+  v.push([-0.8,5,6.5,BRN,0.5,0.5,0.8]);
+  v.push([-0.3,4.5,0,BRN,0.3,1,0.3]);
+  v.push([-0.3,4.5,6.3,BRN,0.3,1,0.3]);
+
+  // === 屋根 ===
+  for(let x=-0.5;x<18.5;x++) for(let z=-0.5;z<7.5;z++) v.push([x,8,z,CRD,1,0.5,1]);
+  // 屋根の茶色縁
+  for(let x=-0.5;x<18.5;x++){v.push([x,8.3,-0.7,BRND,1,0.3,0.3]);v.push([x,8.3,7.2,BRND,1,0.3,0.3]);}
+
+  // === 行先表示板 ===
+  v.push([-0.2,7,1.5,BRND,0.3,1.5,4]);
+  v.push([-0.15,7.3,2,YL,0.15,0.8,3]); // 文字エリア
+
+  // === ナンバープレート ===
+  v.push([-0.25,1,2.5,WH,0.25,1,2]);
+
+  // =====================
+  // 内部
+  // =====================
+  // 運転席
+  v.push([1,2,1,BK,1,2,2]);
+  v.push([0.5,4,2,MT,0.5,0.5,1]);
+
+  // 座席（オレンジ、背もたれ付き）
+  for(let x=4;x<8;x+=2){
+    v.push([x,2,1,ORS]); v.push([x,3,0.5,ORS,1,1,0.3]); // 左列
+    v.push([x,2,5,ORS]); v.push([x,3,5.5,ORS,1,1,0.3]); // 右列
+  }
+  for(let x=10;x<17;x+=2){
+    v.push([x,2,1,ORS]); v.push([x,3,0.5,ORS,1,1,0.3]);
+    v.push([x,2,5,ORS]); v.push([x,3,5.5,ORS,1,1,0.3]);
+  }
+
+  // つり革
+  v.push([3,7,3,MT,14,0.3,0.3]);
+
+  // 乗客
+  function pax(px,pz,bc){
+    v.push([px,2,pz,BK,0.5,0.5,0.5]);
+    v.push([px,2.5,pz,bc,0.6,0.8,0.5]);
+    v.push([px,3.3,pz,SKN,0.5,0.5,0.5]);
+  }
+  pax(5,1.5,BL); pax(7,5,RD); pax(11,1.5,YL);
+  pax(13,5,BL); pax(15,1.5,WH);
+
+  return v;
+}
+
+scene.add(bm(buildBus()));
+scene.add(new THREE.GridHelper(40,20,0xccbb99,0xddccaa));
+
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}
+animate();
+</script></body></html>

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>haru-ni.net レプリカ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-daytime: #f0e2bb;
+      --bg-night: #1a295c;
+      --text-daytime: #422612;
+      --text-night: #c8d8f0;
+      --accent: #f4a000;
+      --scene-bg-day-r: 0.878;
+      --scene-bg-day-g: 0.776;
+      --scene-bg-day-b: 0.482;
+      --scene-bg-night-r: 0.1;
+      --scene-bg-night-g: 0.16;
+      --scene-bg-night-b: 0.36;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--text-daytime);
+      background-color: var(--bg-daytime);
+      transition: background-color 0.8s, color 0.8s;
+    }
+
+    body.is-night {
+      background-color: var(--bg-night);
+      color: var(--text-night);
+    }
+
+    /* Canvas */
+    .canvas-view {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1;
+      cursor: grab;
+    }
+    .canvas-view:active { cursor: grabbing; }
+    .canvas-view canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: saturate(1.1) contrast(1.1);
+    }
+
+    /* Loading */
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg-daytime);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s;
+    }
+    .loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loading-text {
+      font-size: 14px;
+      color: var(--text-daytime);
+      margin-top: 20px;
+    }
+    .loading-bar {
+      width: 200px;
+      height: 3px;
+      background: rgba(66,38,18,0.15);
+      margin-top: 12px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .loading-bar-inner {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    /* UI Overlay */
+    .ui-overlay {
+      position: fixed;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .ui-overlay > * { pointer-events: auto; }
+
+    /* Card — left side like original */
+    .card-container {
+      position: fixed;
+      top: 50%;
+      left: 60px;
+      transform: translateY(-50%) translateX(-20px);
+      z-index: 10;
+      width: 400px;
+      max-width: 40vw;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 32px 36px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .card-container.show {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+    body.is-night .card-container {
+      background: rgba(30,40,80,0.92);
+    }
+    .card-title-en {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .card-title {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .card-description {
+      font-size: 12px;
+      line-height: 1.8;
+      opacity: 0.6;
+      margin-top: 12px;
+    }
+    .card-subtitle {
+      font-size: 14px;
+      line-height: 1.7;
+      opacity: 0.8;
+      white-space: pre-line;
+    }
+
+    /* Spot dots */
+    .card-dots {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(66,38,18,0.2);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .card-dot.active {
+      background: var(--accent);
+      transform: scale(1.3);
+    }
+    body.is-night .card-dot {
+      background: rgba(200,216,240,0.25);
+    }
+    body.is-night .card-dot.active {
+      background: var(--accent);
+    }
+
+    /* Appearance toggle (day/night) */
+    .appearance-toggle {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 20;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    .appearance-toggle:hover {
+      background: rgba(255,255,255,0.9);
+    }
+    body.is-night .appearance-toggle {
+      background: rgba(30,40,80,0.7);
+    }
+    body.is-night .appearance-toggle:hover {
+      background: rgba(30,40,80,0.9);
+    }
+    .appearance-toggle img {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Noise overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url('images/common/noise.png');
+      background-repeat: repeat;
+    }
+
+    /* Top nav */
+    .top-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      padding: 16px 24px;
+      gap: 32px;
+    }
+    .top-nav-logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .top-nav-links {
+      display: flex;
+      gap: 24px;
+      margin-left: auto;
+      align-items: center;
+    }
+    .top-nav-links a {
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: inherit;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .top-nav-links a:hover { opacity: 1; }
+
+    @media (max-width: 768px) {
+      .card-container {
+        top: auto;
+        bottom: 24px;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        max-width: none;
+        transform: translateY(20px);
+        padding: 24px;
+      }
+      .card-container.show {
+        transform: translateY(0);
+      }
+      .card-title { font-size: 20px; }
+      .top-nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-text">Loading...</div>
+    <div class="loading-bar"><div class="loading-bar-inner" id="loading-bar"></div></div>
+  </div>
+
+  <!-- Noise overlay -->
+  <div class="noise-overlay"></div>
+
+  <!-- Canvas -->
+  <div class="canvas-view" id="canvas-view">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <!-- Day/Night toggle -->
+  <button class="appearance-toggle" id="appearance-toggle">
+    <img src="images/common/icon_night.png" alt="toggle" id="appearance-icon">
+  </button>
+
+  <!-- Top Nav -->
+  <nav class="top-nav">
+    <div class="top-nav-logo">はるni</div>
+    <div class="top-nav-links">
+      <a href="#">会社概要</a>
+      <a href="#">ゲーム開発事業</a>
+      <a href="#">教育事業</a>
+      <a href="#">制作実績</a>
+      <a href="#">採用情報</a>
+      <a href="#">ブログ</a>
+      <a href="#">お問い合わせ</a>
+    </div>
+  </nav>
+
+  <!-- Card -->
+  <div class="card-container" id="card">
+    <div class="card-title-en" id="card-title-en"></div>
+    <div class="card-title" id="card-title"></div>
+    <div class="card-subtitle" id="card-subtitle"></div>
+    <div class="card-description" id="card-description"></div>
+    <div class="card-dots" id="card-dots"></div>
+  </div>
+
+  <!-- GSAP -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+
+  <!-- Three.js ES Modules -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+    // ============================================================
+    // haru-ni.net そっくりレプリカ
+    // ============================================================
+
+    const CARDS = [
+      {
+        title: "会社概要", titleEn: "Company",
+        subtitle: "鹿児島市に拠点を構える\nゲーム開発会社です",
+        description: "私達は、鹿児島という日本の端っこにありながらも国内外の様々な会社さまと一緒にゲームを開発させていただいています。",
+        position: [-7.8, -69.6, 11.2],
+        rotation: [85, 0, 0],
+        spotPosition: [-8.1, -49.5, 3],
+        birdRadianFrom: 2.2,
+        focalLength: 16,
+      },
+      {
+        title: "ゲーム開発事業", titleEn: "Game Production",
+        subtitle: "ゲーム全体の制作から\n専門分野でのサポートまで",
+        description: "スマホアプリやPCゲームプラットフォームを中心としたゲーム開発を行っています。",
+        position: [15.8, -34, 26.5],
+        rotation: [77.4, 0, 25],
+        spotPosition: [13.4, -16.6, 16],
+        birdRadianFrom: 2.85,
+        focalLength: 16,
+      },
+      {
+        title: "教育事業", titleEn: "Education",
+        subtitle: "ゲームは遊ぶだけじゃなく、\nつくっても楽しい",
+        description: "IT Adventureという小中学生向けプログラミング教室を鹿児島市に２校運営しています。",
+        position: [-23, -35.7, 6.9],
+        rotation: [85, 0, 0],
+        spotPosition: [-24.4, -21.3, 3],
+        birdRadianFrom: 3.56,
+        focalLength: 16,
+      },
+      {
+        title: "制作実績", titleEn: "Works",
+        subtitle: "CocosやUnity、Live2D、 Spine等\n多様な制作環境に対応",
+        description: "クライアントにご満足いただけるよう、多様な環境や技術に対応し制作しています。",
+        position: [-18.7, 36.6, 10],
+        rotation: [77, 0, -138],
+        spotPosition: [-8.4, 21.4, 3.5],
+        birdRadianFrom: 4.88,
+        focalLength: 16,
+      },
+      {
+        title: "採用情報", titleEn: "Recruit",
+        subtitle: "鹿児島でも\nゲーム開発で挑戦できる",
+        description: "鹿児島という地で眠ってしまっている、ゲーム業界に対して熱い想いと能力を持っている人をきちんと活躍させたい。",
+        position: [22.2, 20.4, 16.8],
+        rotation: [76.6, 0, 149],
+        spotPosition: [16.7, 16.7, 15],
+        birdRadianFrom: 5.58,
+        focalLength: 16,
+      },
+      {
+        title: "お問い合わせ", titleEn: "Contact",
+        subtitle: "素敵なゲーム作品につながる\n新たな縁をお待ちしています",
+        description: "新しいゲームの開発やパートナーシップ提携のご相談、教育事業に関するご質問など、お気軽にお問い合わせください。",
+        position: [25.6, 44.1, 4.8],
+        rotation: [82.2, 0, -180],
+        spotPosition: [24.8, 26.6, 3],
+        birdRadianFrom: 6.28,
+        focalLength: 16,
+      },
+    ];
+
+    // State
+    let scene, camera, renderer;
+    let mainScene, sakuraGroup;
+    let animationMixers = [];
+    let isDaytime = true;
+    let currentCardIndex = 0;
+    let isBirdMode = true;
+
+    // Bird camera orbit
+    let birdRadian = 0.2 * Math.PI * 2;  // initial offset like original
+    let birdRadianTarget = birdRadian;
+    let birdAutoRotate = 0;
+    const birdSpeed = 1 / 3000;
+    const birdRadianOffset = Math.atan(CARDS[0].spotPosition[2] / CARDS[0].spotPosition[0])
+      + (CARDS[0].spotPosition[0] < 0 ? Math.PI : 0) + Math.PI / 2;
+
+    // Drag
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragCurrent = 0;
+    let dragTarget = 0;
+
+    // Textures
+    let commonMaterial;
+    let nightTextureImage;
+    let dayTextureImage;
+    let commonTexture;
+
+    // Clock
+    const clock = new THREE.Clock();
+
+    // ============================================================
+    // Init
+    // ============================================================
+    async function init() {
+      // Renderer
+      const canvas = document.getElementById('canvas');
+      renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      // renderer.useLegacyLights removed in r160+; lighting works by default
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+      // Scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0.878, 0.776, 0.482);
+
+      // Camera — FOV 45, same as original
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 3, 220);
+
+      // Ambient light
+      const ambient = new THREE.AmbientLight(0xffffff, 1.5);
+      ambient.name = 'ambientLight';
+      scene.add(ambient);
+
+      // Resize
+      onResize();
+      window.addEventListener('resize', onResize);
+
+      // Load models
+      await loadModels();
+
+      // Hide loading
+      document.getElementById('loading').classList.add('hidden');
+
+      // Show card after a beat
+      setTimeout(() => {
+        document.getElementById('card').classList.add('show');
+        updateCard(0);
+      }, 600);
+
+      // Setup dots
+      setupDots();
+
+      // Events
+      setupEvents();
+
+      // Start render
+      animate();
+    }
+
+    // ============================================================
+    // Load Models
+    // ============================================================
+    async function loadModels() {
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/');
+
+      const gltfLoader = new GLTFLoader();
+      gltfLoader.setDRACOLoader(dracoLoader);
+
+      const loadBar = document.getElementById('loading-bar');
+
+      // Load world
+      const worldGltf = await new Promise((resolve) => {
+        gltfLoader.load('models/world.glb', resolve, (xhr) => {
+          if (xhr.total) {
+            const pct = Math.round(xhr.loaded / xhr.total * 80);
+            loadBar.style.width = pct + '%';
+          }
+        });
+      });
+
+      // Load sakura
+      const sakuraGltf = await new Promise((resolve) => {
+        gltfLoader.load('models/sakura.glb', resolve, (xhr) => {
+          if (xhr.total) {
+            const pct = 80 + Math.round(xhr.loaded / xhr.total * 20);
+            loadBar.style.width = pct + '%';
+          }
+        });
+      });
+
+      loadBar.style.width = '100%';
+
+      // Setup world
+      mainScene = worldGltf.scene;
+
+      // Find first textured mesh → use shared material (MeshLambertMaterial)
+      let sharedMaterialCreated = false;
+      mainScene.traverse((child) => {
+        if (child.isMesh) {
+          if (!sharedMaterialCreated && child.material.map) {
+            dayTextureImage = child.material.map.image;
+            // Create shared canvas texture
+            const texCanvas = document.createElement('canvas');
+            const ctx = texCanvas.getContext('2d');
+            texCanvas.width = dayTextureImage.width;
+            texCanvas.height = dayTextureImage.height;
+            ctx.drawImage(dayTextureImage, 0, 0);
+            commonTexture = new THREE.CanvasTexture(texCanvas);
+            commonTexture.colorSpace = THREE.SRGBColorSpace;
+            commonMaterial = new THREE.MeshLambertMaterial({ map: commonTexture });
+            sharedMaterialCreated = true;
+
+            // Load night texture
+            nightTextureImage = new Image();
+            nightTextureImage.src = 'images/index/world_texture_night.png';
+          }
+
+          if (child.name === 'floor') {
+            // Floor with circular fade
+            child.material = new THREE.MeshLambertMaterial({ map: commonTexture, transparent: true });
+            child.material.onBeforeCompile = (shader) => {
+              shader.vertexShader = 'varying vec4 vPosition;\n' + shader.vertexShader;
+              shader.vertexShader = shader.vertexShader.replace(
+                'void main() {',
+                'void main() {\nvPosition = vec4(position, 1.);'
+              );
+              shader.fragmentShader = 'varying vec4 vPosition;\n' + shader.fragmentShader;
+              shader.fragmentShader = shader.fragmentShader.replace(
+                '#include <dithering_fragment>',
+                '#include <dithering_fragment>\ngl_FragColor.a = (2.0 - (vPosition.x * vPosition.x + vPosition.y * vPosition.y)) / 1.8;'
+              );
+            };
+            child.receiveShadow = true;
+          } else if (!child.name.startsWith('WORKS')) {
+            child.material = commonMaterial;
+            child.receiveShadow = true;
+            if (/_shadow$/.test(child.name) || child.name === 'main') {
+              child.castShadow = true;
+            }
+          }
+        }
+
+        // Setup DirectionalLight shadows from GLB
+        if (child.isDirectionalLight) {
+          child.castShadow = true;
+          child.shadow.mapSize.set(1024, 1024);
+          const s = 550;
+          child.shadow.camera.right = s;
+          child.shadow.camera.left = -s;
+          child.shadow.camera.top = s;
+          child.shadow.camera.bottom = -s;
+        }
+      });
+
+      scene.add(mainScene);
+
+      // Animations
+      if (worldGltf.animations.length > 0) {
+        const mixer = new THREE.AnimationMixer(mainScene);
+        worldGltf.animations.forEach((clip) => mixer.clipAction(clip).play());
+        animationMixers.push(mixer);
+      }
+
+      // Sakura
+      sakuraGroup = new THREE.Group();
+      sakuraGltf.scene.children.forEach((child) => {
+        if (child.isMesh) {
+          child.material = new THREE.MeshLambertMaterial({
+            map: child.material.map,
+            transparent: true,
+            opacity: 0,
+          });
+        }
+      });
+      sakuraGroup.add(sakuraGltf.scene);
+      sakuraGroup.visible = false;  // hidden by default (shown during sakura event)
+      scene.add(sakuraGroup);
+    }
+
+    // ============================================================
+    // Card system
+    // ============================================================
+    function updateCard(index) {
+      currentCardIndex = index;
+      const card = CARDS[index];
+      document.getElementById('card-title-en').textContent = card.titleEn;
+      document.getElementById('card-title').textContent = card.title;
+      document.getElementById('card-subtitle').textContent = card.subtitle;
+      document.getElementById('card-description').textContent = card.description;
+
+      // Update dots
+      document.querySelectorAll('.card-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+
+      // Animate bird to face this card
+      birdRadianTarget = card.birdRadianFrom;
+    }
+
+    function setupDots() {
+      const dotsContainer = document.getElementById('card-dots');
+      CARDS.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'card-dot' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', () => updateCard(i));
+        dotsContainer.appendChild(dot);
+      });
+    }
+
+    // ============================================================
+    // Day / Night
+    // ============================================================
+    function toggleAppearance() {
+      isDaytime = !isDaytime;
+      document.body.classList.toggle('is-night', !isDaytime);
+
+      const icon = document.getElementById('appearance-icon');
+      icon.src = isDaytime ? 'images/common/icon_night.png' : 'images/common/icon_daytime.png';
+
+      // Animate scene background
+      const targetColor = isDaytime
+        ? { r: 0.878, g: 0.776, b: 0.482 }
+        : { r: 0.1, g: 0.16, b: 0.36 };
+
+      const currentBg = { r: scene.background.r, g: scene.background.g, b: scene.background.b };
+      gsap.to(currentBg, {
+        r: targetColor.r, g: targetColor.g, b: targetColor.b,
+        duration: 0.8,
+        onUpdate: () => scene.background.setRGB(currentBg.r, currentBg.g, currentBg.b),
+      });
+
+      // Swap texture
+      if (commonTexture && nightTextureImage && nightTextureImage.complete) {
+        const texCanvas = commonTexture.image;
+        const ctx = texCanvas.getContext('2d');
+        const img = isDaytime ? dayTextureImage : nightTextureImage;
+        ctx.drawImage(img, 0, 0);
+        commonTexture.needsUpdate = true;
+      }
+
+      // Animate light intensity
+      scene.traverse((child) => {
+        if (child.isAmbientLight) {
+          gsap.to(child, { intensity: isDaytime ? 1.5 : 0.4, duration: 0.8 });
+        }
+        if (child.isDirectionalLight) {
+          gsap.to(child, { intensity: isDaytime ? child.userData.originalIntensity || 1 : 0.2, duration: 0.8 });
+        }
+      });
+    }
+
+    // ============================================================
+    // Events
+    // ============================================================
+    function setupEvents() {
+      const view = document.getElementById('canvas-view');
+
+      // Drag to rotate
+      view.addEventListener('mousedown', onDragStart);
+      view.addEventListener('mousemove', onDragMove);
+      view.addEventListener('mouseup', onDragEnd);
+      view.addEventListener('mouseleave', onDragEnd);
+      view.addEventListener('touchstart', (e) => onDragStart(e), { passive: true });
+      view.addEventListener('touchmove', (e) => onDragMove(e), { passive: true });
+      view.addEventListener('touchend', onDragEnd);
+
+      // Wheel → card switch
+      document.body.addEventListener('wheel', onWheel, { passive: false });
+
+      // Appearance toggle
+      document.getElementById('appearance-toggle').addEventListener('click', toggleAppearance);
+    }
+
+    function getClientX(e) {
+      return e.touches ? e.touches[0].clientX : e.clientX;
+    }
+
+    function onDragStart(e) {
+      isDragging = true;
+      dragStartX = getClientX(e);
+    }
+
+    function onDragMove(e) {
+      if (!isDragging) return;
+      const x = getClientX(e);
+      const dx = (x - dragStartX) * birdSpeed;
+      dragTarget += dx;
+      dragStartX = x;
+    }
+
+    function onDragEnd() {
+      isDragging = false;
+    }
+
+    function onWheel(e) {
+      e.preventDefault();
+      if (Math.abs(e.deltaY) < 10) return;
+
+      const dir = e.deltaY > 0 ? 1 : -1;
+      const next = Math.max(0, Math.min(CARDS.length - 1, currentCardIndex + dir));
+      if (next !== currentCardIndex) {
+        updateCard(next);
+      }
+    }
+
+    function onResize() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+
+    // ============================================================
+    // Camera update (bird mode orbit)
+    // ============================================================
+    function updateBirdCamera(dt) {
+      // Smooth drag
+      dragCurrent += (dragTarget - dragCurrent) * Math.min(0.004 * dt, 1);
+
+      // Auto rotate
+      birdAutoRotate += (1 / 10000) * dt;
+
+      // Smooth radian toward target card
+      birdRadian += (birdRadianTarget - birdRadian) * 0.03;
+
+      const totalRadian = birdRadian + birdAutoRotate + dragCurrent + birdRadianOffset;
+
+      const radius = 85;
+      const height = 45;
+
+      camera.position.set(
+        radius * Math.sin(totalRadian) - 5,
+        height,
+        -radius * Math.cos(totalRadian) - 5.8
+      );
+
+      camera.rotation.order = 'YXZ';
+      camera.rotation.set(-0.4, -totalRadian + Math.PI, 0);
+
+      // Focal length
+      camera.setFocalLength(16);
+    }
+
+    // ============================================================
+    // Render loop
+    // ============================================================
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const dt = clock.getDelta() * 1000; // ms
+
+      // Update animations
+      animationMixers.forEach((mixer) => mixer.update(dt / 1000));
+
+      // Camera
+      updateBirdCamera(dt);
+
+      // Scale scene like original
+      if (mainScene) {
+        mainScene.scale.setScalar(1);
+      }
+
+      camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+    }
+
+    // ============================================================
+    // Start
+    // ============================================================
+    init().catch(console.error);
+  </script>
+</body>
+</html>

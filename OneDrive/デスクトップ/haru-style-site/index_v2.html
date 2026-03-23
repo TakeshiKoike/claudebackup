@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Haru Style Site v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #e0c67b;
+      --bg-sub: #d4b86a;
+      --text: #422612;
+      --text-sub: #6b4c2a;
+      --accent: #f4a000;
+      --accent2: #f1d81f;
+      --card-bg: #fffdf5;
+      --shadow: rgba(66, 38, 18, 0.15);
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.8;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-sub); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+    /* Header */
+    header {
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+      padding: 0 40px; height: 70px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: transparent; transition: background 0.4s, box-shadow 0.4s;
+    }
+    header.scrolled { background: rgba(224,198,123,0.95); box-shadow: 0 2px 20px var(--shadow); }
+
+    .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.15em; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--accent); }
+
+    nav { display: flex; align-items: center; gap: 28px; }
+    nav a {
+      color: var(--text); text-decoration: none; font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.1em; padding: 6px 14px; border-radius: 20px; transition: all 0.3s;
+    }
+    nav a:hover { background: var(--accent); color: #fff; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 8px; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); transition: all 0.3s; }
+
+    /* Hero with 3D Canvas */
+    .hero {
+      position: relative; width: 100%; height: 100vh; overflow: hidden;
+      display: flex; align-items: flex-start;
+    }
+
+    #hero-canvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1; cursor: grab; filter: saturate(1.1) contrast(1.05);
+    }
+    #hero-canvas:active { cursor: grabbing; }
+
+    /* Card overlay */
+    .hero-card {
+      position: absolute; z-index: 10; top: 50%; left: 40px;
+      transform: translateY(-50%);
+      background: var(--card-bg); border-radius: 16px; padding: 36px;
+      max-width: 360px; box-shadow: 0 8px 40px var(--shadow);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+
+    .hero-card .card-label {
+      font-size: 0.7rem; letter-spacing: 0.2em; color: var(--accent);
+      font-weight: 700; margin-bottom: 12px;
+    }
+
+    .hero-card h2 {
+      font-size: 1.3rem; font-weight: 700; margin-bottom: 12px;
+      letter-spacing: 0.06em; line-height: 1.5;
+    }
+
+    .hero-card p {
+      font-size: 0.82rem; color: var(--text-sub); margin-bottom: 20px; line-height: 1.8;
+    }
+
+    .hero-card .card-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 28px; background: var(--accent); color: #fff;
+      text-decoration: none; border-radius: 50px; font-weight: 500;
+      font-size: 0.8rem; letter-spacing: 0.1em; transition: all 0.3s; border: none; cursor: pointer;
+    }
+    .hero-card .card-btn:hover { background: var(--text); transform: translateY(-2px); }
+
+    /* Card navigation dots */
+    .card-dots {
+      position: absolute; z-index: 10; bottom: 40px; left: 50%;
+      transform: translateX(-50%); display: flex; gap: 10px;
+    }
+    .card-dots button {
+      width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--text);
+      background: transparent; cursor: pointer; transition: all 0.3s; padding: 0;
+    }
+    .card-dots button.active { background: var(--accent); border-color: var(--accent); transform: scale(1.3); }
+
+    /* Sections below hero */
+    section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+
+    .section-label { font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 12px; }
+    .section-title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: 0.06em; margin-bottom: 16px; line-height: 1.4; }
+    .section-desc { font-size: 0.95rem; color: var(--text-sub); max-width: 600px; margin-bottom: 60px; }
+
+    .fade-in { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+
+    .card {
+      background: var(--card-bg); border-radius: 16px; padding: 40px 28px;
+      position: relative; overflow: hidden; transition: transform 0.4s, box-shadow 0.4s; cursor: default;
+    }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px var(--shadow); }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transform: scaleX(0); transform-origin: left; transition: transform 0.4s;
+    }
+    .card:hover::before { transform: scaleX(1); }
+
+    .card-icon {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 24px; color: #fff; transition: transform 0.4s;
+    }
+    .card:hover .card-icon { transform: rotate(-8deg) scale(1.1); }
+    .card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.06em; }
+    .card p { font-size: 0.85rem; color: var(--text-sub); line-height: 1.7; }
+    .card-num { position: absolute; top: 20px; right: 24px; font-size: 3rem; font-weight: 700; opacity: 0.06; }
+
+    footer {
+      background: var(--text); color: var(--bg); padding: 60px 40px 30px; margin-top: 60px;
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px;
+    }
+    .footer-brand .logo { color: var(--bg); display: inline-block; margin-bottom: 16px; }
+    .footer-brand p { font-size: 0.8rem; opacity: 0.6; line-height: 1.7; }
+    .footer-col h5 { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.15em; margin-bottom: 16px; opacity: 0.8; }
+    .footer-col a { display: block; font-size: 0.8rem; color: var(--bg); text-decoration: none; opacity: 0.5; margin-bottom: 10px; transition: opacity 0.3s; }
+    .footer-col a:hover { opacity: 1; }
+    .footer-bottom {
+      max-width: 1200px; margin: 0 auto; padding-top: 24px;
+      border-top: 1px solid rgba(224,198,123,0.1);
+      display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; opacity: 0.4;
+    }
+
+    @media (max-width: 960px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      header { padding: 0 20px; }
+      nav { display: none; }
+      .hamburger { display: flex; }
+      nav.open { display: flex; flex-direction: column; position: fixed; top: 70px; left: 0; width: 100%; background: rgba(224,198,123,0.98); padding: 30px 20px; gap: 16px; box-shadow: 0 8px 20px var(--shadow); }
+      section { padding: 60px 20px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .hero-card { left: 20px; right: 20px; max-width: none; padding: 24px; }
+      .footer-inner { grid-template-columns: 1fr; gap: 30px; }
+      footer { padding: 40px 20px 20px; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header id="header">
+    <a href="#" class="logo">HARU<span>ni</span></a>
+    <nav id="nav">
+      <a href="#about">ABOUT</a>
+      <a href="#services">SERVICES</a>
+      <a href="#works">WORKS</a>
+      <a href="#contact">CONTACT</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- Hero with 3D Town -->
+  <div class="hero" id="heroSection">
+    <canvas id="hero-canvas"></canvas>
+
+    <div class="hero-card" id="heroCard">
+      <div class="card-label" id="cardLabel">ABOUT US</div>
+      <h2 id="cardTitle">遊び心に満ちた<br>クリエイティブカンパニー</h2>
+      <p id="cardDesc">私たちは、遊び心とテクノロジーを融合させ、人々の暮らしに新しい価値と感動を届けるクリエイティブスタジオです。</p>
+      <button class="card-btn" id="cardBtn">MORE &rarr;</button>
+    </div>
+
+    <div class="card-dots" id="cardDots">
+      <button class="active" data-index="0"></button>
+      <button data-index="1"></button>
+      <button data-index="2"></button>
+      <button data-index="3"></button>
+      <button data-index="4"></button>
+      <button data-index="5"></button>
+    </div>
+  </div>
+
+  <!-- Services Section -->
+  <section id="services">
+    <div class="fade-in">
+      <div class="section-label">SERVICES</div>
+      <div class="section-title">私たちにできること</div>
+      <div class="section-desc">企画からデザイン、開発、運用まで。ワンストップでサポートします。</div>
+    </div>
+    <div class="cards-grid">
+      <div class="card fade-in" style="transition-delay:0.1s">
+        <div class="card-num">01</div>
+        <div class="card-icon">&#9998;</div>
+        <h3>UI/UX Design</h3>
+        <p>ユーザーの心に響くデザインを。リサーチからプロトタイプ、テストまで一貫して行います。</p>
+      </div>
+      <div class="card fade-in" style="transition-delay:0.2s">
+        <div class="card-num">02</div>
+        <div class="card-icon">&#128187;</div>
+        <h3>Web Development</h3>
+        <p>最新技術を活用し、パフォーマンスとアクセシビリティに優れたWebサイト・アプリを構築します。</p>
+      </div>
+      <div class="card fade-in" style="transition-delay:0.3s">
+        <div class="card-num">03</div>
+        <div class="card-icon">&#127912;</div>
+        <h3>Branding</h3>
+        <p>ロゴ、カラー、タイポグラフィ。ブランドの世界観を丁寧に設計し、一貫した体験を構築します。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">HARU<span>ni</span></a>
+        <p>テクノロジーとクリエイティビティの力で、<br>人々の暮らしに新しい価値を届けます。</p>
+      </div>
+      <div class="footer-col">
+        <h5>MENU</h5>
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#works">Works</a>
+      </div>
+      <div class="footer-col">
+        <h5>SOCIAL</h5>
+        <a href="#">Twitter / X</a>
+        <a href="#">Instagram</a>
+      </div>
+      <div class="footer-col">
+        <h5>CONTACT</h5>
+        <a href="mailto:hello@example.com">hello@example.com</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 HARUni Inc. All rights reserved.</span>
+      <span>Privacy Policy</span>
+    </div>
+  </footer>
+
+  <script>
+  // ============================================================
+  //  Three.js Procedural Voxel Town — haru-ni.net style
+  // ============================================================
+  (function() {
+    const canvas = document.getElementById('hero-canvas');
+    const hero = document.getElementById('heroSection');
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(hero.offsetWidth, hero.offsetHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setClearColor(0xe0c67b, 1);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0xe0c67b, 30, 80);
+
+    const camera = new THREE.PerspectiveCamera(40, hero.offsetWidth / hero.offsetHeight, 0.1, 200);
+    camera.position.set(18, 16, 18);
+    camera.lookAt(0, 2, 0);
+
+    // === Lights ===
+    const ambientLight = new THREE.AmbientLight(0xfff5e0, 0.6);
+    scene.add(ambientLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xffeebb, 0x8d7748, 0.5);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff0d0, 1.0);
+    sunLight.position.set(15, 25, 15);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(2048, 2048);
+    sunLight.shadow.camera.near = 1;
+    sunLight.shadow.camera.far = 60;
+    sunLight.shadow.camera.left = -20;
+    sunLight.shadow.camera.right = 20;
+    sunLight.shadow.camera.top = 20;
+    sunLight.shadow.camera.bottom = -20;
+    scene.add(sunLight);
+
+    const fillLight = new THREE.DirectionalLight(0xffe0a0, 0.3);
+    fillLight.position.set(-10, 10, -5);
+    scene.add(fillLight);
+
+    // === Color palette (haru-ni style) ===
+    const C = {
+      pink:     0xf5a0b0,
+      hotPink:  0xe8628a,
+      salmon:   0xf4977a,
+      yellow:   0xf5d44b,
+      orange:   0xf4a000,
+      cyan:     0x6dd5d5,
+      teal:     0x4db8a4,
+      green:    0x7bc67e,
+      lime:     0xc5e35b,
+      red:      0xe85050,
+      blue:     0x5599dd,
+      purple:   0xb577d4,
+      white:    0xfffef5,
+      cream:    0xfff5e0,
+      brown:    0x8b6040,
+      darkBrown:0x5a3a20,
+      gray:     0xaaaaaa,
+      ground:   0x8bc06a,
+      road:     0xddd4bb,
+    };
+
+    function mat(color, opts = {}) {
+      return new THREE.MeshStandardMaterial({
+        color, roughness: opts.roughness || 0.7, metalness: opts.metalness || 0.05, ...opts
+      });
+    }
+
+    // === Helper: create a box mesh ===
+    function box(w, h, d, color, x, y, z, opts = {}) {
+      const g = new THREE.BoxGeometry(w, h, d);
+      const m = new THREE.Mesh(g, mat(color, opts));
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      if (opts.ry) m.rotation.y = opts.ry;
+      if (opts.rx) m.rotation.x = opts.rx;
+      return m;
+    }
+
+    function cyl(rTop, rBot, h, segs, color, x, y, z) {
+      const g = new THREE.CylinderGeometry(rTop, rBot, h, segs);
+      const m = new THREE.Mesh(g, mat(color));
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      return m;
+    }
+
+    // === Town group ===
+    const town = new THREE.Group();
+    scene.add(town);
+
+    // === Ground platform (floating island) ===
+    const groundTop = box(26, 1, 26, C.ground, 0, -0.5, 0);
+    town.add(groundTop);
+    // Island sides (beveled)
+    const islandSide = box(25, 3, 25, C.brown, 0, -2.5, 0);
+    town.add(islandSide);
+    const islandBottom = box(22, 2, 22, C.darkBrown, 0, -4.5, 0);
+    town.add(islandBottom);
+
+    // Roads
+    town.add(box(26, 0.05, 2.5, C.road, 0, 0.03, 3));
+    town.add(box(2.5, 0.05, 26, C.road, 3, 0.03, 0));
+    // Road markings
+    for (let i = -12; i < 13; i += 3) {
+      town.add(box(1.2, 0.06, 0.2, C.white, i, 0.06, 3));
+      town.add(box(0.2, 0.06, 1.2, C.white, 3, 0.06, i));
+    }
+
+    // ===== BUILDINGS =====
+
+    // Building 1: Main pink tower (tall)
+    function buildPinkTower(x, z) {
+      const g = new THREE.Group();
+      g.add(box(4, 7, 4, C.pink, 0, 3.5, 0));
+      g.add(box(4.2, 0.3, 4.2, C.hotPink, 0, 7.1, 0));
+      // Windows
+      for (let wy = 2; wy <= 6; wy += 1.5) {
+        g.add(box(0.6, 0.8, 0.1, C.cream, -1, wy, 2.01));
+        g.add(box(0.6, 0.8, 0.1, C.cream, 1, wy, 2.01));
+        g.add(box(0.6, 0.8, 0.1, C.cream, -1, wy, -2.01));
+        g.add(box(0.6, 0.8, 0.1, C.cream, 1, wy, -2.01));
+      }
+      // Roof blocks
+      g.add(box(2, 2, 2, C.hotPink, 0, 8.2, 0));
+      g.add(box(1, 1.5, 1, C.pink, 0, 9.95, 0));
+      g.position.set(x, 0, z);
+      return g;
+    }
+    town.add(buildPinkTower(-6, -6));
+
+    // Building 2: Yellow building with sign
+    function buildYellowShop(x, z) {
+      const g = new THREE.Group();
+      g.add(box(5, 4, 4, C.yellow, 0, 2, 0));
+      g.add(box(5.2, 0.3, 4.2, C.orange, 0, 4.1, 0));
+      // Sign board
+      g.add(box(3.5, 1.2, 0.2, C.red, 0, 5.2, 2.1));
+      g.add(box(3.3, 1, 0.1, C.white, 0, 5.2, 2.22));
+      // Door
+      g.add(box(1.2, 2, 0.1, C.brown, 0, 1, 2.01));
+      // Windows
+      g.add(box(0.8, 0.8, 0.1, C.cyan, -1.5, 2.8, 2.01, { roughness: 0.3 }));
+      g.add(box(0.8, 0.8, 0.1, C.cyan, 1.5, 2.8, 2.01, { roughness: 0.3 }));
+      // Awning
+      g.add(box(5.5, 0.15, 1.2, C.orange, 0, 3.5, 2.8));
+      g.position.set(x, 0, z);
+      return g;
+    }
+    town.add(buildYellowShop(5, -7));
+
+    // Building 3: Cyan/teal store
+    function buildCyanStore(x, z) {
+      const g = new THREE.Group();
+      g.add(box(3.5, 3, 3.5, C.cyan, 0, 1.5, 0));
+      g.add(box(3.7, 0.2, 3.7, C.teal, 0, 3.1, 0));
+      g.add(box(2, 1.5, 2, C.cyan, 0, 3.95, 0));
+      // Windows
+      g.add(box(1.5, 1, 0.1, C.white, 0, 2, 1.76, { roughness: 0.2 }));
+      g.add(box(0.8, 0.8, 0.1, C.white, 0, 4.2, 1.01, { roughness: 0.2 }));
+      g.position.set(x, 0, z);
+      return g;
+    }
+    town.add(buildCyanStore(-7, 6));
+
+    // Building 4: Small pink house
+    function buildSmallHouse(x, z, color) {
+      const g = new THREE.Group();
+      g.add(box(2.5, 2.5, 2.5, color, 0, 1.25, 0));
+      // Triangular roof (approximated with rotated box)
+      g.add(box(3, 0.3, 3, C.hotPink, 0, 2.6, 0));
+      g.add(box(2.2, 1.2, 2.2, color, 0, 3.2, 0));
+      g.add(box(1.2, 0.8, 1.2, C.hotPink, 0, 3.9, 0));
+      // Window
+      g.add(box(0.6, 0.6, 0.1, C.cream, 0, 1.8, 1.26));
+      // Door
+      g.add(box(0.6, 1.2, 0.1, C.brown, 0, 0.6, 1.26));
+      g.position.set(x, 0, z);
+      return g;
+    }
+    town.add(buildSmallHouse(7, 7, C.pink));
+    town.add(buildSmallHouse(-3, 9, C.salmon));
+    town.add(buildSmallHouse(10, -3, C.pink));
+
+    // Building 5: Purple theater
+    function buildTheater(x, z) {
+      const g = new THREE.Group();
+      g.add(box(5, 5, 5, C.purple, 0, 2.5, 0));
+      g.add(box(5.3, 0.3, 5.3, C.pink, 0, 5.1, 0));
+      // Marquee
+      g.add(box(4, 1.5, 0.3, C.yellow, 0, 6.3, 2.65));
+      g.add(box(3.6, 1.2, 0.1, C.white, 0, 6.3, 2.82));
+      // Columns
+      g.add(cyl(0.2, 0.2, 4, 8, C.cream, -1.8, 2, 2.6));
+      g.add(cyl(0.2, 0.2, 4, 8, C.cream, 1.8, 2, 2.6));
+      // Big window
+      g.add(box(2, 2, 0.1, C.cyan, 0, 3, 2.51, { roughness: 0.2 }));
+      // Door
+      g.add(box(1.5, 2.2, 0.1, C.darkBrown, 0, 1.1, 2.51));
+      g.position.set(x, 0, z);
+      return g;
+    }
+    town.add(buildTheater(-5, -1));
+
+    // Building 6: Multi-story blue
+    function buildBlueOffice(x, z) {
+      const g = new THREE.Group();
+      g.add(box(3, 5, 3, C.blue, 0, 2.5, 0));
+      g.add(box(3.2, 0.2, 3.2, C.white, 0, 5.1, 0));
+      // Stack
+      g.add(box(2, 2, 2, C.cyan, 0, 6.2, 0));
+      // Windows grid
+      for (let wy = 1.5; wy <= 4.5; wy += 1.5) {
+        g.add(box(0.5, 0.6, 0.08, C.cream, -0.7, wy, 1.52));
+        g.add(box(0.5, 0.6, 0.08, C.cream, 0.7, wy, 1.52));
+      }
+      g.position.set(x, 0, z);
+      return g;
+    }
+    town.add(buildBlueOffice(8, -9));
+
+    // ===== FERRIS WHEEL =====
+    const ferrisGroup = new THREE.Group();
+    ferrisGroup.position.set(9, 0, 5);
+    town.add(ferrisGroup);
+
+    // Support structure
+    ferrisGroup.add(cyl(0.15, 0.2, 7, 8, C.orange, -1, 3.5, 0));
+    ferrisGroup.add(cyl(0.15, 0.2, 7, 8, C.orange, 1, 3.5, 0));
+    // Cross beams
+    ferrisGroup.add(box(2.2, 0.15, 0.15, C.orange, 0, 5, 0));
+    ferrisGroup.add(box(2.2, 0.15, 0.15, C.orange, 0, 3, 0));
+
+    // Wheel hub
+    const wheelGroup = new THREE.Group();
+    wheelGroup.position.set(0, 7, 0);
+    ferrisGroup.add(wheelGroup);
+
+    // Wheel ring (spokes)
+    const wheelRadius = 4;
+    const cabinCount = 10;
+    const spokeColors = [C.orange, C.yellow];
+    for (let i = 0; i < cabinCount; i++) {
+      const angle = (i / cabinCount) * Math.PI * 2;
+      const sx = Math.cos(angle) * wheelRadius;
+      const sy = Math.sin(angle) * wheelRadius;
+      // Spoke
+      const spoke = box(0.08, wheelRadius * 2, 0.08, spokeColors[i % 2], 0, 0, 0, { ry: 0 });
+      spoke.rotation.z = angle;
+      wheelGroup.add(spoke);
+    }
+
+    // Outer rim segments
+    for (let i = 0; i < 40; i++) {
+      const angle = (i / 40) * Math.PI * 2;
+      const nx = Math.cos(angle) * wheelRadius;
+      const ny = Math.sin(angle) * wheelRadius;
+      const rimPiece = box(0.65, 0.1, 0.15, C.orange, nx, ny, 0);
+      rimPiece.rotation.z = angle;
+      wheelGroup.add(rimPiece);
+    }
+
+    // Cabins (gondolas)
+    const cabins = [];
+    const cabinColors = [C.pink, C.cyan, C.yellow, C.lime, C.salmon, C.purple, C.green, C.orange, C.blue, C.hotPink];
+    for (let i = 0; i < cabinCount; i++) {
+      const cabinGroup = new THREE.Group();
+      const angle = (i / cabinCount) * Math.PI * 2;
+      cabinGroup.position.set(Math.cos(angle) * wheelRadius, Math.sin(angle) * wheelRadius, 0);
+
+      // Cabin body
+      const cabinBody = box(0.7, 0.8, 0.7, cabinColors[i], 0, -0.5, 0);
+      cabinGroup.add(cabinBody);
+      // Cabin roof
+      cabinGroup.add(box(0.8, 0.1, 0.8, C.white, 0, -0.05, 0));
+      // Hanger
+      cabinGroup.add(cyl(0.03, 0.03, 0.3, 6, C.gray, 0, 0.1, 0));
+
+      cabinGroup.userData = { angle, idx: i };
+      wheelGroup.add(cabinGroup);
+      cabins.push(cabinGroup);
+    }
+
+    // Center hub
+    wheelGroup.add(cyl(0.4, 0.4, 0.3, 16, C.orange, 0, 0, 0));
+
+    // ===== HOT AIR BALLOON =====
+    const balloonGroup = new THREE.Group();
+    balloonGroup.position.set(-2, 14, -8);
+    town.add(balloonGroup);
+
+    // Balloon envelope
+    const balloonGeo = new THREE.SphereGeometry(1.2, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.75);
+    const balloonMat = mat(C.red);
+    const balloonMesh = new THREE.Mesh(balloonGeo, balloonMat);
+    balloonMesh.castShadow = true;
+    balloonGroup.add(balloonMesh);
+
+    // Balloon stripes
+    const stripe1Geo = new THREE.SphereGeometry(1.22, 16, 12, Math.PI * 0.3, Math.PI * 0.4, 0, Math.PI * 0.75);
+    const stripe1 = new THREE.Mesh(stripe1Geo, mat(C.white));
+    balloonGroup.add(stripe1);
+    const stripe2Geo = new THREE.SphereGeometry(1.22, 16, 12, Math.PI * 1.1, Math.PI * 0.4, 0, Math.PI * 0.75);
+    const stripe2 = new THREE.Mesh(stripe2Geo, mat(C.yellow));
+    balloonGroup.add(stripe2);
+
+    // Basket
+    balloonGroup.add(box(0.6, 0.4, 0.6, C.brown, 0, -1.6, 0));
+    // Ropes
+    const ropePositions = [[-0.25, -0.25], [0.25, -0.25], [-0.25, 0.25], [0.25, 0.25]];
+    ropePositions.forEach(([rx, rz]) => {
+      balloonGroup.add(cyl(0.02, 0.02, 1.2, 4, C.darkBrown, rx, -1, rz));
+    });
+
+    // ===== TREES =====
+    function makeTree(x, z, height, crownColor) {
+      const g = new THREE.Group();
+      // Trunk
+      g.add(cyl(0.12, 0.15, height * 0.5, 6, C.brown, 0, height * 0.25, 0));
+      // Crown layers
+      const crownY = height * 0.5;
+      g.add(cyl(0, height * 0.4, height * 0.5, 6, crownColor, 0, crownY + height * 0.25, 0));
+      g.add(cyl(0, height * 0.3, height * 0.35, 6, crownColor, 0, crownY + height * 0.5, 0));
+      g.position.set(x, 0, z);
+      g.castShadow = true;
+      return g;
+    }
+
+    // Sakura trees (pink)
+    function makeSakuraTree(x, z) {
+      const g = new THREE.Group();
+      g.add(cyl(0.1, 0.12, 1.5, 6, C.brown, 0, 0.75, 0));
+      const crownGeo = new THREE.SphereGeometry(0.9, 8, 6);
+      const crown = new THREE.Mesh(crownGeo, mat(C.pink, { roughness: 0.9 }));
+      crown.position.y = 2;
+      crown.scale.y = 0.7;
+      g.add(crown);
+      g.position.set(x, 0, z);
+      return g;
+    }
+
+    // Place trees around the town
+    town.add(makeTree(-10, -10, 2.5, C.green));
+    town.add(makeTree(-11, -5, 2, C.lime));
+    town.add(makeTree(11, 10, 2.5, C.green));
+    town.add(makeTree(-9, 10, 2, C.green));
+    town.add(makeSakuraTree(-1, -10));
+    town.add(makeSakuraTree(6, -3));
+    town.add(makeSakuraTree(-10, 2));
+    town.add(makeSakuraTree(2, 11));
+
+    // ===== TINY PEOPLE (colored boxes) =====
+    function makePerson(x, z, bodyColor) {
+      const g = new THREE.Group();
+      // Body
+      g.add(box(0.25, 0.4, 0.2, bodyColor, 0, 0.35, 0));
+      // Head
+      const headGeo = new THREE.SphereGeometry(0.13, 8, 6);
+      const head = new THREE.Mesh(headGeo, mat(C.cream));
+      head.position.set(0, 0.7, 0);
+      g.add(head);
+      g.position.set(x, 0, z);
+      return g;
+    }
+
+    const personColors = [C.red, C.blue, C.yellow, C.pink, C.cyan, C.purple, C.orange, C.green];
+    const personPositions = [
+      [1, 3.5], [-2, 3.5], [5, 3.5], [-4, 5], [0, -3], [7, 1], [-8, -2], [3, -5],
+      [-6, 8], [9, -6], [4, 8], [-3, -8]
+    ];
+    personPositions.forEach(([px, pz], i) => {
+      town.add(makePerson(px, pz, personColors[i % personColors.length]));
+    });
+
+    // ===== LAMP POSTS =====
+    function makeLamp(x, z) {
+      const g = new THREE.Group();
+      g.add(cyl(0.05, 0.06, 2, 6, C.darkBrown, 0, 1, 0));
+      g.add(box(0.3, 0.25, 0.3, C.yellow, 0, 2.15, 0, { roughness: 0.3 }));
+      g.position.set(x, 0, z);
+      return g;
+    }
+    town.add(makeLamp(-1, 5));
+    town.add(makeLamp(6, 3.5));
+    town.add(makeLamp(-4, 3.5));
+    town.add(makeLamp(3, -5));
+
+    // ===== BENCHES =====
+    function makeBench(x, z, ry) {
+      const g = new THREE.Group();
+      g.add(box(1, 0.08, 0.4, C.brown, 0, 0.45, 0));
+      g.add(box(0.08, 0.45, 0.08, C.darkBrown, -0.4, 0.22, 0.14));
+      g.add(box(0.08, 0.45, 0.08, C.darkBrown, 0.4, 0.22, 0.14));
+      g.add(box(0.08, 0.45, 0.08, C.darkBrown, -0.4, 0.22, -0.14));
+      g.add(box(0.08, 0.45, 0.08, C.darkBrown, 0.4, 0.22, -0.14));
+      g.add(box(1, 0.5, 0.06, C.brown, 0, 0.6, -0.2));
+      g.position.set(x, 0, z);
+      g.rotation.y = ry || 0;
+      return g;
+    }
+    town.add(makeBench(1, 6, 0));
+    town.add(makeBench(-7, -3, Math.PI / 2));
+
+    // ===== SAKURA PETALS (particles) =====
+    const petalCount = 150;
+    const petalGeo = new THREE.BufferGeometry();
+    const petalPos = new Float32Array(petalCount * 3);
+    const petalVel = [];
+    for (let i = 0; i < petalCount; i++) {
+      petalPos[i * 3] = (Math.random() - 0.5) * 30;
+      petalPos[i * 3 + 1] = Math.random() * 20 + 2;
+      petalPos[i * 3 + 2] = (Math.random() - 0.5) * 30;
+      petalVel.push({
+        x: (Math.random() - 0.5) * 0.01,
+        y: -0.01 - Math.random() * 0.02,
+        z: (Math.random() - 0.5) * 0.01,
+      });
+    }
+    petalGeo.setAttribute('position', new THREE.BufferAttribute(petalPos, 3));
+    const petalMat = new THREE.PointsMaterial({
+      color: 0xffb0c0, size: 0.15, transparent: true, opacity: 0.8, sizeAttenuation: true,
+    });
+    const petals = new THREE.Points(petalGeo, petalMat);
+    scene.add(petals);
+
+    // ===== CAMERA ORBIT (drag) =====
+    let isDragging = false;
+    let prevMouseX = 0;
+    let orbitAngle = Math.PI / 4;
+    let targetOrbitAngle = orbitAngle;
+    let autoRotate = true;
+    const orbitRadius = 26;
+    const orbitHeight = 16;
+
+    canvas.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      prevMouseX = e.clientX;
+      autoRotate = false;
+      canvas.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - prevMouseX;
+      targetOrbitAngle -= dx * 0.005;
+      prevMouseX = e.clientX;
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDragging = false;
+      canvas.style.cursor = 'grab';
+      // Resume auto-rotate after 3 seconds
+      setTimeout(() => { if (!isDragging) autoRotate = true; }, 3000);
+    });
+
+    // Touch support
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        prevMouseX = e.touches[0].clientX;
+        autoRotate = false;
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (!isDragging || e.touches.length !== 1) return;
+      const dx = e.touches[0].clientX - prevMouseX;
+      targetOrbitAngle -= dx * 0.005;
+      prevMouseX = e.touches[0].clientX;
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', () => {
+      isDragging = false;
+      setTimeout(() => { if (!isDragging) autoRotate = true; }, 3000);
+    });
+
+    // ===== CARD DATA =====
+    const cardData = [
+      { label: 'ABOUT US', title: '遊び心に満ちた<br>クリエイティブカンパニー', desc: '私たちは、遊び心とテクノロジーを融合させ、人々の暮らしに新しい価値と感動を届けるクリエイティブスタジオです。' },
+      { label: 'GAME DEV', title: '最高の体験を<br>ゲームで届ける', desc: 'コンソール・モバイル・PCゲームの企画・開発を手がけています。プレイヤーの心に残る体験を追求します。' },
+      { label: 'EDUCATION', title: '教育の未来を<br>テクノロジーで拓く', desc: 'ゲーム開発で培ったインタラクティブ技術を教育分野に応用。楽しく学べるコンテンツを開発しています。' },
+      { label: 'WORKS', title: '制作実績', desc: 'これまでに手がけたプロジェクトの一部をご紹介します。多様なジャンルのゲームやアプリを開発しています。' },
+      { label: 'RECRUIT', title: 'ゲームは遊ぶだけじゃなく、<br>つくっても楽しい', desc: '「Adventure」というパーツを持ったプログラマーが活躍する場所。私たちと一緒に最高のゲームを作りませんか。' },
+      { label: 'CONTACT', title: 'お気軽に<br>お問い合わせください', desc: 'プロジェクトのご相談、お見積もり、採用に関するお問い合わせなど、お気軽にご連絡ください。' },
+    ];
+
+    let currentCard = 0;
+    const cardLabel = document.getElementById('cardLabel');
+    const cardTitle = document.getElementById('cardTitle');
+    const cardDesc = document.getElementById('cardDesc');
+    const dots = document.querySelectorAll('#cardDots button');
+
+    function updateCard(idx) {
+      currentCard = idx;
+      const data = cardData[idx];
+      const heroCard = document.getElementById('heroCard');
+      heroCard.style.opacity = '0';
+      heroCard.style.transform = 'translateY(-45%)';
+      setTimeout(() => {
+        cardLabel.textContent = data.label;
+        cardTitle.innerHTML = data.title;
+        cardDesc.textContent = data.desc;
+        heroCard.style.opacity = '1';
+        heroCard.style.transform = 'translateY(-50%)';
+      }, 250);
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+
+    dots.forEach(d => {
+      d.addEventListener('click', () => {
+        const idx = parseInt(d.dataset.index);
+        updateCard(idx);
+        // Rotate to corresponding angle
+        targetOrbitAngle = (idx / cardData.length) * Math.PI * 2 + Math.PI / 4;
+        autoRotate = false;
+        setTimeout(() => { if (!isDragging) autoRotate = true; }, 5000);
+      });
+    });
+
+    // ===== RESIZE =====
+    function onResize() {
+      const w = hero.offsetWidth;
+      const h = hero.offsetHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+
+    // ===== ANIMATION LOOP =====
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      // Auto-rotate
+      if (autoRotate) {
+        targetOrbitAngle += 0.002;
+      }
+
+      // Smooth orbit
+      orbitAngle += (targetOrbitAngle - orbitAngle) * 0.05;
+
+      // Camera orbit
+      camera.position.x = Math.cos(orbitAngle) * orbitRadius;
+      camera.position.z = Math.sin(orbitAngle) * orbitRadius;
+      camera.position.y = orbitHeight + Math.sin(t * 0.3) * 0.5;
+      camera.lookAt(0, 3, 0);
+
+      // Ferris wheel rotation
+      wheelGroup.rotation.z = t * 0.15;
+
+      // Keep cabins upright
+      cabins.forEach(cabin => {
+        cabin.rotation.z = -wheelGroup.rotation.z;
+      });
+
+      // Balloon float
+      balloonGroup.position.y = 14 + Math.sin(t * 0.5) * 0.8;
+      balloonGroup.rotation.y = Math.sin(t * 0.2) * 0.1;
+
+      // Sakura petals
+      const pArr = petals.geometry.attributes.position.array;
+      for (let i = 0; i < petalCount; i++) {
+        const v = petalVel[i];
+        pArr[i * 3] += v.x + Math.sin(t + i) * 0.003;
+        pArr[i * 3 + 1] += v.y;
+        pArr[i * 3 + 2] += v.z + Math.cos(t + i * 0.7) * 0.003;
+        // Reset when below ground
+        if (pArr[i * 3 + 1] < -1) {
+          pArr[i * 3] = (Math.random() - 0.5) * 30;
+          pArr[i * 3 + 1] = 18 + Math.random() * 5;
+          pArr[i * 3 + 2] = (Math.random() - 0.5) * 30;
+        }
+      }
+      petals.geometry.attributes.position.needsUpdate = true;
+
+      // Update card based on orbit angle
+      const normalizedAngle = ((orbitAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const newCard = Math.floor((normalizedAngle / (Math.PI * 2)) * cardData.length) % cardData.length;
+      if (newCard !== currentCard) {
+        updateCard(newCard);
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+  })();
+
+  // ===== Header scroll =====
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // ===== Hamburger =====
+  const hamburger = document.getElementById('hamburger');
+  const nav = document.getElementById('nav');
+  hamburger.addEventListener('click', () => nav.classList.toggle('open'));
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+
+  // ===== Scroll fade-in =====
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>医療離島ジオラマ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-daytime: #d4e8f0;
+      --bg-night: #0e1b3d;
+      --text-daytime: #1a3a4a;
+      --text-night: #c8d8f0;
+      --accent: #e05030;
+    }
+
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--text-daytime);
+      background-color: var(--bg-daytime);
+      transition: background-color 0.8s, color 0.8s;
+    }
+    body.is-night { background-color: var(--bg-night); color: var(--text-night); }
+
+    .canvas-view {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1; cursor: grab;
+    }
+    .canvas-view:active { cursor: grabbing; }
+    .canvas-view canvas {
+      width: 100%; height: 100%; display: block;
+      filter: saturate(1.1) contrast(1.05);
+    }
+
+    .loading-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg-daytime); z-index: 1000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.6s;
+    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-text { font-size: 14px; color: var(--text-daytime); }
+
+    .card-container {
+      position: fixed; top: 50%; left: 60px;
+      transform: translateY(-50%) translateX(-20px);
+      z-index: 10; width: 400px; max-width: 40vw;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
+      border-radius: 16px; padding: 32px 36px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      opacity: 0; transition: opacity 0.5s, transform 0.5s;
+    }
+    .card-container.show { opacity: 1; transform: translateY(-50%) translateX(0); }
+    body.is-night .card-container { background: rgba(14,27,61,0.92); }
+
+    .card-title-en {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+    }
+    .card-title { font-size: 26px; font-weight: 700; margin-bottom: 12px; }
+    .card-description { font-size: 12px; line-height: 1.8; opacity: 0.6; margin-top: 12px; }
+    .card-subtitle { font-size: 14px; line-height: 1.7; opacity: 0.8; white-space: pre-line; }
+
+    .card-dots { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+    .card-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(26,58,74,0.2); cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .card-dot.active { background: var(--accent); transform: scale(1.3); }
+    body.is-night .card-dot { background: rgba(200,216,240,0.25); }
+    body.is-night .card-dot.active { background: var(--accent); }
+
+    .appearance-toggle {
+      position: fixed; top: 24px; right: 24px; z-index: 20;
+      width: 44px; height: 44px; border: none; border-radius: 50%;
+      background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; transition: background 0.3s;
+    }
+    .appearance-toggle:hover { background: rgba(255,255,255,0.9); }
+    body.is-night .appearance-toggle { background: rgba(14,27,61,0.7); }
+
+    .top-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+      display: flex; align-items: center; padding: 16px 24px; gap: 32px;
+    }
+    .top-nav-logo { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
+    .top-nav-links { display: flex; gap: 24px; margin-left: auto; }
+    .top-nav-links a {
+      font-size: 12px; font-weight: 700; text-decoration: none;
+      color: inherit; opacity: 0.6; transition: opacity 0.2s;
+    }
+    .top-nav-links a:hover { opacity: 1; }
+
+    .noise-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 5; pointer-events: none; opacity: 0.03;
+      background-image: url('images/common/noise.png'); background-repeat: repeat;
+    }
+
+    @media (max-width: 768px) {
+      .card-container {
+        top: auto; bottom: 24px; left: 16px; right: 16px;
+        width: auto; max-width: none; transform: translateY(20px); padding: 24px;
+      }
+      .card-container.show { transform: translateY(0); }
+      .card-title { font-size: 20px; }
+      .top-nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-overlay" id="loading"><div class="loading-text">島を構築中...</div></div>
+  <div class="noise-overlay"></div>
+  <div class="canvas-view" id="canvas-view"><canvas id="canvas"></canvas></div>
+  <button class="appearance-toggle" id="appearance-toggle">🌙</button>
+
+  <nav class="top-nav">
+    <div class="top-nav-logo">離島医療センター</div>
+    <div class="top-nav-links">
+      <a href="#">診療所</a><a href="#">ヘリポート</a><a href="#">看護ステーション</a>
+      <a href="#">灯台</a><a href="#">港</a><a href="#">お問い合わせ</a>
+    </div>
+  </nav>
+
+  <div class="card-container" id="card">
+    <div class="card-title-en" id="card-title-en"></div>
+    <div class="card-title" id="card-title"></div>
+    <div class="card-subtitle" id="card-subtitle"></div>
+    <div class="card-description" id="card-description"></div>
+    <div class="card-dots" id="card-dots"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+  <script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }}
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    // ============================================================
+    // 医療離島ジオラマ — haru-ni.net骨格流用
+    // ============================================================
+
+    // Color palette (shared voxel colors)
+    const C = {
+      grass1: 0x5a9e4b, grass2: 0x4a8e3b, grass3: 0x6ab85a,
+      dirt: 0x8b6b4a, dirtDark: 0x6b4b2a, rock: 0x7a7a7a, rockDark: 0x5a5a5a,
+      sand: 0xe8d8a0, water: 0x4a90c8, waterDeep: 0x2a6098,
+      white: 0xf0f0f0, wallWhite: 0xe8e8e0, wallCream: 0xf0e8d0,
+      roof: 0xc85030, roofBlue: 0x4070a0, roofGreen: 0x408060,
+      wood: 0x9a7a50, woodDark: 0x7a5a30,
+      red: 0xe04030, orange: 0xf09030, yellow: 0xf0d040,
+      blue: 0x4080d0, lightBlue: 0x80c0e0, darkBlue: 0x203060,
+      green: 0x40a050, darkGreen: 0x2a6030,
+      concrete: 0xb0b0a8, asphalt: 0x606060,
+      helipad: 0xd0d0c8, heliYellow: 0xf0d000,
+      glass: 0xa0d8e8, metalGray: 0x808890,
+      skin: 0xf0c8a0, nurseWhite: 0xf8f8f8, doctorBlue: 0x5090c0,
+      pink: 0xf0a0b0, flower1: 0xf06080, flower2: 0xf0e040, flower3: 0xa060d0,
+      trunk: 0x6a4a2a, leaves1: 0x3a8a3a, leaves2: 0x50a050, leaves3: 0x2a7a2a,
+      lighthouse: 0xf0f0e0, lighthouseRed: 0xd04030,
+      boat: 0xd0c0a0, boatRed: 0xc04030,
+    };
+
+    const CARDS = [
+      { title: "診療所", titleEn: "Clinic",
+        subtitle: "島の医療を支える\n小さな総合病院",
+        description: "内科・外科・小児科を備え、島民の健康を24時間体制で守っています。遠隔診療システムも導入済み。",
+        birdRadianFrom: 0.5 },
+      { title: "ヘリポート", titleEn: "Heliport",
+        subtitle: "緊急搬送の命綱\nドクターヘリ発着場",
+        description: "重症患者を本土の高度医療機関へ搬送するための緊急ヘリポート。24時間離着陸可能。",
+        birdRadianFrom: 1.5 },
+      { title: "看護ステーション", titleEn: "Nursing Station",
+        subtitle: "地域に寄り添う\n訪問看護の拠点",
+        description: "訪問看護師が島内を巡回し、在宅療養中の患者さんのケアを行っています。",
+        birdRadianFrom: 2.5 },
+      { title: "灯台", titleEn: "Lighthouse",
+        subtitle: "島のシンボル\n安全な航路を照らす",
+        description: "100年以上の歴史を持つ灯台。夜間の船舶航行の安全を守り続けています。",
+        birdRadianFrom: 3.5 },
+      { title: "港", titleEn: "Harbor",
+        subtitle: "本土との架け橋\n物資と人の玄関口",
+        description: "定期船が毎日運航。医薬品や生活物資の搬入、患者の搬送にも使用されます。",
+        birdRadianFrom: 4.5 },
+      { title: "お問い合わせ", titleEn: "Contact",
+        subtitle: "離島医療に興味のある方\nお気軽にご連絡ください",
+        description: "離島医療の見学・研修プログラムへの参加をお待ちしています。",
+        birdRadianFrom: 5.5 },
+    ];
+
+    let scene, camera, renderer, mainGroup;
+    let isDaytime = true, currentCardIndex = 0;
+    let birdRadian = 0, birdRadianTarget = 0.5, birdAutoRotate = 0;
+    let isDragging = false, dragStartX = 0, dragCurrent = 0, dragTarget = 0;
+    const clock = new THREE.Clock();
+
+    // ============================================================
+    // Voxel helper — single cube
+    // ============================================================
+    function voxel(x, y, z, color, sx=1, sy=1, sz=1) {
+      const geo = new THREE.BoxGeometry(sx, sy, sz);
+      const mat = new THREE.MeshLambertMaterial({ color });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      return mesh;
+    }
+
+    // Merged voxel builder for performance
+    function mergedVoxels(voxelData) {
+      const geo = new THREE.BufferGeometry();
+      const positions = [];
+      const normals = [];
+      const colors = [];
+      const color = new THREE.Color();
+      const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+      const posAttr = boxGeo.attributes.position;
+      const normAttr = boxGeo.attributes.normal;
+      const idx = boxGeo.index;
+
+      for (const [x, y, z, c, sx=1, sy=1, sz=1] of voxelData) {
+        color.set(c);
+        const startIdx = positions.length / 3;
+        for (let i = 0; i < idx.count; i++) {
+          const vi = idx.getX(i);
+          positions.push(
+            posAttr.getX(vi) * sx + x,
+            posAttr.getY(vi) * sy + y,
+            posAttr.getZ(vi) * sz + z
+          );
+          normals.push(normAttr.getX(vi), normAttr.getY(vi), normAttr.getZ(vi));
+          colors.push(color.r, color.g, color.b);
+        }
+      }
+
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      return mesh;
+    }
+
+    // ============================================================
+    // Build island
+    // ============================================================
+    function buildIsland() {
+      const group = new THREE.Group();
+      const v = []; // voxel data array: [x, y, z, color, sx, sy, sz]
+
+      // --- Island base (layered elliptical platform) ---
+      for (let layer = -8; layer <= 0; layer++) {
+        const r = 28 + layer * 2.5;
+        const rz = 22 + layer * 2;
+        for (let x = -35; x <= 35; x++) {
+          for (let z = -30; z <= 30; z++) {
+            if ((x*x)/(r*r) + (z*z)/(rz*rz) < 1) {
+              const c = layer === 0 ? (Math.random() > 0.5 ? C.grass1 : C.grass2)
+                : layer > -3 ? C.dirt : (Math.random() > 0.3 ? C.rock : C.rockDark);
+              v.push([x, layer, z, c]);
+            }
+          }
+        }
+      }
+
+      // --- Grass variation on top ---
+      for (let x = -28; x <= 28; x++) {
+        for (let z = -22; z <= 22; z++) {
+          if ((x*x)/(28*28) + (z*z)/(22*22) < 0.92 && Math.random() > 0.7) {
+            v.push([x, 0.5, z, C.grass3, 1, 0.2, 1]);
+          }
+        }
+      }
+
+      // --- Paths (sandy roads) ---
+      for (let x = -20; x <= 20; x++) {
+        v.push([x, 0.6, 0, C.sand, 1, 0.1, 2]);
+      }
+      for (let z = -18; z <= 8; z++) {
+        v.push([0, 0.6, z, C.sand, 2, 0.1, 1]);
+      }
+
+      // --- Clinic (center-right, main building) ---
+      const cx = 8, cz = -6;
+      for (let x = 0; x < 10; x++) for (let z = 0; z < 8; z++) for (let y = 1; y <= 6; y++) {
+        v.push([cx+x, y, cz+z, C.wallWhite]);
+      }
+      // Roof
+      for (let x = -1; x < 11; x++) for (let z = -1; z < 9; z++) {
+        v.push([cx+x, 7, cz+z, C.roofBlue]);
+      }
+      // Red cross on front
+      for (let dy = 2; dy <= 5; dy++) v.push([cx-0.01, dy, cz+4, C.red, 0.1, 1, 1]);
+      for (let dz = 2; dz <= 6; dz++) v.push([cx-0.01, 3.5, cz+dz, C.red, 0.1, 1, 1]);
+      // Windows
+      for (let y = 2; y <= 5; y += 2) for (let z = 1; z <= 6; z += 2) {
+        v.push([cx+10.01, y, cz+z, C.glass, 0.1, 1.2, 0.8]);
+        v.push([cx-0.01, y, cz+z, C.glass, 0.1, 1.2, 0.8]);
+      }
+      // Door
+      v.push([cx-0.01, 1.5, cz+4, C.lightBlue, 0.1, 2, 1.5]);
+
+      // --- Heliport (elevated platform, top-left) ---
+      const hx = -12, hz = -12;
+      for (let x = 0; x < 8; x++) for (let z = 0; z < 8; z++) {
+        v.push([hx+x, 1, hz+z, C.concrete]);
+        v.push([hx+x, 4, hz+z, C.helipad]); // elevated pad
+      }
+      // Support pillars
+      for (let y = 1; y <= 4; y++) {
+        v.push([hx, y, hz, C.concrete]); v.push([hx+7, y, hz, C.concrete]);
+        v.push([hx, y, hz+7, C.concrete]); v.push([hx+7, y, hz+7, C.concrete]);
+      }
+      // H marking
+      v.push([hx+2, 4.1, hz+2, C.heliYellow, 1, 0.1, 4]);
+      v.push([hx+5, 4.1, hz+2, C.heliYellow, 1, 0.1, 4]);
+      v.push([hx+2, 4.1, hz+3.5, C.heliYellow, 4, 0.1, 1]);
+      // Circle
+      for (let a = 0; a < Math.PI * 2; a += 0.3) {
+        v.push([hx+3.5+Math.cos(a)*3, 4.1, hz+3.5+Math.sin(a)*3, C.heliYellow, 0.6, 0.1, 0.6]);
+      }
+      // Helicopter (small)
+      v.push([hx+3, 5, hz+4, C.red, 3, 1.2, 1.5]);
+      v.push([hx+6, 5.5, hz+4, C.metalGray, 2, 0.5, 0.5]); // tail
+      v.push([hx+3.5, 6.2, hz+4, C.metalGray, 0.2, 0.3, 4]); // rotor
+
+      // --- Nursing Station (left side) ---
+      const nx = -18, nz = 4;
+      for (let x = 0; x < 7; x++) for (let z = 0; z < 6; z++) for (let y = 1; y <= 4; y++) {
+        v.push([nx+x, y, nz+z, C.wallCream]);
+      }
+      for (let x = -1; x < 8; x++) for (let z = -1; z < 7; z++) {
+        v.push([nx+x, 5, nz+z, C.roofGreen]);
+      }
+      // Pink cross (nursing symbol)
+      for (let dy = 2; dy <= 4; dy++) v.push([nx+7.01, dy, nz+3, C.pink, 0.1, 1, 1]);
+      for (let dz = 1; dz <= 5; dz++) v.push([nx+7.01, 3, nz+dz, C.pink, 0.1, 1, 1]);
+      // Windows
+      for (let z = 1; z <= 4; z += 2) {
+        v.push([nx+7.01, 2, nz+z, C.glass, 0.1, 1.2, 0.8]);
+        v.push([nx+7.01, 4, nz+z, C.glass, 0.1, 1.2, 0.8]);
+      }
+
+      // --- Lighthouse (far corner) ---
+      const lx = 20, lz = 14;
+      for (let y = 1; y <= 12; y++) {
+        const c = y % 3 === 0 ? C.lighthouseRed : C.lighthouse;
+        const r = Math.max(1.5, 3 - y * 0.1);
+        for (let dx = -r; dx <= r; dx++) for (let dz = -r; dz <= r; dz++) {
+          if (dx*dx + dz*dz < r*r) v.push([lx+dx, y, lz+dz, c]);
+        }
+      }
+      // Light top
+      v.push([lx, 13, lz, C.yellow, 2, 1.5, 2]);
+      v.push([lx, 14, lz, C.glass, 2.5, 0.5, 2.5]);
+      // Railing
+      for (let a = 0; a < Math.PI * 2; a += 0.5) {
+        v.push([lx+Math.cos(a)*2.5, 12.5, lz+Math.sin(a)*2.5, C.metalGray, 0.2, 1, 0.2]);
+      }
+
+      // --- Harbor / Pier (front, extending into "water") ---
+      const px = 0, pz = 18;
+      for (let z = 0; z < 8; z++) for (let x = -3; x <= 3; x++) {
+        v.push([px+x, 0.5, pz+z, C.wood, 1, 0.5, 1]);
+      }
+      // Support posts
+      for (let z = 1; z < 8; z += 2) {
+        v.push([px-3, -1, pz+z, C.woodDark, 0.6, 3, 0.6]);
+        v.push([px+3, -1, pz+z, C.woodDark, 0.6, 3, 0.6]);
+      }
+      // Boat
+      v.push([px+6, 0.3, pz+4, C.boat, 4, 1.5, 2]);
+      v.push([px+6, 1.8, pz+3.5, C.boatRed, 0.3, 2, 0.3]); // mast
+      v.push([px+6, 2.5, pz+3, C.wallWhite, 0.1, 1.5, 1.5]); // sail
+
+      // --- Small houses (residential area) ---
+      const houses = [[4, 8], [-6, 12], [14, 6], [-8, -14], [18, -4], [-22, -6]];
+      for (const [hx2, hz2] of houses) {
+        const hc = [C.wallCream, C.wallWhite, C.orange][Math.floor(Math.random()*3)];
+        const rc = [C.roof, C.roofBlue, C.roofGreen][Math.floor(Math.random()*3)];
+        for (let x = 0; x < 3; x++) for (let z = 0; z < 3; z++) for (let y = 1; y <= 3; y++) {
+          v.push([hx2+x, y, hz2+z, hc]);
+        }
+        for (let x = -0.5; x < 3.5; x++) for (let z = -0.5; z < 3.5; z++) {
+          v.push([hx2+x, 4, hz2+z, rc]);
+        }
+      }
+
+      // --- Trees ---
+      const trees = [
+        [-5,-8], [5,4], [-10,10], [15,12], [-20,12], [22,8], [-24,-10], [10,-14],
+        [24,-8], [-14,14], [8,14], [-4,6], [12,2], [-16,-4], [20,0], [-8,8],
+        [0, -10], [16, -12], [-22, 2], [26, 4],
+      ];
+      for (const [tx, tz] of trees) {
+        if ((tx*tx)/(28*28) + (tz*tz)/(22*22) > 0.85) continue;
+        const h = 2 + Math.floor(Math.random() * 3);
+        // trunk
+        for (let y = 1; y <= h; y++) v.push([tx, y, tz, C.trunk]);
+        // canopy
+        const lc = [C.leaves1, C.leaves2, C.leaves3][Math.floor(Math.random()*3)];
+        for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (let dy = 0; dy <= 1; dy++) {
+          if (Math.abs(dx)+Math.abs(dz)+Math.abs(dy) < 3)
+            v.push([tx+dx, h+1+dy, tz+dz, lc]);
+        }
+      }
+
+      // --- Flowers scattered ---
+      for (let i = 0; i < 40; i++) {
+        const fx = Math.floor(Math.random() * 50 - 25);
+        const fz = Math.floor(Math.random() * 40 - 20);
+        if ((fx*fx)/(28*28) + (fz*fz)/(22*22) < 0.8) {
+          const fc = [C.flower1, C.flower2, C.flower3, C.pink][Math.floor(Math.random()*4)];
+          v.push([fx, 1, fz, fc, 0.4, 0.4, 0.4]);
+        }
+      }
+
+      // --- People (tiny voxel figures) ---
+      const people = [
+        [cx+2, 1, cz-1, C.doctorBlue],   // doctor near clinic
+        [cx+4, 1, cz-1, C.nurseWhite],    // nurse near clinic
+        [nx+3, 1, nz+7, C.nurseWhite],    // nurse at station
+        [nx+5, 1, nz+7, C.pink],          // visiting nurse
+        [px, 1, pz-1, C.skin],            // person at harbor
+        [hx+2, 5, hz+2, C.orange],        // pilot at heliport
+      ];
+      for (const [px2, py2, pz2, pc] of people) {
+        v.push([px2, py2, pz2, C.skin, 0.5, 0.5, 0.5]);       // head
+        v.push([px2, py2+0.7, pz2, pc, 0.6, 0.8, 0.6]);       // body
+      }
+
+      // --- Ambulance near clinic ---
+      v.push([cx+5, 1, cz-2, C.wallWhite, 2.5, 1.5, 1.5]);
+      v.push([cx+5, 2.5, cz-2, C.red, 2.5, 0.3, 1.5]);        // red stripe
+      v.push([cx+3.8, 0.5, cz-2.7, C.asphalt, 0.5, 0.5, 0.5]); // wheel
+      v.push([cx+6.2, 0.5, cz-2.7, C.asphalt, 0.5, 0.5, 0.5]); // wheel
+
+      // --- Water ring around island ---
+      for (let x = -38; x <= 38; x++) {
+        for (let z = -32; z <= 32; z++) {
+          const d = (x*x)/(30*30) + (z*z)/(24*24);
+          if (d >= 0.85 && d < 1.8) {
+            v.push([x, -0.5, z, Math.random() > 0.3 ? C.water : C.waterDeep, 1, 0.3, 1]);
+          }
+        }
+      }
+
+      // Build merged mesh
+      const island = mergedVoxels(v);
+      group.add(island);
+
+      // Floor (circular fade, same as haru-ni.net)
+      const floorGeo = new THREE.PlaneGeometry(120, 120);
+      const floorMat = new THREE.MeshLambertMaterial({
+        color: 0x4a90c8, transparent: true, opacity: 0.3
+      });
+      floorMat.onBeforeCompile = (shader) => {
+        shader.vertexShader = 'varying vec3 vWorldPos;\n' + shader.vertexShader;
+        shader.vertexShader = shader.vertexShader.replace(
+          'void main() {',
+          'void main() {\nvWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;'
+        );
+        shader.fragmentShader = 'varying vec3 vWorldPos;\n' + shader.fragmentShader;
+        shader.fragmentShader = shader.fragmentShader.replace(
+          '#include <dithering_fragment>',
+          `#include <dithering_fragment>
+          float dist = (vWorldPos.x * vWorldPos.x + vWorldPos.z * vWorldPos.z) / 3600.0;
+          gl_FragColor.a *= max(0.0, 1.0 - dist);`
+        );
+      };
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -8.5;
+      floor.receiveShadow = true;
+      group.add(floor);
+
+      return group;
+    }
+
+    // ============================================================
+    // Init (same skeleton as v9)
+    // ============================================================
+    async function init() {
+      const canvas = document.getElementById('canvas');
+      renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0.83, 0.91, 0.94);
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 3, 300);
+
+      // Lights
+      const ambient = new THREE.AmbientLight(0xffffff, 1.2);
+      scene.add(ambient);
+
+      const sun = new THREE.DirectionalLight(0xfff5e0, 2.0);
+      sun.position.set(40, 60, 30);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048);
+      sun.shadow.camera.left = -60;
+      sun.shadow.camera.right = 60;
+      sun.shadow.camera.top = 60;
+      sun.shadow.camera.bottom = -60;
+      sun.shadow.camera.near = 10;
+      sun.shadow.camera.far = 150;
+      scene.add(sun);
+
+      const fill = new THREE.DirectionalLight(0xc0d8f0, 0.5);
+      fill.position.set(-30, 20, -20);
+      scene.add(fill);
+
+      // Build island
+      mainGroup = buildIsland();
+      scene.add(mainGroup);
+
+      onResize();
+      window.addEventListener('resize', onResize);
+
+      document.getElementById('loading').classList.add('hidden');
+      setTimeout(() => {
+        document.getElementById('card').classList.add('show');
+        updateCard(0);
+      }, 400);
+
+      setupDots();
+      setupEvents();
+      animate();
+    }
+
+    // ============================================================
+    // Card, events, camera — same as v9
+    // ============================================================
+    function updateCard(index) {
+      currentCardIndex = index;
+      const card = CARDS[index];
+      document.getElementById('card-title-en').textContent = card.titleEn;
+      document.getElementById('card-title').textContent = card.title;
+      document.getElementById('card-subtitle').textContent = card.subtitle;
+      document.getElementById('card-description').textContent = card.description;
+      document.querySelectorAll('.card-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+      birdRadianTarget = card.birdRadianFrom;
+    }
+
+    function setupDots() {
+      const dc = document.getElementById('card-dots');
+      CARDS.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'card-dot' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', () => updateCard(i));
+        dc.appendChild(dot);
+      });
+    }
+
+    function toggleAppearance() {
+      isDaytime = !isDaytime;
+      document.body.classList.toggle('is-night', !isDaytime);
+      document.getElementById('appearance-toggle').textContent = isDaytime ? '🌙' : '☀️';
+
+      const tc = isDaytime ? {r:0.83,g:0.91,b:0.94} : {r:0.05,g:0.1,b:0.24};
+      const bg = {r: scene.background.r, g: scene.background.g, b: scene.background.b};
+      gsap.to(bg, {
+        r: tc.r, g: tc.g, b: tc.b, duration: 0.8,
+        onUpdate: () => scene.background.setRGB(bg.r, bg.g, bg.b),
+      });
+
+      scene.traverse((child) => {
+        if (child.isAmbientLight) gsap.to(child, { intensity: isDaytime ? 1.2 : 0.3, duration: 0.8 });
+        if (child.isDirectionalLight) gsap.to(child, { intensity: isDaytime ? 2.0 : 0.3, duration: 0.8 });
+      });
+    }
+
+    function setupEvents() {
+      const view = document.getElementById('canvas-view');
+      view.addEventListener('mousedown', onDragStart);
+      view.addEventListener('mousemove', onDragMove);
+      view.addEventListener('mouseup', onDragEnd);
+      view.addEventListener('mouseleave', onDragEnd);
+      view.addEventListener('touchstart', onDragStart, { passive: true });
+      view.addEventListener('touchmove', onDragMove, { passive: true });
+      view.addEventListener('touchend', onDragEnd);
+      document.body.addEventListener('wheel', onWheel, { passive: false });
+      document.getElementById('appearance-toggle').addEventListener('click', toggleAppearance);
+    }
+
+    function getClientX(e) { return e.touches ? e.touches[0].clientX : e.clientX; }
+    function onDragStart(e) { isDragging = true; dragStartX = getClientX(e); }
+    function onDragMove(e) {
+      if (!isDragging) return;
+      const x = getClientX(e);
+      dragTarget -= (x - dragStartX) / 3000;
+      dragStartX = x;
+    }
+    function onDragEnd() { isDragging = false; }
+    function onWheel(e) {
+      e.preventDefault();
+      if (Math.abs(e.deltaY) < 10) return;
+      const dir = e.deltaY > 0 ? 1 : -1;
+      const next = Math.max(0, Math.min(CARDS.length - 1, currentCardIndex + dir));
+      if (next !== currentCardIndex) updateCard(next);
+    }
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function updateBirdCamera(dt) {
+      dragCurrent += (dragTarget - dragCurrent) * Math.min(0.004 * dt, 1);
+      birdAutoRotate += dt / 10000;
+      birdRadian += (birdRadianTarget - birdRadian) * 0.03;
+
+      const totalRadian = birdRadian + birdAutoRotate + dragCurrent;
+      const radius = 65;
+      const height = 40;
+
+      camera.position.set(
+        radius * Math.sin(totalRadian),
+        height,
+        radius * Math.cos(totalRadian)
+      );
+      camera.rotation.order = 'YXZ';
+      camera.rotation.set(-0.45, -totalRadian + Math.PI, 0);
+      camera.setFocalLength(18);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta() * 1000;
+      updateBirdCamera(dt);
+      camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+    }
+
+    init().catch(console.error);
+  </script>
+</body>
+</html>

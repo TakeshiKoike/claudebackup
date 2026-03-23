@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>キャラ v7 — 6頭身スリム</title>
+<style>*{margin:0;padding:0}body{background:#e8e0d0;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:14px sans-serif;color:#422612;background:rgba(255,255,255,0.9);padding:10px 16px;border-radius:8px;z-index:10}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">キャラ v7 — 6頭身スリム<br>Drag:回転 / Scroll:ズーム</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xe8e0d0);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,200);
+camera.position.set(2,4,-6);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(0,1.8,0);
+
+scene.add(new THREE.AmbientLight(0xffffff,1.5));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(10,20,-10);scene.add(sun);
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(20,20).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:0xc8c0b0})));
+scene.add(new THREE.GridHelper(20,20,0x888888,0xcccccc));
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  return new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+}
+
+// ★★★ v7: 6頭身スリム — 0.25ボクセル ★★★
+// 頭10 + 首3 + 胴15 + 脚30 + 靴4 = 62px高 (頭10px → 約6.2頭身)
+// 頭幅10, 肩幅14, 腰幅10, 腕2px幅, 脚3px幅, 体厚6, 頭厚8
+function buildSlimChar(opts={}){
+  const v=[]; const S=0.25;
+  const DH=8; // 頭の厚み
+  const DB=6; // 体の厚み
+  const p=(x,y,z,c)=>v.push([x*S,y*S,z*S,c,S,S,S]);
+
+  const SK=opts.skin||0xf0c8a0, SKD=0xe0b890;
+  const E=0x202020, PKL=0xf8c0d0, MO=0xd8a080;
+  const hc=opts.hair||0x3a2a1a;
+  const sc=opts.shirt||0xf0f0e8, scD=opts.shirtD||0xe0e0d0;
+  const pc=opts.pants||0x2a3a6a;
+  const sh=opts.shoe||0x3a3a3a;
+
+  function fillH(x,y,c){for(let z=0;z<DH;z++)p(x,y,z,c);}
+  function fillB(x,y,c){for(let z=0;z<DB;z++)p(x,y,z,c);}
+  function fmbH(x,y,cf,cm,cb){p(x,y,0,cf);for(let z=1;z<DH-1;z++)p(x,y,z,cm);p(x,y,DH-1,cb);}
+  function fmbB(x,y,cf,cm,cb){p(x,y,0,cf);for(let z=1;z<DB-1;z++)p(x,y,z,cm);p(x,y,DB-1,cb);}
+
+  // 体のx中心=7（頭中心=5で頭幅10 → x=0〜9）
+  // 体を頭に合わせてセンタリング: 肩幅14 → x=0〜13, 中心7
+  // 頭は中心合わせ: 頭幅10 → x=2〜11, 中心6.5
+
+  // ============ 頭 (y=52〜61) 幅10 x=2〜11 ============
+  // 丸い頭頂
+  for(let x=4;x<=9;x++) fillH(x,61,hc);
+  for(let x=3;x<=10;x++) fillH(x,60,hc);
+  for(let x=2;x<=11;x++) fillH(x,59,hc);
+  for(let x=2;x<=11;x++) fillH(x,58,hc);
+  // 顔
+  for(let x=2;x<=11;x++) fmbH(x,57,SK,SK,hc); // 額
+  for(let x=2;x<=11;x++) fmbH(x,56,SK,SK,hc);
+  // 目
+  for(let x=2;x<=11;x++) fmbH(x,55,SK,SK,hc);
+  p(4,55,0,E); p(9,55,0,E);
+  // ほっぺ
+  for(let x=2;x<=11;x++) fmbH(x,54,SK,SK,hc);
+  p(3,54,0,PKL); p(10,54,0,PKL);
+  // 口
+  for(let x=2;x<=11;x++) fmbH(x,53,SK,SK,hc);
+  p(6,53,0,MO); p(7,53,0,MO);
+  // 顎
+  for(let x=3;x<=10;x++) fmbH(x,52,SK,SK,hc);
+
+  // ============ 首 (y=49〜51) 幅4 x=5〜8 ============
+  for(let y=49;y<=51;y++) for(let x=5;x<=8;x++) fmbB(x,y,SK,SK,SK);
+
+  // ============ 胴体 (y=34〜48) ============
+  // 肩 y=47〜48 幅14 x=0〜13
+  for(let x=0;x<=13;x++) fillB(x,48,sc);
+  for(let x=0;x<=13;x++) fillB(x,47,sc);
+  // 胸 y=44〜46 幅12 x=1〜12
+  for(let y=44;y<=46;y++) for(let x=1;x<=12;x++) fillB(x,y,sc);
+  // 腰 y=40〜43 幅10 x=2〜11
+  for(let y=40;y<=43;y++) for(let x=2;x<=11;x++) fillB(x,y,sc);
+  // 襟
+  p(5,48,0,scD);p(6,48,0,scD);p(7,48,0,scD);p(8,48,0,scD);
+  // ベルト y=39
+  for(let x=2;x<=11;x++) fillB(x,39,scD);
+  // 腰下 y=34〜38
+  for(let y=34;y<=38;y++) for(let x=2;x<=11;x++) fillB(x,y,sc);
+
+  // ============ 腕 (y=37〜47) 幅2 ============
+  // 左腕 x=-2〜-1
+  for(let y=42;y<=47;y++){fillB(-2,y,sc);fillB(-1,y,sc);}
+  for(let y=39;y<=41;y++){fmbB(-2,y,sc,sc,sc);fmbB(-1,y,sc,sc,sc);}
+  // 左手
+  for(let y=37;y<=38;y++){fmbB(-2,y,SK,SK,SK);fmbB(-1,y,SK,SK,SK);}
+  // 右腕 x=14〜15
+  for(let y=42;y<=47;y++){fillB(14,y,sc);fillB(15,y,sc);}
+  for(let y=39;y<=41;y++){fmbB(14,y,sc,sc,sc);fmbB(15,y,sc,sc,sc);}
+  // 右手
+  for(let y=37;y<=38;y++){fmbB(14,y,SK,SK,SK);fmbB(15,y,SK,SK,SK);}
+
+  // ============ 脚 (y=4〜33) ============
+  if(opts.skirt){
+    const skC=opts.skirtC||pc;
+    // スカート y=22〜33
+    for(let y=30;y<=33;y++) for(let x=2;x<=11;x++) fillB(x,y,skC);
+    for(let y=26;y<=29;y++) for(let x=1;x<=12;x++) fillB(x,y,skC);
+    for(let y=22;y<=25;y++) for(let x=0;x<=13;x++) fillB(x,y,skC);
+    // 脚 y=4〜21 幅3ずつ
+    for(let y=4;y<=21;y++){
+      for(let x=3;x<=5;x++) fmbB(x,y,SK,SK,SK);
+      for(let x=8;x<=10;x++) fmbB(x,y,SK,SK,SK);
+    }
+    // 靴 y=0〜3
+    for(let y=0;y<=3;y++){
+      for(let x=2;x<=6;x++) fillB(x,y,sh);
+      for(let x=7;x<=11;x++) fillB(x,y,sh);
+    }
+  } else {
+    // ズボン上部 y=28〜33 幅まだ広い
+    for(let y=30;y<=33;y++) for(let x=2;x<=11;x++) fillB(x,y,pc);
+    // 左脚 y=4〜29 幅3 x=3〜5
+    for(let y=4;y<=29;y++) for(let x=3;x<=5;x++) fillB(x,y,pc);
+    // 右脚 y=4〜29 幅3 x=8〜10
+    for(let y=4;y<=29;y++) for(let x=8;x<=10;x++) fillB(x,y,pc);
+    // 靴 y=0〜3
+    for(let y=0;y<=3;y++){
+      for(let x=2;x<=6;x++) fillB(x,y,sh);
+      for(let x=7;x<=11;x++) fillB(x,y,sh);
+    }
+  }
+
+  // ============ アクセサリ ============
+  if(opts.hat){
+    const hatC=opts.hatC||0xe05040;
+    for(let x=2;x<=11;x++) fillH(x,62,hatC);
+    for(let x=3;x<=10;x++) fillH(x,63,hatC);
+  }
+  if(opts.longHair){
+    for(let y=34;y<=58;y++){for(let z=1;z<DH-1;z++){p(1,y,z,hc);p(12,y,z,hc);}}
+    for(let x=3;x<=10;x++) for(let y=28;y<=58;y++) p(x,y,DH,hc);
+  }
+  if(opts.ponytail){
+    for(let y=52;y<=61;y++){p(6,y,DH,hc);p(7,y,DH,hc);}
+    p(6,56,DH+1,hc);p(7,56,DH+1,hc);
+    p(6,52,DH+1,hc);p(7,52,DH+1,hc);
+  }
+  if(opts.bag){
+    const bagC=opts.bagC||0x8a6040;
+    for(let x=4;x<=9;x++) for(let y=39;y<=46;y++){p(x,y,DB,bagC);p(x,y,DB+1,bagC);}
+    for(let y=46;y<=49;y++){p(4,y,DB-1,0x555555);p(9,y,DB-1,0x555555);}
+  }
+  return v;
+}
+
+const SC=0.055;
+
+const t1=bm(buildSlimChar({shirt:0xe05040,shirtD:0xc03828,pants:0x2a3a6a,hair:0xd4a040,hat:true,hatC:0x306898,bag:true,bagC:0x4090c8}));
+t1.scale.set(SC,SC,SC);t1.position.set(0,0.01,0);scene.add(t1);
+
+const t2=bm(buildSlimChar({shirt:0xf0a0b0,shirtD:0xd88898,hair:0x6a4a2a,longHair:true,ponytail:true,skirt:true,skirtC:0x2a3a6a}));
+t2.scale.set(SC,SC,SC);t2.position.set(2,0.01,0);scene.add(t2);
+
+const t3=bm(buildSlimChar({shirt:0x4090c8,shirtD:0x3078a8,pants:0x404040,hair:0x1a1a1a}));
+t3.scale.set(SC,SC,SC);t3.position.set(-2,0.01,0);scene.add(t3);
+
+const t4=bm(buildSlimChar({shirt:0xf0f0e8,shirtD:0xd8d8c8,pants:0x2a3a6a,hair:0xa0a0a0}));
+t4.scale.set(SC,SC,SC);t4.position.set(-4,0.01,0);scene.add(t4);
+
+const t5=bm(buildSlimChar({shirt:0x50a050,shirtD:0x388838,pants:0x8a6040,hair:0xf0d848,hat:true,hatC:0xe05040}));
+t5.scale.set(SC,SC,SC);t5.position.set(4,0.01,0);scene.add(t5);
+
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}
+animate();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>

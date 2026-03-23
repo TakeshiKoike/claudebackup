@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>キャラ v4 — 0.5ボクセル高精細</title>
+<style>*{margin:0;padding:0}body{background:#e8e0d0;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:14px sans-serif;color:#422612;background:rgba(255,255,255,0.9);padding:10px 16px;border-radius:8px;z-index:10}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">キャラ v4 — 0.5ボクセル高精細版 (18x28px)<br>Drag:回転 / Scroll:ズーム</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xe8e0d0);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,200);
+camera.position.set(4,6,-8);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(0,1.5,0);
+
+scene.add(new THREE.AmbientLight(0xffffff,1.5));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(10,20,-10);scene.add(sun);
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(20,20).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:0xc8c0b0})));
+scene.add(new THREE.GridHelper(20,20,0x888888,0xcccccc));
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+// ★★★ 0.5ボクセル高精細キャラ ★★★
+// 座標: x=0〜17(幅18), y=0〜27(高28), z=0〜13(厚14) の0.5ボクセル
+function buildHiResChar(opts={}){
+  const v=[]; const S=0.5;
+  const D=14; // 厚み14ハーフボクセル = 7ユニット
+  const p=(x,y,z,c)=>v.push([x*S,y*S,z*S,c,S,S,S]);
+
+  const SK=opts.skin||0xf0c8a0, SKD=0xe0b890, SKL=0xf8d8b8;
+  const E=0x202020, EW=0xf0f0f0; // 目（黒+白目）
+  const PKL=0xf8c0d0, MO=0xd8a888; // ほっぺ、口
+  const hc=opts.hair||0x3a2a1a, hcL=opts.hairL||(hc+0x202020); // 髪ハイライト
+  const sc=opts.shirt||0xf0f0e8, scD=opts.shirtD||(sc-0x101008); // シャツ暗
+  const pc=opts.pants||0x2a3a6a;
+  const sh=opts.shoe||0x3a3a3a;
+  const BT=opts.button||0xc0c0b0; // ボタン
+
+  // ヘルパー: x,yにz=0〜D-1を埋める
+  function fill(x,y,c){ for(let z=0;z<D;z++) p(x,y,z,c); }
+  // 前面 / 中間 / 背面
+  function front(x,y,c){ p(x,y,0,c); }
+  function fmb(x,y,cf,cm,cb){
+    p(x,y,0,cf);
+    for(let z=1;z<D-1;z++) p(x,y,z,cm);
+    p(x,y,D-1,cb);
+  }
+
+  // ============ 髪（y=24〜27）============
+  // 頭頂 y=27
+  for(let x=3;x<=14;x++) fill(x,27,hc);
+  // y=26
+  for(let x=2;x<=15;x++) fill(x,26,hc);
+  // y=25
+  for(let x=1;x<=16;x++) fill(x,25,(x%3===0)?hcL:hc);
+  // y=24
+  for(let x=0;x<=17;x++) fill(x,24,hc);
+
+  // ============ 顔（y=16〜23）============
+  // y=23: 額（前=肌、後=髪）
+  fmb(0,23,hc,hc,hc); fmb(1,23,hc,hc,hc);
+  for(let x=2;x<=15;x++) fmb(x,23,SK,SK,hc);
+  fmb(16,23,hc,hc,hc); fmb(17,23,hc,hc,hc);
+
+  // y=22: 額
+  fmb(0,22,hc,hc,hc);
+  for(let x=1;x<=16;x++) fmb(x,22,SK,SK,hc);
+  fmb(17,22,hc,hc,hc);
+
+  // y=21: 眉毛
+  fmb(0,21,hc,hc,hc);
+  for(let x=1;x<=16;x++) fmb(x,21,SK,SK,hc);
+  fmb(17,21,hc,hc,hc);
+  // 眉（前面のみ色替え）
+  front(4,21,hc); front(5,21,hc); front(6,21,hc);
+  front(11,21,hc); front(12,21,hc); front(13,21,hc);
+
+  // y=20: 目の上
+  fmb(0,20,hc,hc,hc);
+  for(let x=1;x<=16;x++) fmb(x,20,SK,SK,hc);
+  fmb(17,20,hc,hc,hc);
+
+  // y=19: 目（白目+黒目）
+  fmb(0,19,hc,hc,hc);
+  for(let x=1;x<=16;x++) fmb(x,19,SK,SK,hc);
+  fmb(17,19,hc,hc,hc);
+  // 左目
+  front(4,19,EW); front(5,19,E); front(6,19,EW);
+  // 右目
+  front(11,19,EW); front(12,19,E); front(13,19,EW);
+
+  // y=18: 目の下
+  fmb(0,18,hc,hc,hc);
+  for(let x=1;x<=16;x++) fmb(x,18,SK,SK,hc);
+  fmb(17,18,hc,hc,hc);
+  // ほっぺ
+  front(3,18,PKL); front(4,18,PKL);
+  front(13,18,PKL); front(14,18,PKL);
+
+  // y=17: 鼻
+  fmb(0,17,hc,hc,hc);
+  for(let x=1;x<=16;x++) fmb(x,17,SK,SK,hc);
+  fmb(17,17,hc,hc,hc);
+  front(8,17,SKD); front(9,17,SKD); // 鼻
+
+  // y=16: 口
+  fmb(0,16,hc,hc,hc);
+  for(let x=1;x<=16;x++) fmb(x,16,SK,SK,hc);
+  fmb(17,16,hc,hc,hc);
+  front(7,16,MO); front(8,16,MO); front(9,16,MO); front(10,16,MO); // 口
+
+  // ============ 首（y=14〜15）============
+  for(let x=6;x<=11;x++) fmb(x,15,SK,SK,SK);
+  for(let x=6;x<=11;x++) fmb(x,14,SK,SK,SK);
+
+  // ============ 体（y=6〜13）============
+  // y=13: 肩
+  for(let x=0;x<=17;x++) fill(x,13,sc);
+  // y=12: 上半身
+  for(let x=0;x<=17;x++) fill(x,12,sc);
+  // 襟（前面のみ）
+  front(7,13,scD); front(8,13,scD); front(9,13,scD); front(10,13,scD);
+  front(7,12,scD); front(10,12,scD);
+
+  // y=11: 胸
+  for(let x=0;x<=17;x++) fill(x,11,sc);
+  // ボタン
+  front(8,11,BT); front(9,11,BT);
+
+  // y=10
+  for(let x=0;x<=17;x++) fill(x,10,sc);
+  front(8,10,BT); front(9,10,BT);
+
+  // y=9: 手＋体
+  fmb(0,9,SK,SK,SK); fmb(1,9,SK,SK,SK); // 左手
+  for(let x=2;x<=15;x++) fill(x,9,sc);
+  fmb(16,9,SK,SK,SK); fmb(17,9,SK,SK,SK); // 右手
+
+  // y=8: 手＋腰
+  fmb(0,8,SK,SK,SK); fmb(1,8,SK,SK,SK);
+  for(let x=2;x<=15;x++) fill(x,8,sc);
+  fmb(16,8,SK,SK,SK); fmb(17,8,SK,SK,SK);
+
+  // y=7: ベルトライン
+  for(let x=2;x<=15;x++) fill(x,7,scD);
+
+  // y=6: 腰
+  for(let x=2;x<=15;x++) fill(x,6,sc);
+
+  // ============ 下半身 ============
+  if(opts.skirt){
+    const skC=opts.skirtC||pc;
+    // スカート y=2〜5
+    for(let y=3;y<=5;y++) for(let x=1;x<=16;x++) fill(x,y,skC);
+    for(let x=0;x<=17;x++) fill(x,2,skC); // 裾広め
+    // 足 y=1
+    for(let x=4;x<=7;x++) fmb(x,1,SK,SK,SK);
+    for(let x=10;x<=13;x++) fmb(x,1,SK,SK,SK);
+    // 靴 y=0
+    for(let x=3;x<=8;x++) fill(x,0,sh);
+    for(let x=9;x<=14;x++) fill(x,0,sh);
+  } else {
+    // ズボン y=1〜5
+    for(let y=3;y<=5;y++){
+      for(let x=3;x<=7;x++) fill(x,y,pc);
+      for(let x=10;x<=14;x++) fill(x,y,pc);
+    }
+    for(let x=3;x<=7;x++) fill(x,2,pc);
+    for(let x=10;x<=14;x++) fill(x,2,pc);
+    for(let x=3;x<=7;x++) fill(x,1,pc);
+    for(let x=10;x<=14;x++) fill(x,1,pc);
+    // 靴 y=0
+    for(let x=2;x<=8;x++) fill(x,0,sh);
+    for(let x=9;x<=15;x++) fill(x,0,sh);
+  }
+
+  // ============ アクセサリ ============
+  if(opts.hat){
+    const hatC=opts.hatC||0xe05040;
+    for(let x=0;x<=17;x++) fill(x,28,hatC);
+    for(let x=1;x<=16;x++) fill(x,29,hatC);
+    for(let x=2;x<=15;x++) fill(x,30,hatC);
+  }
+
+  if(opts.longHair){
+    // サイド（本体に接触）
+    for(let y=10;y<=23;y++){for(let z=2;z<D-2;z++){p(-1,y,z,hc); p(18,y,z,hc);}}
+    // 背面ロング（z=D, 接触）
+    for(let x=2;x<=15;x++) for(let y=6;y<=23;y++) p(x,y,D,hc);
+  }
+
+  if(opts.ponytail){
+    for(let y=20;y<=27;y++) p(8,y,D,hc);
+    for(let y=20;y<=27;y++) p(9,y,D,hc);
+    p(8,24,D+1,hc);p(9,24,D+1,hc);
+    p(8,22,D+1,hc);p(9,22,D+1,hc);
+    p(8,20,D+2,hc);p(9,20,D+2,hc);
+  }
+
+  if(opts.bag){
+    const bagC=opts.bagC||0x8a6040;
+    for(let x=5;x<=12;x++) for(let y=8;y<=12;y++){p(x,y,D,bagC); p(x,y,D+1,bagC);}
+    // ストラップ
+    for(let y=12;y<=14;y++){p(5,y,D-1,0x555555); p(12,y,D-1,0x555555);}
+  }
+
+  return v;
+}
+
+// テスト5体
+const SC=0.11; // 高精細版は半分のスケール
+
+const t1 = bm(buildHiResChar({
+  shirt:0xe05040, shirtD:0xc03828, pants:0x2a3a6a, hair:0xd4a040,
+  hat:true, hatC:0x306898, bag:true, bagC:0x4090c8
+}));
+t1.scale.set(SC,SC,SC); t1.position.set(0,0.01,0); scene.add(t1);
+
+const t2 = bm(buildHiResChar({
+  shirt:0xf0a0b0, shirtD:0xd88898, pants:0xf0a0b0, hair:0x6a4a2a,
+  longHair:true, ponytail:true, skirt:true, skirtC:0x2a3a6a
+}));
+t2.scale.set(SC,SC,SC); t2.position.set(3,0.01,0); scene.add(t2);
+
+const t3 = bm(buildHiResChar({
+  shirt:0x4090c8, shirtD:0x3078a8, pants:0x404040, hair:0x1a1a1a
+}));
+t3.scale.set(SC,SC,SC); t3.position.set(-3,0.01,0); scene.add(t3);
+
+const t4 = bm(buildHiResChar({
+  shirt:0xf0f0e8, shirtD:0xd8d8c8, pants:0x2a3a6a, hair:0xa0a0a0, button:0x4090c8
+}));
+t4.scale.set(SC,SC,SC); t4.position.set(-6,0.01,0); scene.add(t4);
+
+const t5 = bm(buildHiResChar({
+  shirt:0x50a050, shirtD:0x388838, pants:0x8a6040, hair:0xf0d848,
+  hat:true, hatC:0xe05040
+}));
+t5.scale.set(SC,SC,SC); t5.position.set(6,0.01,0); scene.add(t5);
+
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>カラフルビル v1</title>
+<style>*{margin:0;padding:0}body{background:#f0e2bb;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:13px sans-serif;color:#422612;background:rgba(255,255,255,0.8);padding:8px 14px;border-radius:8px}</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">カラフルビル v1 — 見本風の街の建物群</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xf0e2bb);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,1,500);
+camera.position.set(45,35,45);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(8,10,8);
+scene.add(new THREE.AmbientLight(0xffffff,1.3));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(30,50,20);
+sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+// helper: solid box
+function box(v,bx,by,bz,w,h,d,c){
+  for(let x=0;x<w;x++) for(let y=0;y<h;y++) for(let z=0;z<d;z++)
+    v.push([bx+x,by+y,bz+z,c]);
+}
+
+function buildBuildings(){
+  const v=[];
+
+  // Palette
+  const PK=0xe8788a;  // pink
+  const PKL=0xf0a0a8; // pink light
+  const PKD=0xd06070; // pink dark
+  const YL=0xe8c840;  // yellow
+  const YLD=0xd0a830; // yellow dark
+  const BL=0x4090c8;  // blue
+  const BLD=0x306898;  // blue dark
+  const CR=0xf0e0c8;  // cream
+  const CRD=0xd8c8a8; // cream dark
+  const CY=0x60c8c0;  // cyan
+  const GR=0x50a050;  // green
+  const RD=0xe05040;  // red
+  const WH=0xf0f0e8;  // white
+  const GL=0x90c8e0;  // glass
+  const MT=0x808888;  // metal
+  const WD=0x9a7a50;  // wood
+  const CN=0xb0b0a8;  // concrete
+  const OR=0xf09030;  // orange
+
+  // =====================================================
+  // Building A: Tall pink building (like haru-ni.net main tower)
+  // 8w x 20h x 6d, with setback at top
+  // =====================================================
+  const ax=0, az=0;
+
+  // Main body
+  box(v, ax,0,az, 8,16,6, PK);
+  // Upper setback
+  box(v, ax+1,16,az+1, 6,6,4, PKL);
+  // Roof cap
+  box(v, ax,16,az, 8,1,6, PKD);
+  box(v, ax+1,22,az+1, 6,1,4, PKD);
+
+  // Windows — front face (x=ax)
+  for(let floor=0;floor<5;floor++){
+    const fy=2+floor*3;
+    for(let wz=1;wz<5;wz+=2){
+      v.push([ax-0.1,fy,az+wz, GL, 0.1,2,1]);
+    }
+  }
+  // Windows — side face (z=az)
+  for(let floor=0;floor<5;floor++){
+    const fy=2+floor*3;
+    for(let wx=1;wx<7;wx+=2){
+      v.push([ax+wx,fy,az-0.1, GL, 1,2,0.1]);
+    }
+  }
+  // Door
+  v.push([ax-0.1,0,az+2, CY, 0.1,3,2]);
+  // Awning over door
+  box(v, ax-2,3,az+1, 2,1,4, PKD);
+  // Sign on top
+  box(v, ax-0.15,13,az+1, 1,2,4, RD);
+
+  // Balconies on side (z=6)
+  for(let floor=1;floor<4;floor++){
+    const fy=2+floor*3;
+    box(v, ax+1,fy,az+6, 3,1,2, CN);
+    v.push([ax+1,fy+1,az+7, MT, 0.2,1,0.2]);
+    v.push([ax+3,fy+1,az+7, MT, 0.2,1,0.2]);
+  }
+
+  // Rooftop AC
+  box(v, ax+2,17,az+1, 2,1,2, MT);
+  // Antenna
+  v.push([ax+6,22,az+3, MT, 0.3,4,0.3]);
+
+  // =====================================================
+  // Building B: Yellow building (connected, right side)
+  // 6w x 12h x 8d
+  // =====================================================
+  const bx=8, bz=0;
+
+  box(v, bx,0,bz, 6,12,8, YL);
+  // Darker accent stripe
+  box(v, bx,6,bz, 6,1,8, YLD);
+  // Roof
+  box(v, bx-1,12,bz-1, 8,1,10, YLD);
+
+  // Windows — front
+  for(let floor=0;floor<3;floor++){
+    const fy=1+floor*4;
+    for(let wz=1;wz<7;wz+=2){
+      v.push([bx-0.1,fy,bz+wz, GL, 0.1,2,1.5]);
+    }
+  }
+  // Windows — side (z=0)
+  for(let floor=0;floor<3;floor++){
+    const fy=1+floor*4;
+    for(let wx=1;wx<5;wx+=2){
+      v.push([bx+wx,fy,bz-0.1, GL, 1.5,2,0.1]);
+    }
+  }
+  // Big entrance (roll-up style)
+  v.push([bx-0.1,0,bz+3, BL, 0.1,3,3]);
+  // Sign above entrance
+  box(v, bx-0.15,4,bz+2, 1,1,5, WH);
+  // Awning
+  for(let z=2;z<7;z++) v.push([bx-1.5,4,bz+z, OR, 1.5,0.3,1]);
+
+  // Stairs on side (z=8)
+  for(let s=0;s<4;s++){
+    box(v, bx+1,s,bz+8+s, 3,1,1, CN);
+  }
+
+  // Rooftop water tank
+  box(v, bx+1,12,bz+1, 2,3,2, CY);
+  box(v, bx+1,15,bz+1, 2,0.5,2, MT);
+
+  // =====================================================
+  // Building C: Blue/cyan small building (front-left)
+  // 5w x 8h x 5d
+  // =====================================================
+  const cx=0, cz=8;
+
+  box(v, cx,0,cz, 5,8,5, BL);
+  box(v, cx-1,8,cz-1, 7,1,7, BLD);
+
+  // Large front windows (glass shop-front)
+  for(let wz=1;wz<4;wz++){
+    v.push([cx-0.1,1,cz+wz, GL, 0.1,3,1]);
+  }
+  // Upper windows
+  for(let wz=1;wz<4;wz+=2){
+    v.push([cx-0.1,5,cz+wz, GL, 0.1,2,1]);
+  }
+  // Door
+  v.push([cx-0.1,0,cz+2, WH, 0.1,3,1]);
+  // Side stripe
+  box(v, cx,4,cz, 5,1,5, BLD);
+  // Flower box
+  for(let z=0;z<3;z++) v.push([cx-1,0,cz+1+z, WD, 1,1,1]);
+  for(let z=0;z<3;z++) v.push([cx-1,1,cz+1+z, GR, 0.8,0.5,0.8]);
+
+  // =====================================================
+  // Building D: Cream/beige tall narrow (behind B)
+  // 4w x 18h x 4d
+  // =====================================================
+  const dx=10, dz=9;
+
+  box(v, dx,0,dz, 4,18,4, CR);
+  box(v, dx-0.5,18,dz-0.5, 5,1,5, CRD);
+
+  // Windows every 3 floors
+  for(let floor=0;floor<6;floor++){
+    const fy=1+floor*3;
+    v.push([dx-0.1,fy,dz+1, GL, 0.1,2,2]);
+    v.push([dx+4.1,fy,dz+1, GL, 0.1,2,2]);
+  }
+  // Accent lines
+  for(let floor=0;floor<6;floor++){
+    const fy=floor*3;
+    box(v, dx,fy,dz, 4,0.5,4, CRD);
+  }
+  // Flag on roof
+  v.push([dx+2,18,dz+2, MT, 0.2,3,0.2]);
+  v.push([dx+2.2,19.5,dz+2, RD, 1.5,1,0.1]);
+
+  // =====================================================
+  // Building E: Small pink shop (front)
+  // 4w x 5h x 4d
+  // =====================================================
+  const ex=5, ez=8;
+
+  box(v, ex,0,ez, 4,5,4, PKL);
+  box(v, ex-0.5,5,ez-0.5, 5,1,5, PK);
+
+  // Shop window (big glass)
+  v.push([ex-0.1,1,ez+1, GL, 0.1,2,2]);
+  v.push([ex-0.1,0,ez+1.5, WD, 0.1,1,1]); // door
+  // Awning
+  for(let z=0;z<4;z++) v.push([ex-1.5,3,ez+z, RD, 1.5,0.3,1]);
+  // Potted plants
+  v.push([ex-1,0,ez, OR, 0.8,0.8,0.8]);
+  v.push([ex-1,0.8,ez, GR, 0.6,0.6,0.6]);
+  v.push([ex-1,0,ez+3, OR, 0.8,0.8,0.8]);
+  v.push([ex-1,0.8,ez+3, GR, 0.6,0.6,0.6]);
+
+  // =====================================================
+  // Building F: Orange accent building (far right)
+  // 5w x 10h x 5d
+  // =====================================================
+  const fx=15, fz=2;
+
+  box(v, fx,0,fz, 5,10,5, OR);
+  box(v, fx,5,fz, 5,1,5, RD); // accent stripe
+  box(v, fx-0.5,10,fz-0.5, 6,1,6, 0xc06828);
+
+  // Windows
+  for(let floor=0;floor<3;floor++){
+    const fy=1+floor*3;
+    for(let wz=1;wz<4;wz+=2){
+      v.push([fx-0.1,fy,fz+wz, GL, 0.1,2,1]);
+    }
+    v.push([fx+5.1,fy,fz+2, GL, 0.1,2,1]);
+  }
+  // Balcony
+  box(v, fx-2,4,fz+1, 2,1,3, CN);
+  v.push([fx-2,5,fz+1, MT, 0.2,1,0.2]);
+  v.push([fx-2,5,fz+3, MT, 0.2,1,0.2]);
+
+  // Rooftop sign
+  box(v, fx+1,10,fz+1, 3,2,0.5, YL);
+
+  // =====================================================
+  // Ground details
+  // =====================================================
+  // Street lamp
+  v.push([-2,0,6, MT, 0.3,5,0.3]);
+  v.push([-2,5,6, YL, 0.8,0.5,0.8]);
+
+  // Tree
+  v.push([16,0,0, WD, 1,3,1]);
+  v.push([16,3,0, GR, 2,2,2]);
+
+  // Bench
+  v.push([16,0,8, WD, 0.8,0.5,2]);
+
+  return bm(v);
+}
+
+scene.add(buildBuildings());
+scene.add(new THREE.GridHelper(60,30,0xccbb99,0xddccaa));
+
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}
+animate();
+</script></body></html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>GLB Inspector</title>
+<style>*{margin:0;padding:0}body{background:#f0e2bb;display:flex;height:100vh}
+canvas{flex:1}#info{width:400px;overflow-y:auto;padding:16px;font:12px monospace;color:#422612;background:#f5edda;border-left:1px solid #ddd}
+#info h3{margin:12px 0 4px;font-size:14px}
+.obj-item{cursor:pointer;padding:2px 4px;border-radius:4px}.obj-item:hover{background:#e8d8b0}
+.obj-item.selected{background:#f4a000;color:#fff}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<canvas id="c"></canvas>
+<div id="info"><h2>world.glb 構造分析</h2><div id="list"></div></div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf0e2bb);
+const camera = new THREE.PerspectiveCamera(45,1,1,500);
+camera.position.set(80,60,80);
+const renderer = new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(2);
+renderer.shadowMap.enabled=true;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls = new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;
+scene.add(new THREE.AmbientLight(0xffffff,1.5));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(40,60,30);scene.add(sun);
+
+function resize(){
+  const w=innerWidth-400,h=innerHeight;
+  camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);
+}
+resize(); window.addEventListener('resize',resize);
+
+const draco=new DRACOLoader();
+draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/');
+const loader=new GLTFLoader();loader.setDRACOLoader(draco);
+
+loader.load('models/world.glb', (gltf)=>{
+  const model = gltf.scene;
+  scene.add(model);
+
+  // Analyze
+  const list = document.getElementById('list');
+  const meshes = [];
+  let html = '<h3>メッシュ一覧</h3>';
+
+  model.traverse((child)=>{
+    if(child.isMesh){
+      const g = child.geometry;
+      const bb = new THREE.Box3().setFromObject(child);
+      const size = new THREE.Vector3();
+      bb.getSize(size);
+      const center = new THREE.Vector3();
+      bb.getCenter(center);
+
+      meshes.push(child);
+      const idx = meshes.length-1;
+      html += `<div class="obj-item" data-idx="${idx}">
+        <b>${child.name||'(unnamed)'}</b><br>
+        vertices: ${g.attributes.position.count}<br>
+        size: ${size.x.toFixed(1)} x ${size.y.toFixed(1)} x ${size.z.toFixed(1)}<br>
+        center: ${center.x.toFixed(1)}, ${center.y.toFixed(1)}, ${center.z.toFixed(1)}<br>
+        material: ${child.material.type}${child.material.map?' +texture':''}<br>
+      </div>`;
+    }
+    if(child.isLight){
+      html += `<div class="obj-item"><b>Light: ${child.type}</b> ${child.name}<br>
+        intensity: ${child.intensity}, pos: ${child.position.x.toFixed(1)},${child.position.y.toFixed(1)},${child.position.z.toFixed(1)}</div>`;
+    }
+  });
+
+  html += `<h3>アニメーション: ${gltf.animations.length}</h3>`;
+  gltf.animations.forEach((a,i)=>{
+    html += `<div>${i}: "${a.name}" ${a.duration.toFixed(1)}s, ${a.tracks.length} tracks</div>`;
+  });
+
+  html += `<h3>合計</h3><div>メッシュ数: ${meshes.length}</div>`;
+
+  list.innerHTML = html;
+
+  // Click to isolate
+  let selectedMesh = null;
+  let originalMaterials = new Map();
+
+  list.addEventListener('click',(e)=>{
+    const item = e.target.closest('.obj-item');
+    if(!item || !item.dataset.idx) return;
+    const idx = parseInt(item.dataset.idx);
+    const mesh = meshes[idx];
+
+    // Reset all
+    document.querySelectorAll('.obj-item.selected').forEach(el=>el.classList.remove('selected'));
+    item.classList.add('selected');
+
+    // Dim all, highlight selected
+    meshes.forEach((m,i)=>{
+      if(!originalMaterials.has(m)) originalMaterials.set(m, m.material);
+      if(i===idx){
+        m.material = originalMaterials.get(m);
+        m.material.opacity = 1;
+      } else {
+        m.material = new THREE.MeshLambertMaterial({
+          color:0x888888, transparent:true, opacity:0.15
+        });
+      }
+    });
+
+    // Focus camera
+    const bb = new THREE.Box3().setFromObject(mesh);
+    const center = new THREE.Vector3();
+    const size = new THREE.Vector3();
+    bb.getCenter(center);
+    bb.getSize(size);
+    controls.target.copy(center);
+    const maxDim = Math.max(size.x,size.y,size.z);
+    camera.position.copy(center).add(new THREE.Vector3(maxDim*1.5, maxDim, maxDim*1.5));
+  });
+
+  // Double click to reset
+  list.addEventListener('dblclick',()=>{
+    meshes.forEach(m=>{
+      if(originalMaterials.has(m)) m.material = originalMaterials.get(m);
+    });
+    document.querySelectorAll('.obj-item.selected').forEach(el=>el.classList.remove('selected'));
+    controls.target.set(0,0,0);
+    camera.position.set(80,60,80);
+  });
+});
+
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}
+animate();
+</script></body></html>

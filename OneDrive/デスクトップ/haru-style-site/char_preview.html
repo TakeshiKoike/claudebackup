@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>キャラクター プレビュー</title>
+<style>*{margin:0;padding:0}body{background:#e8e0d0;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:14px sans-serif;color:#422612;background:rgba(255,255,255,0.9);padding:10px 16px;border-radius:8px;z-index:10;max-width:300px;line-height:1.6}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">
+<b>キャラクター プレビュー（40人）</b><br>
+上段: 大人35人 / 下段: 子供5人<br>
+Drag: 回転 / Scroll: ズーム
+</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xe8e0d0);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,200);
+camera.position.set(0,5,-18);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(0,3,0);
+
+scene.add(new THREE.AmbientLight(0xffffff,1.5));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(10,20,10);scene.add(sun);
+
+// 床
+const floorGeo=new THREE.PlaneGeometry(60,30);floorGeo.rotateX(-Math.PI/2);
+scene.add(new THREE.Mesh(floorGeo,new THREE.MeshLambertMaterial({color:0xc8c0b0})));
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+function buildCharacter(opts={}){
+  const v=[];
+  const D = 7; // 全キャラ統一の厚み
+  const SK = opts.skin||0xf0c8a0, SD=0xe0b890, E=0x202020;
+  const PKL=0xf8c0d0;
+  const hc=opts.hair||0x3a2a1a, sc=opts.shirt||0xf0f0e8, pc=opts.pants||0x2a3a6a, sh=opts.shoe||0x3a3a3a;
+
+  // === 髪 ===
+  for(let x=1;x<=7;x++) v.push([x,13,0,hc,1,1,D]);
+  for(let x=0;x<=8;x++) v.push([x,12,0,hc,1,1,D]);
+  for(let x=1;x<=7;x++) for(let y=10;y<=13;y++) v.push([x,y,D,hc,1,1,1]);
+
+  // ロングヘア（サイドに垂れる髪、背面も長め）
+  if(opts.longHair){
+    // サイドの垂れ髪（細く1ボクセル幅）
+    for(let y=6;y<=11;y++){v.push([-1,y,1,hc,1,1,D-2]);v.push([9,y,1,hc,1,1,D-2]);}
+    // 背面の長い髪
+    for(let x=2;x<=6;x++) for(let y=5;y<=11;y++) v.push([x,y,D,hc,1,1,1]);
+    // 前髪
+    v.push([1,12,-1,hc,1,1,1]);v.push([2,11,-1,hc,1,1,1]);
+    v.push([6,11,-1,hc,1,1,1]);v.push([7,12,-1,hc,1,1,1]);
+  }
+  // ポニーテール（背面から突き出す小さな束）
+  if(opts.ponytail){
+    for(let y=10;y<=13;y++) v.push([4,y,D+1,hc,1,1,1]);
+    v.push([4,12,D+2,hc,1,1,1]);v.push([4,11,D+2,hc,1,1,1]);
+    v.push([4,10,D+3,hc,1,1,1]);
+  }
+
+  // === 帽子（コンパクト：頭と同じ幅、浅め）===
+  if(opts.hat){
+    const hatC=opts.hatC||0xe05040;
+    // 帽子本体（頭と同サイズ、高さ2段）
+    for(let x=0;x<=8;x++) v.push([x,14,0,hatC,1,1,D]);
+    for(let x=1;x<=7;x++) v.push([x,15,0,hatC,1,1,D]);
+    // つば（前だけ少し出る、1段）
+    for(let x=0;x<=8;x++) v.push([x,13,-1,hatC,1,1,1]);
+  }
+
+  // === 顔 ===
+  v.push([0,11,0,hc,1,1,D]); for(let x=1;x<=7;x++) v.push([x,11,0,SK,1,1,D]); v.push([8,11,0,hc,1,1,D]);
+  v.push([0,10,0,hc,1,1,D]); v.push([1,10,0,SK,1,1,D]); v.push([2,10,0,E,1,1,D]);
+  v.push([3,10,0,SK,1,1,D]); v.push([4,10,0,SK,1,1,D]); v.push([5,10,0,SK,1,1,D]);
+  v.push([6,10,0,E,1,1,D]); v.push([7,10,0,SK,1,1,D]); v.push([8,10,0,hc,1,1,D]);
+  for(let y=8;y<=11;y++){v.push([0,y,D,SK,1,1,1]);v.push([8,y,D,SK,1,1,1]);}
+  for(let x=1;x<=7;x++) v.push([x,9,0,SK,1,1,D]); v.push([2,9,0,PKL,1,1,D]); v.push([6,9,0,PKL,1,1,D]);
+  for(let x=1;x<=7;x++) v.push([x,8,0,SK,1,1,D]); v.push([3,8,0,SD,1,1,D]); v.push([4,8,0,SD,1,1,D]); v.push([5,8,0,SD,1,1,D]);
+
+  // メガネ（顔の前面のみ、薄い線）
+  if(opts.glasses){
+    const GC=0x2a2a2a;
+    v.push([1,10,-1,GC,1,1,1]);v.push([2,10,-1,GC,1,1,1]);v.push([3,10,-1,GC,1,1,1]);
+    v.push([4,10,-1,GC,1,1,1]);
+    v.push([5,10,-1,GC,1,1,1]);v.push([6,10,-1,GC,1,1,1]);v.push([7,10,-1,GC,1,1,1]);
+  }
+
+  // === 首 ===
+  v.push([3,7,0,SK,1,1,D]); v.push([4,7,0,SK,1,1,D]); v.push([5,7,0,SK,1,1,D]);
+
+  // === 体 ===
+  for(let x=0;x<=8;x++) v.push([x,6,0,sc,1,1,D]);
+  for(let x=0;x<=8;x++) v.push([x,5,0,sc,1,1,D]);
+  v.push([0,4,0,SK,1,1,D]); for(let x=1;x<=7;x++) v.push([x,4,0,sc,1,1,D]); v.push([8,4,0,SK,1,1,D]);
+  for(let x=1;x<=7;x++) v.push([x,3,0,sc,1,1,D]);
+  for(let x=1;x<=7;x++) for(let y=3;y<=6;y++) v.push([x,y,D,sc,1,1,1]);
+
+  // === 下半身 ===
+  if(opts.skirt){
+    const skC=opts.skirtC||pc;
+    // スカート（台形風に少し広がる）
+    for(let x=1;x<=7;x++) v.push([x,2,0,skC,1,1,D]);
+    for(let x=0;x<=8;x++) v.push([x,1,0,skC,1,1,D]); // 裾は少し広い
+    for(let x=1;x<=7;x++) v.push([x,2,D,skC,1,1,1]);
+    for(let x=0;x<=8;x++) v.push([x,1,D,skC,1,1,1]);
+    // 靴
+    v.push([2,0,0,sh,1,1,D]); v.push([3,0,0,sh,1,1,D]);
+    v.push([5,0,0,sh,1,1,D]); v.push([6,0,0,sh,1,1,D]);
+    for(const x of[2,3,5,6]) v.push([x,0,D,sh,1,1,1]);
+  } else {
+    v.push([2,2,0,pc,1,1,D]); v.push([3,2,0,pc,1,1,D]); v.push([5,2,0,pc,1,1,D]); v.push([6,2,0,pc,1,1,D]);
+    v.push([2,1,0,pc,1,1,D]); v.push([3,1,0,pc,1,1,D]); v.push([5,1,0,pc,1,1,D]); v.push([6,1,0,pc,1,1,D]);
+    for(const x of[2,3,5,6]) for(let y=1;y<=2;y++) v.push([x,y,D,pc,1,1,1]);
+    // 靴
+    v.push([1,0,0,sh,1,1,D]); v.push([2,0,0,sh,1,1,D]); v.push([3,0,0,sh,1,1,D]);
+    v.push([5,0,0,sh,1,1,D]); v.push([6,0,0,sh,1,1,D]); v.push([7,0,0,sh,1,1,D]);
+    for(const x of[1,2,3,5,6,7]) v.push([x,0,D,sh,1,1,1]);
+  }
+
+  // === リュック（小さめ、背中に密着）===
+  if(opts.bag){
+    const bagC=opts.bagC||0x8a6040;
+    // 小さな四角いリュック（3x3x2）
+    for(let x=3;x<=5;x++) for(let y=4;y<=6;y++) v.push([x,y,D+1,bagC,1,1,1]);
+    for(let x=3;x<=5;x++) for(let y=4;y<=6;y++) v.push([x,y,D+2,bagC,1,1,1]);
+    // ストラップ
+    v.push([3,7,D,0x555555,1,1,1]);v.push([5,7,D,0x555555,1,1,1]);
+  }
+
+  return v;
+}
+
+// 大人キャラ35人
+const charData = [
+  {shirt:0x4090c8,pants:0x2a3a6a,hair:0x3a2a1a, label:'青シャツ男性'},
+  {shirt:0xe05040,pants:0x404040,hair:0xd4a040,hat:true,hatC:0xf0f0e8, label:'赤シャツ+白帽子+金髪'},
+  {shirt:0xf0f0e8,pants:0x2a3a6a,hair:0x1a1a1a,glasses:true, label:'白衣医師+メガネ'},
+  {shirt:0xf0a0b0,pants:0xf0a0b0,hair:0x6a4a2a,ponytail:true,skirt:true,skirtC:0xf0a0b0, label:'看護師+ポニテ+スカート'},
+  {shirt:0x50a050,pants:0x404040,hair:0xf0d848,bag:true,bagC:0x4090c8, label:'緑+金髪+青リュック'},
+  {shirt:0xf09030,pants:0x8a6040,hair:0x8a4a20,hat:true,hatC:0xf09030, label:'オレンジ帽子'},
+  {shirt:0xf0f0e8,pants:0x2a3a6a,hair:0x1a1a1a,longHair:true,skin:0xe8c0a0, label:'長髪女性'},
+  {shirt:0x60c8c0,pants:0x404040,hair:0xc83838,glasses:true, label:'シアン+赤髪+メガネ'},
+  {shirt:0xf0f0e8,pants:0x306898,hair:0x6a4a2a,bag:true,bagC:0x8a6040, label:'白シャツ+茶リュック'},
+  {shirt:0xe8c840,pants:0x2a3a6a,hair:0x1a1a1a, label:'黄シャツ+黒髪'},
+  {shirt:0xd050a0,pants:0x404040,hair:0xd4a040,longHair:true,skirt:true,skirtC:0x2a3a6a, label:'マゼンタ+金髪ロング'},
+  {shirt:0x4090c8,pants:0x8a6040,hair:0x8a4a20,hat:true,hatC:0x306898, label:'青帽子'},
+  {shirt:0xf0f0e8,pants:0x2a3a6a,hair:0xa0a0a0,glasses:true, label:'白髪+メガネ(年配)'},
+  {shirt:0xf0a0b0,pants:0x404040,hair:0x6a4a2a,longHair:true,ponytail:true, label:'ピンク+ポニテロング'},
+  {shirt:0xe8c840,pants:0x8a6040,hair:0x1a1a1a,bag:true,bagC:0xe05040, label:'黄色+赤バッグ'},
+  {shirt:0x4090c8,pants:0x2a3a6a,hair:0xf0d848, label:'青+金髪'},
+  {shirt:0x50a050,pants:0x306898,hair:0x3a2a1a,hat:true,hatC:0x50a050, label:'緑帽子'},
+  {shirt:0xf09030,pants:0x2a3a6a,hair:0xc83838,longHair:true, label:'オレンジ+赤髪ロング'},
+  {shirt:0xf09030,pants:0x404040,hair:0x1a1a1a,glasses:true, label:'オレンジ+メガネ'},
+  {shirt:0xf0a0b0,pants:0x2a3a6a,hair:0x6a4a2a,skirt:true,skirtC:0x2a3a6a,ponytail:true, label:'ピンク+スカート+ポニテ'},
+  {shirt:0x4090c8,pants:0x404040,hair:0xd4a040,hat:true,hatC:0x4090c8,bag:true,bagC:0x404040, label:'青帽子+バッグ'},
+  {shirt:0xf0f0e8,pants:0x2a3a6a,hair:0x3a2a1a, label:'白衣'},
+  {shirt:0xe05040,pants:0x8a6040,hair:0x1a1a1a,hat:true,hatC:0xe05040, label:'赤帽子'},
+  {shirt:0x50a050,pants:0x404040,hair:0xa06830,longHair:true,skirt:true,skirtC:0x50a050, label:'緑ロング+スカート'},
+  {shirt:0x60c8c0,pants:0x2a3a6a,hair:0x6a4a2a,bag:true,bagC:0x60c8c0, label:'シアン+リュック'},
+  {shirt:0xd050a0,pants:0x404040,hair:0xf0d848,glasses:true,longHair:true, label:'マゼンタ+金髪+メガネ'},
+  {shirt:0xe8c840,pants:0x306898,hair:0x1a1a1a, label:'黄+黒髪'},
+  {shirt:0xf0f0e8,pants:0x8a6040,hair:0xa0a0a0,hat:true,hatC:0xf0f0e8,glasses:true, label:'白帽子+白髪(年配)'},
+  {shirt:0x4090c8,pants:0x2a3a6a,hair:0x8a4a20, label:'青+茶髪'},
+  {shirt:0xf0f0e8,pants:0x2a3a6a,hair:0x1a1a1a,glasses:true, label:'白衣医師'},
+  {shirt:0xf0a0b0,pants:0xf0a0b0,hair:0x6a4a2a,ponytail:true,skirt:true,skirtC:0xf0a0b0, label:'看護師'},
+  {shirt:0x4090c8,pants:0x306898,hair:0x3a2a1a,bag:true,bagC:0x306898, label:'青+紺リュック'},
+  {shirt:0xe8c840,pants:0x2a3a6a,hair:0xc83838,hat:true,hatC:0xe8c840, label:'黄帽子+赤髪'},
+  {shirt:0xf09030,pants:0x404040,hair:0xf0d848,longHair:true, label:'オレンジ+金髪ロング'},
+  {shirt:0x60c8c0,pants:0x8a6040,hair:0x6a4a2a,glasses:true,bag:true,bagC:0x8a6040, label:'シアン+メガネ+バッグ'},
+];
+
+// 子供キャラ5人
+const childData = [
+  {shirt:0xe05040,pants:0x2a3a6a,hair:0x1a1a1a,child:true,hat:true,hatC:0xe05040, label:'赤帽子の子'},
+  {shirt:0xf0d848,pants:0x50a050,hair:0x6a4a2a,child:true, label:'黄シャツの子'},
+  {shirt:0x4090c8,pants:0x404040,hair:0xf0d848,child:true,bag:true,bagC:0xe05040, label:'青+赤バッグの子'},
+  {shirt:0xf0a0b0,pants:0xd050a0,hair:0x3a2a1a,child:true, label:'ピンクの子'},
+  {shirt:0x50a050,pants:0x2a3a6a,hair:0xc83838,child:true, label:'緑+赤髪の子'},
+];
+
+const SC=0.22, SCC=0.16;
+const cols=12; // 1列あたり
+// 大人キャラを並べる
+charData.forEach((opts,i)=>{
+  const row=Math.floor(i/cols);
+  const col=i%cols;
+  const m=bm(buildCharacter(opts));
+  m.scale.set(SC,SC,SC);
+  m.position.set(col*2.2-13, 0.01, row*3.5);
+  m._isPerson=true;m._baseRotY=0;
+  scene.add(m);
+});
+// 子供キャラを下に並べる
+childData.forEach((opts,i)=>{
+  const m=bm(buildCharacter(opts));
+  m.scale.set(SCC,SCC,SCC);
+  m.position.set(i*2.5-5, 0.01, 12);
+  m._isPerson=true;m._baseRotY=0;
+  scene.add(m);
+});
+
+// ラベル（子供行の表示）
+const labelGeo=new THREE.PlaneGeometry(6,0.5);labelGeo.rotateX(-Math.PI/2);
+const labelMat=new THREE.MeshBasicMaterial({color:0x888888,transparent:true,opacity:0.3});
+const label=new THREE.Mesh(labelGeo,labelMat);label.position.set(0,0.01,11);scene.add(label);
+
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  for(let ci=0;ci<scene.children.length;ci++){
+    const child=scene.children[ci];
+    if(child._isPerson){
+      child.rotation.y = child._baseRotY + Math.sin(t*0.8+ci*0.9)*0.15;
+    }
+  }
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>

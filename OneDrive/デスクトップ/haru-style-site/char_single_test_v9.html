@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>キャラ v9 — 0.5ボクセル歩行2体</title>
+<style>*{margin:0;padding:0}body{background:#e8e0d0;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:14px sans-serif;color:#422612;background:rgba(255,255,255,0.9);padding:10px 16px;border-radius:8px;z-index:10}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">キャラ v9 — 0.5ボクセル 5頭身 歩行アニメ<br>Drag:回転 / Scroll:ズーム</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xe8e0d0);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,200);
+camera.position.set(2,3,-5);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(0,1,0);
+
+scene.add(new THREE.AmbientLight(0xffffff,1.5));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(10,20,-10);scene.add(sun);
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(20,20).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:0xc8c0b0})));
+scene.add(new THREE.GridHelper(20,20,0x888888,0xcccccc));
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+// ★★★ v9: 0.5ボクセル / 5頭身 / パーツ分割歩行 ★★★
+// 頭5 + 首1 + 胴7 + 脚10 + 靴2 = 25px (5頭身)
+// 幅: 頭6, 肩8, 腰6, 腕1, 脚2, 体厚み4, 頭厚み5
+function buildWalkChar(opts={}){
+  const S=0.5;
+  const DH=5, DB=4;
+  const SK=opts.skin||0xf0c8a0;
+  const E=0x202020, PKL=0xf8c0d0, MO=0xd8a080;
+  const hc=opts.hair||0x3a2a1a;
+  const sc=opts.shirt||0xf0f0e8, scD=opts.shirtD||0xe0e0d0;
+  const pc=opts.pants||0x2a3a6a;
+  const sh=opts.shoe||0x3a3a3a;
+
+  function mkMesh(fn){
+    const v=[];
+    const pp=(x,y,z,c)=>v.push([x*S,y*S,z*S,c,S,S,S]);
+    const fl=(x,y,c,d)=>{for(let z=0;z<d;z++)pp(x,y,z,c);};
+    const fb=(x,y,cf,cm,cb,d)=>{pp(x,y,0,cf);for(let z=1;z<d-1;z++)pp(x,y,z,cm);pp(x,y,d-1,cb);};
+    fn(pp,fl,fb);
+    return bm(v);
+  }
+
+  const group=new THREE.Group();
+
+  // ===== 胴体+頭+首 =====
+  const body=mkMesh((pp,fl,fb)=>{
+    const fH=(x,y,c)=>fl(x,y,c,DH);
+    const fB=(x,y,c)=>fl(x,y,c,DB);
+    const fbH=(x,y,cf,cm,cb)=>fb(x,y,cf,cm,cb,DH);
+    const fbB=(x,y,cf,cm,cb)=>fb(x,y,cf,cm,cb,DB);
+
+    // 頭 y=20〜24 幅6 x=1〜6
+    for(let x=2;x<=5;x++) fH(x,24,hc);
+    for(let x=1;x<=6;x++) fH(x,23,hc);
+    for(let x=1;x<=6;x++) fbH(x,22,SK,SK,hc); // 目の段
+    pp(2,22,0,E); pp(5,22,0,E);
+    for(let x=1;x<=6;x++) fbH(x,21,SK,SK,hc); // ほっぺ
+    pp(1,21,0,PKL); pp(6,21,0,PKL);
+    for(let x=1;x<=6;x++) fbH(x,20,SK,SK,hc); // 口
+    pp(3,20,0,MO); pp(4,20,0,MO);
+
+    if(opts.hat){
+      const hatC=opts.hatC||0xe05040;
+      for(let x=1;x<=6;x++) fH(x,25,hatC);
+      for(let x=2;x<=5;x++) fH(x,26,hatC);
+    }
+    if(opts.longHair){
+      for(let y=12;y<=23;y++){fl(0,y,hc,DH-1);fl(7,y,hc,DH-1);}
+      for(let x=2;x<=5;x++) for(let y=10;y<=23;y++) pp(x,y,DH,hc);
+    }
+    if(opts.ponytail){
+      for(let y=20;y<=24;y++){pp(3,y,DH,hc);pp(4,y,DH,hc);}
+      pp(3,22,DH+1,hc);pp(4,22,DH+1,hc);
+      pp(3,20,DH+1,hc);
+    }
+
+    // 首 y=19 幅2
+    fbB(3,19,SK,SK,SK); fbB(4,19,SK,SK,SK);
+
+    // 胴 y=12〜18
+    // 肩 y=18 幅8
+    for(let x=0;x<=7;x++) fB(x,18,sc);
+    pp(3,18,0,scD);pp(4,18,0,scD); // 襟
+    // 胸 y=16〜17 幅7
+    for(let x=0;x<=6;x++) fB(x,17,sc);
+    for(let x=0;x<=6;x++) fB(x,16,sc);
+    // 腰 y=14〜15 幅6
+    for(let x=1;x<=6;x++) fB(x,15,sc);
+    for(let x=1;x<=6;x++) fB(x,14,sc);
+    // ベルト y=13
+    for(let x=1;x<=6;x++) fB(x,13,scD);
+    // 腰下 y=12
+    for(let x=1;x<=6;x++) fB(x,12,sc);
+
+    if(opts.bag){
+      const bagC=opts.bagC||0x8a6040;
+      for(let x=2;x<=5;x++) for(let y=14;y<=17;y++){pp(x,y,DB,bagC);pp(x,y,DB+1,bagC);}
+      pp(2,18,DB-1,0x555555);pp(5,18,DB-1,0x555555);
+    }
+
+    // スカート（体に付ける）
+    if(opts.skirt){
+      const skC=opts.skirtC||pc;
+      for(let x=1;x<=6;x++) fB(x,11,skC);
+      for(let x=0;x<=7;x++) fB(x,10,skC);
+      for(let x=0;x<=7;x++) fB(x,9,skC);
+      for(let x=0;x<=7;x++) fB(x,8,skC);
+    }
+  });
+  group.add(body);
+
+  // ===== 左腕 =====（ピボット:肩 x=-1,y=18）
+  const lAP=new THREE.Group();
+  lAP.position.set(-1*S, 18*S, DB/2*S);
+  const lA=mkMesh((pp,fl,fb)=>{
+    for(let y=-1;y>=-5;y--) fl(0,y,sc,DB);
+    fb(0,-6,SK,SK,SK,DB); fb(0,-7,SK,SK,SK,DB);
+  });
+  lA.position.set(0,-18*S,-DB/2*S);
+  lAP.add(lA); group.add(lAP);
+
+  // ===== 右腕 =====
+  const rAP=new THREE.Group();
+  rAP.position.set(8*S, 18*S, DB/2*S);
+  const rA=mkMesh((pp,fl,fb)=>{
+    for(let y=-1;y>=-5;y--) fl(0,y,sc,DB);
+    fb(0,-6,SK,SK,SK,DB); fb(0,-7,SK,SK,SK,DB);
+  });
+  rA.position.set(0,-18*S,-DB/2*S);
+  rAP.add(rA); group.add(rAP);
+
+  // ===== 左脚 =====（ピボット: 股 x=2,y=12）
+  const lLP=new THREE.Group();
+  lLP.position.set(2*S, 12*S, DB/2*S);
+  const lL=mkMesh((pp,fl,fb)=>{
+    const legC=opts.skirt?SK:pc;
+    for(let y=-1;y>=-8;y--){fl(0,y,legC,DB);fl(1,y,legC,DB);}
+    for(let y=-9;y>=-10;y--){fl(0,y,sh,DB);fl(1,y,sh,DB);}
+  });
+  lL.position.set(0,-12*S,-DB/2*S);
+  lLP.add(lL); group.add(lLP);
+
+  // ===== 右脚 =====
+  const rLP=new THREE.Group();
+  rLP.position.set(5*S, 12*S, DB/2*S);
+  const rL=mkMesh((pp,fl,fb)=>{
+    const legC=opts.skirt?SK:pc;
+    for(let y=-1;y>=-8;y--){fl(0,y,legC,DB);fl(1,y,legC,DB);}
+    for(let y=-9;y>=-10;y--){fl(0,y,sh,DB);fl(1,y,sh,DB);}
+  });
+  rL.position.set(0,-12*S,-DB/2*S);
+  rLP.add(rL); group.add(rLP);
+
+  return {group, lAP, rAP, lLP, rLP};
+}
+
+const chars=[];
+const SC=0.11;
+
+const c1=buildWalkChar({shirt:0xe05040,shirtD:0xc03828,pants:0x2a3a6a,hair:0xd4a040,hat:true,hatC:0x306898,bag:true,bagC:0x4090c8});
+c1.group.scale.set(SC,SC,SC);c1.group.position.set(-1,0.56,0);scene.add(c1.group);chars.push(c1);
+
+const c2=buildWalkChar({shirt:0xf0a0b0,shirtD:0xd88898,hair:0x6a4a2a,longHair:true,ponytail:true,skirt:true,skirtC:0x2a3a6a});
+c2.group.scale.set(SC,SC,SC);c2.group.position.set(1.5,0.56,0);scene.add(c2.group);chars.push(c2);
+
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  chars.forEach((ch,i)=>{
+    const phase=t*2+i*2;
+    const sw=0.35;
+    ch.lAP.rotation.x=Math.sin(phase)*sw;
+    ch.rAP.rotation.x=-Math.sin(phase)*sw;
+    ch.lLP.rotation.x=-Math.sin(phase)*sw;
+    ch.rLP.rotation.x=Math.sin(phase)*sw;
+  });
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>

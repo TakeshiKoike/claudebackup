@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>総合病院ビル v1</title>
+<style>*{margin:0;padding:0}body{background:#f0e2bb;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:13px sans-serif;color:#422612;background:rgba(255,255,255,0.8);padding:8px 14px;border-radius:8px}</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">総合病院ビル v1 — ドラッグで回転 / ホイールでズーム</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xf0e2bb);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,1,500);
+camera.position.set(40,30,40);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(0,12,0);
+scene.add(new THREE.AmbientLight(0xffffff,1.3));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(30,50,20);
+sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const[x,y,z,cc,sx=1,sy=1,sz=1]of data){c.set(cc);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sx+x,bp.getY(vi)*sy+y,bp.getZ(vi)*sz+z);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+function buildHospital(){
+  const v=[];
+
+  // Palette
+  const W1=0xf0ece0; // main wall (warm white)
+  const W2=0xd8e8f0; // accent wall (light blue-gray)
+  const W3=0xe0d0c0; // side wall (beige)
+  const GL=0x90c8e0; // glass windows
+  const GLD=0x70a8c0; // darker glass
+  const RF=0x4888b0; // roof / top accent (blue)
+  const RF2=0xc05838; // red accent roof
+  const RD=0xe05040; // red cross
+  const CN=0xb0b0a8; // concrete
+  const MT=0x808888; // metal (AC units etc)
+  const DR=0x60a0c0; // door
+  const SG=0xe8c030; // sign yellow
+  const GR=0x50a050; // green (plants)
+  const WD=0x9a7a50; // wood
+
+  // === Main tower (tall section) ===
+  // 10w x 24h x 8d
+  for(let x=0;x<10;x++) for(let y=0;y<24;y++) for(let z=0;z<8;z++){
+    // Only outer shell (not solid inside)
+    if(x===0||x===9||z===0||z===7||y===0||y===23) v.push([x,y,z,W1]);
+  }
+
+  // Windows on front (x=0 face) — grid pattern with frames
+  for(let floor=0;floor<6;floor++){
+    const fy=2+floor*4;
+    for(let wz=1;wz<=6;wz+=2){
+      // Window (2 high)
+      v.push([-0.1,fy,wz,GL,0.1,2,1.5]);
+      // Window frame (thin border)
+      v.push([-0.1,fy-0.2,wz,W3,0.1,0.2,1.5]); // bottom
+      v.push([-0.1,fy+2,wz,W3,0.1,0.2,1.5]); // top
+    }
+  }
+
+  // Windows on back (x=9 face)
+  for(let floor=0;floor<6;floor++){
+    const fy=2+floor*4;
+    for(let wz=1;wz<=6;wz+=2){
+      v.push([9.1,fy,wz,GL,0.1,2,1.5]);
+    }
+  }
+
+  // Windows on sides (z=0, z=7 faces)
+  for(let floor=0;floor<6;floor++){
+    const fy=2+floor*4;
+    for(let wx=2;wx<=7;wx+=2){
+      v.push([wx,fy,-0.1,GL,1.5,2,0.1]);
+      v.push([wx,fy,7.1,GL,1.5,2,0.1]);
+    }
+  }
+
+  // Floor lines (horizontal accent every 4 floors)
+  for(let floor=0;floor<6;floor++){
+    const fy=1+floor*4;
+    for(let z=0;z<8;z++){v.push([-0.1,fy,z,W3,0.15,0.5,1]);v.push([9.1,fy,z,W3,0.15,0.5,1]);}
+    for(let x=0;x<10;x++){v.push([x,fy,-0.1,W3,1,0.5,0.15]);v.push([x,fy,7.1,W3,1,0.5,0.15]);}
+  }
+
+  // === Low wing (right side, connected) ===
+  // 8w x 10h x 10d, attached at z=8
+  for(let x=1;x<9;x++) for(let y=0;y<10;y++) for(let z=8;z<18;z++){
+    if(x===1||x===8||z===8||z===17||y===0||y===9) v.push([x,y,z,W2]);
+  }
+  // Windows on low wing front (z=17)
+  for(let floor=0;floor<2;floor++){
+    const fy=2+floor*4;
+    for(let wx=2;wx<=7;wx+=2){
+      v.push([wx,fy,17.1,GL,1.5,2,0.1]);
+    }
+  }
+  // Windows on low wing sides
+  for(let floor=0;floor<2;floor++){
+    const fy=2+floor*4;
+    for(let wz=9;wz<=16;wz+=2){
+      v.push([0.9,fy,wz,GL,0.1,2,1.5]);
+      v.push([8.1,fy,wz,GL,0.1,2,1.5]);
+    }
+  }
+
+  // === Entrance canopy (front of main tower) ===
+  for(let z=2;z<=5;z++) v.push([-2,4,z,CN]); // canopy slab
+  for(let z=2;z<=5;z++) v.push([-2,4.5,z,RF,1,0.3,1]); // blue top
+  // Canopy support pillars
+  v.push([-2,0,-0.1+2,CN,1,4,1]);
+  v.push([-2,0,-0.1+5,CN,1,4,1]);
+  // Entrance door
+  v.push([-0.15,0,3,DR,0.15,3,2]);
+
+  // === Red cross sign ===
+  // On front wall, centered
+  for(let dy=0;dy<5;dy++) v.push([-0.2,16+dy,3.5,RD,0.2,1,1]);
+  for(let dz=0;dz<5;dz++) v.push([-0.2,18,1.5+dz,RD,0.2,1,1]);
+
+  // === Hospital sign board ===
+  v.push([-0.2,13,1,SG,0.2,2,6]); // yellow sign background
+  // (text would go here in texture — for voxel we just show the colored board)
+
+  // === Rooftop of main tower ===
+  // AC units
+  for(let i=0;i<3;i++){
+    v.push([2+i*3,24,2,MT,2,1.5,2]);
+  }
+  // Helipad marking on roof
+  for(let x=3;x<=6;x++) v.push([x,24.1,4,RF2,1,0.1,1]);
+  for(let z=2;z<=6;z++) v.push([5,24.1,z,RF2,1,0.1,1]);
+  // Railing
+  for(let x=0;x<=9;x++){v.push([x,24,0,MT,1,1,0.3]);v.push([x,24,7,MT,1,1,0.3]);}
+  for(let z=0;z<=7;z++){v.push([0,24,z,MT,0.3,1,1]);v.push([9,24,z,MT,0.3,1,1]);}
+
+  // === Rooftop of low wing ===
+  // Green rooftop garden
+  for(let x=2;x<8;x++) for(let z=9;z<17;z++){
+    v.push([x,10,z,GR,1,0.3,1]);
+  }
+  // Small trees on roof garden
+  for(const[tx,tz] of [[3,11],[6,14],[4,15]]){
+    v.push([tx,10.3,tz,WD,0.5,1.5,0.5]); // trunk
+    v.push([tx,11.8,tz,GR,1.5,1,1.5]); // canopy
+  }
+
+  // === Ground level details ===
+  // Ambulance bay (covered area on side)
+  for(let z=-3;z<0;z++) for(let x=0;x<5;x++) v.push([x,0,z,CN]);
+  v.push([0,3,-3,CN,5,0.5,1]); // overhead cover
+  for(let y=0;y<3;y++){v.push([0,y,-3,CN]);v.push([4,y,-3,CN]);} // pillars
+
+  // Ambulance (small)
+  v.push([1,0.5,-2,0xf0f0f0,3,1.5,1.5]);
+  v.push([1,2,-2,RD,3,0.3,1.5]); // red stripe
+
+  // Bushes along front
+  for(let z=0;z<=7;z+=2) v.push([-3,0,z,GR,1,1,1.5]);
+
+  // Bench
+  v.push([-3,0,1,WD,1,0.5,2]);
+
+  // Small sign post
+  v.push([-3,0,6,MT,0.3,3,0.3]);
+  v.push([-3,2.5,6,0x4080d0,1.5,1,0.3]); // sign
+
+  return bm(v);
+}
+
+scene.add(buildHospital());
+scene.add(new THREE.GridHelper(60,30,0xccbb99,0xddccaa));
+
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}
+animate();
+</script></body></html>

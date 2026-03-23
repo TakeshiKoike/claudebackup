@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><title>バス v7</title>
+<style>*{margin:0;padding:0}body{background:#f0e2bb;overflow:hidden}canvas{display:block}
+.info{position:fixed;top:16px;left:16px;font:13px sans-serif;color:#422612;background:rgba(255,255,255,0.8);padding:8px 14px;border-radius:8px}</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head><body>
+<div class="info">バス v7 — 細かいピクセルで丸みのあるバス</div>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xf0e2bb);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,500);
+camera.position.set(12,9,14);
+const renderer=new THREE.WebGLRenderer({antialias:true,canvas:document.getElementById('c')});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(5,3,2);
+scene.add(new THREE.AmbientLight(0xffffff,1.3));
+const sun=new THREE.DirectionalLight(0xfff5e0,2);sun.position.set(15,25,10);
+sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+window.camera=camera;
+
+// 0.5単位のボクセル生成
+const S=0.5; // 半ボクセル単位
+function bm(data){
+  const pos=[],nrm=[],col=[];const c=new THREE.Color();
+  const b=new THREE.BoxGeometry(1,1,1),bp=b.attributes.position,bn=b.attributes.normal,bi=b.index;
+  for(const d of data){
+    const sz=d[4]||S;
+    c.set(d[3]);
+    for(let i=0;i<bi.count;i++){const vi=bi.getX(i);
+      pos.push(bp.getX(vi)*sz+d[0],bp.getY(vi)*sz+d[1],bp.getZ(vi)*sz+d[2]);
+      nrm.push(bn.getX(vi),bn.getY(vi),bn.getZ(vi));col.push(c.r,c.g,c.b);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nrm,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.castShadow=true;m.receiveShadow=true;return m;
+}
+
+function buildBus(){
+  const v=[];
+  // 0.5単位のピクセルで構築（1マス=0.5unit）
+  // バス全体: 20x10x8 ハーフボクセル = 10x5x4 unit
+
+  const Y1=0xf0d848;  // 黄色メイン
+  const Y2=0xe0c030;  // 黄色やや暗
+  const Y3=0xc8a820;  // 黄色暗（下部）
+  const RF=0xf0e8d8;  // 屋根クリーム
+  const RFD=0xe8dcc8; // 屋根暗め（縁）
+  const GL=0x80c8e8;  // ガラス
+  const GLD=0x68b0d0; // ガラス暗め（反射）
+  const BK=0x1a1a1a;  // 黒タイヤ
+  const BKL=0x333333; // タイヤ明るめ
+  const MT=0x999999;  // メタル
+  const MTD=0x777777; // メタル暗
+  const WH=0xf8f8e8;  // 白
+  const RD=0xd04030;  // 赤
+  const OR=0xe88830;  // オレンジ
+  const BR=0x7a5a30;  // 茶
+  const BRD=0x5a3a18; // 茶暗
+
+  // p(x,y,z,color) — 0.5サイズのボクセルを配置
+  const p=(x,y,z,c)=>v.push([x*S,y*S,z*S,c]);
+
+  // タイヤは別メッシュで作成（回転アニメーション用）
+  // ここではタイヤを配置しない
+
+  // ========================================
+  // シャシー y=0,1（タイヤ隙間あけて）
+  // ========================================
+  for(let x=0;x<20;x++) for(let z=0;z<8;z++){
+    const isTireGap = (x>=2&&x<=4)||(x>=14&&x<=16);
+    if(!isTireGap){
+      p(x,0,z,BRD);
+      p(x,1,z,BRD);
+    }
+  }
+  // タイヤ間の軸
+  for(const tx of [3,15]){
+    p(tx,0,0,MTD); p(tx,0,7,MTD);
+    p(tx,1,0,MTD); p(tx,1,7,MTD);
+  }
+
+  // ========================================
+  // 車体下部 y=2,3（暗い黄色＋オレンジライン）
+  // ========================================
+  for(let x=0;x<20;x++) for(let z=0;z<8;z++){
+    p(x,2,z,Y3);
+    p(x,3,z,Y3);
+  }
+  // オレンジ帯 y=4
+  for(let x=0;x<20;x++){
+    p(x,4,0,OR); p(x,4,7,OR);
+    // 前後面
+    if(x===0||x===19){ for(let z=1;z<7;z++) p(x,4,z,OR); }
+  }
+
+  // ========================================
+  // 車体上部（窓エリア y=5,6,7）
+  // ========================================
+
+  // 窓レイアウト（左壁 z=0, 右壁 z=7）
+  // 窓1: x=2-6, 窓2: x=8-12, 窓3: x=14-17
+  function isWinX(x){
+    return (x>=2&&x<=6)||(x>=8&&x<=12)||(x>=14&&x<=17);
+  }
+
+  for(const zw of [0,7]){
+    for(let x=0;x<20;x++){
+      for(let y=5;y<=7;y++){
+        if(isWinX(x)){
+          // 窓の上下端は少し暗いガラス（窓枠風）
+          const gc = (y===5||y===7)?GLD:GL;
+          p(x,y,zw,gc);
+        } else {
+          p(x,y,zw,Y1);
+        }
+      }
+    }
+  }
+
+  // 前壁 x=0
+  for(let z=0;z<8;z++){
+    for(let y=5;y<=7;y++){
+      const isFG = z>=2&&z<=5;
+      if(isFG){
+        const gc=(y===5||y===7)?GLD:GL;
+        p(0,y,z,gc);
+      } else {
+        p(0,y,z,Y1);
+      }
+    }
+  }
+  // 前面の角を落とす（丸み）— 上の角4つを黄色→削除の代わりに屋根色に
+  p(0,7,0,RF); p(0,7,7,RF);
+
+  // 後壁 x=19
+  for(let z=0;z<8;z++){
+    for(let y=5;y<=7;y++){
+      const isRG = z>=2&&z<=5 && y>=6;
+      if(isRG){
+        p(19,y,z,GL);
+      } else {
+        p(19,y,z,Y1);
+      }
+    }
+  }
+  p(19,7,0,RF); p(19,7,7,RF);
+
+  // ========================================
+  // 屋根 y=8（角を削って丸みを出す）
+  // ========================================
+  for(let x=0;x<20;x++) for(let z=0;z<8;z++){
+    // 四隅の角を削る
+    const isCorner =
+      (x===0&&z===0)||(x===0&&z===7)||
+      (x===19&&z===0)||(x===19&&z===7);
+    if(!isCorner){
+      p(x,8,z,RF);
+    }
+  }
+  // 屋根の縁を少し暗く
+  for(let x=0;x<20;x++){
+    p(x,8,0,RFD); p(x,8,7,RFD);
+  }
+  for(let z=1;z<7;z++){
+    p(0,8,z,RFD); p(19,8,z,RFD);
+  }
+
+  // ========================================
+  // フェンダー（タイヤアーチ）
+  // ========================================
+  for(const tx of [2,14]){
+    // 左側 z=-1
+    p(tx,2,-1,Y3); p(tx+2,2,-1,Y3);
+    p(tx-1,1,-1,Y3); p(tx+3,1,-1,Y3);
+    // アーチ上部
+    p(tx,3,-1,Y3); p(tx+1,3,-1,Y3); p(tx+2,3,-1,Y3);
+    // 右側 z=8
+    p(tx,2,8,Y3); p(tx+2,2,8,Y3);
+    p(tx-1,1,8,Y3); p(tx+3,1,8,Y3);
+    p(tx,3,8,Y3); p(tx+1,3,8,Y3); p(tx+2,3,8,Y3);
+  }
+
+  // ========================================
+  // ディテール
+  // ========================================
+
+  // ヘッドライト（前面、丸く）
+  p(-1,3,1,WH); p(-1,4,1,WH);
+  p(-1,3,6,WH); p(-1,4,6,WH);
+  // ヘッドライト外枠
+  p(-1,2,1,MTD); p(-1,2,6,MTD);
+
+  // ウインカー
+  p(-1,2,2,OR); p(-1,2,5,OR);
+
+  // バンパー
+  for(let z=0;z<8;z++) p(-1,1,z,MT);
+  for(let z=0;z<8;z++) p(-1,0,z,MTD);
+
+  // ナンバープレート
+  p(-1,3,3,WH); p(-1,3,4,WH);
+
+  // 行先表示板
+  p(-1,7,2,BR); p(-1,7,3,BR); p(-1,7,4,BR); p(-1,7,5,BR);
+  p(-1,8,2,BRD); p(-1,8,3,WH); p(-1,8,4,WH); p(-1,8,5,BRD);
+
+  // テールライト
+  p(20,3,1,RD); p(20,4,1,RD);
+  p(20,3,6,RD); p(20,4,6,RD);
+  // テールウインカー
+  p(20,2,1,OR); p(20,2,6,OR);
+
+  // リアバンパー
+  for(let z=0;z<8;z++) p(20,1,z,MT);
+  for(let z=0;z<8;z++) p(20,0,z,MTD);
+
+  // サイドミラー
+  p(-1,6,-1,MT); p(-1,7,-1,MTD);
+  p(-1,6,8,MT); p(-1,7,8,MTD);
+
+  // ワイパー（前面ガラス上）
+  p(-1,5,3,BRD); p(-1,5,4,BRD);
+
+  // ドア（左壁 z=0, x=7-8）
+  for(let y=2;y<=7;y++){
+    p(7,y,0,(y>=5)?GLD:Y2);
+    p(8,y,0,(y>=5)?GLD:Y2);
+  }
+  // ドア枠
+  p(6,2,0,MTD); p(6,3,0,MTD); p(6,4,0,MTD);
+  p(9,2,0,MTD); p(9,3,0,MTD); p(9,4,0,MTD);
+  // ドアステップ
+  p(7,1,-1,MT); p(8,1,-1,MT);
+
+  // 窓枠の縦線（薄い色差で表現）
+  for(const zw of [0,7]){
+    // 窓1と2の間
+    p(7,5,zw,Y2); p(7,6,zw,Y2); p(7,7,zw,Y2);
+    // 窓2と3の間
+    p(13,5,zw,Y2); p(13,6,zw,Y2); p(13,7,zw,Y2);
+  }
+
+  return v;
+}
+
+// バス本体をグループに入れる
+const busGroup = new THREE.Group();
+busGroup.add(bm(buildBus()));
+
+// タイヤを作成（CylinderGeometryで本当に丸いタイヤ）
+function buildTireMesh(){
+  const group = new THREE.Group();
+
+  // タイヤ本体（円柱）
+  const tireGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.5, 16);
+  // 回転: 円柱はY軸方向なので、Z軸に寝かせる
+  tireGeo.rotateX(Math.PI/2);
+  const tireMat = new THREE.MeshLambertMaterial({color:0x1a1a1a});
+  const tire = new THREE.Mesh(tireGeo, tireMat);
+  tire.castShadow=true;
+  group.add(tire);
+
+  // ホイール（少し小さい円柱、両面に突き出す）
+  const hubGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.6, 12);
+  hubGeo.rotateX(Math.PI/2);
+  const hubMat = new THREE.MeshLambertMaterial({color:0x999999});
+  const hub = new THREE.Mesh(hubGeo, hubMat);
+  group.add(hub);
+
+  // ホイールキャップ（小さい円盤、外面）
+  const capGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.05, 8);
+  capGeo.rotateX(Math.PI/2);
+  const capMat = new THREE.MeshLambertMaterial({color:0xbbbbbb});
+  const cap1 = new THREE.Mesh(capGeo, capMat);
+  cap1.position.z = 0.32;
+  group.add(cap1);
+  const cap2 = cap1.clone();
+  cap2.position.z = -0.32;
+  group.add(cap2);
+
+  return group;
+}
+
+const tirePositions = [
+  [3*0.5, 0.7, -0.3],    // 左前
+  [15*0.5, 0.7, -0.3],   // 左後
+  [3*0.5, 0.7, 4.3],     // 右前
+  [15*0.5, 0.7, 4.3],    // 右後
+];
+
+const tireMeshes = [];
+for(const[tx,ty,tz] of tirePositions){
+  const tireMesh = buildTireMesh();
+  tireMesh.position.set(tx,ty,tz);
+  busGroup.add(tireMesh);
+  tireMeshes.push(tireMesh);
+}
+
+scene.add(busGroup);
+scene.add(new THREE.GridHelper(24,24,0xccbb99,0xddccaa));
+
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+const clock = new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // バスが前後に揺れるように走る（sinカーブ）
+  busGroup.position.x = Math.sin(t * 0.5) * 2;
+
+  // タイヤ回転（x軸方向に走るのでy軸周りに回す → 寝かせた円柱なので実際はchildrenを回転）
+  const speed = Math.cos(t * 0.5) * 2;
+  for(const tireGroup of tireMeshes){
+    // タイヤグループ内の全メッシュをまとめて回転（z軸=円柱の軸方向に垂直）
+    tireGroup.rotation.z -= speed * 0.03;
+  }
+
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+</script></body></html>
